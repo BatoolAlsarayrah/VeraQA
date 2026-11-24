@@ -1,1 +1,1 @@
-export { THEME_STORAGE_KEY, type Theme, useTheme } from './useTheme';
+export { type Theme, THEME_STORAGE_KEY, useTheme } from './useTheme';
