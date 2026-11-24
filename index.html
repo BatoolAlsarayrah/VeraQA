@@ -4,6 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>VeraQA</title>
+    <!--
+      Theme before first paint, so there is no flash. Keep in sync with src/hooks/useTheme.ts:
+      a saved choice wins, otherwise follow the OS (nothing is saved until the person picks).
+      .loading holds back transitions until the page has loaded.
+    -->
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var theme = null;
+        try {
+          theme = localStorage.getItem('veraqa-theme');
+        } catch (e) {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        }
+        root.dataset.theme = theme;
+        root.classList.add('loading');
+        window.addEventListener('load', function () {
+          requestAnimationFrame(function () {
+            root.classList.remove('loading');
+          });
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
