@@ -11,7 +11,6 @@ import tseslint from 'typescript-eslint';
 export default defineConfig([
   globalIgnores(['dist', 'coverage', 'playwright-report', 'test-results']),
 
-  // Every file: base rules and import ordering.
   {
     extends: [js.configs.recommended],
     plugins: { 'simple-import-sort': simpleImportSort },
@@ -21,7 +20,6 @@ export default defineConfig([
     },
   },
 
-  // TypeScript, with type-aware rules.
   {
     files: ['**/*.{ts,tsx}'],
     extends: [tseslint.configs.recommendedTypeChecked],
@@ -40,7 +38,6 @@ export default defineConfig([
     },
   },
 
-  // The app: browser, React, hooks, fast refresh and accessibility.
   {
     files: ['src/**/*.{ts,tsx}'],
     extends: [
@@ -53,7 +50,6 @@ export default defineConfig([
     },
   },
 
-  // Config files run in Node.
   {
     files: ['*.{js,ts}'],
     languageOptions: {
@@ -65,6 +61,6 @@ export default defineConfig([
     extends: [tseslint.configs.disableTypeChecked],
   },
 
-  // Formatting is Prettier's job: turn off rules that would fight it. Keep last.
+  // Must stay last so it can turn off rules that conflict with Prettier.
   prettier,
 ]);

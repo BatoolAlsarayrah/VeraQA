@@ -2,11 +2,11 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import indexHtml from '../../index.html?raw';
-import { type Theme, THEME_STORAGE_KEY, useTheme } from './useTheme';
+import { type Theme, THEME_KEY, useTheme } from './useTheme';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
 
-/** Stands in for the OS appearance setting, which jsdom doesn't have. */
+// jsdom has no matchMedia, so this stands in for the OS appearance setting.
 function mockSystemTheme(initial: Theme) {
   let matches = initial === 'dark';
   const listeners = new Set<() => void>();
@@ -31,8 +31,7 @@ function mockSystemTheme(initial: Theme) {
   };
 }
 
-/** Runs the real inline theme script from index.html, as the browser does before first paint. */
-function runBootScript() {
+function runThemeScript() {
   const match = /<script>([\s\S]*?)<\/script>/.exec(indexHtml);
   if (!match?.[1]) throw new Error('Inline theme script not found in index.html');
   // eslint-disable-next-line @typescript-eslint/no-implied-eval -- runs our own trusted index.html script
@@ -40,8 +39,8 @@ function runBootScript() {
   boot();
 }
 
-const attribute = () => document.documentElement.dataset.theme;
-const saved = () => localStorage.getItem(THEME_STORAGE_KEY);
+const htmlTheme = () => document.documentElement.dataset.theme;
+const storedTheme = () => localStorage.getItem(THEME_KEY);
 
 describe('useTheme', () => {
   let system: ReturnType<typeof mockSystemTheme>;
@@ -56,73 +55,73 @@ describe('useTheme', () => {
 
   it('follows the OS on a first visit and saves nothing', () => {
     system = mockSystemTheme('dark');
-    runBootScript();
+    runThemeScript();
     const { result } = renderHook(() => useTheme());
 
-    expect(attribute()).toBe('dark');
+    expect(htmlTheme()).toBe('dark');
     expect(result.current.theme).toBe('dark');
-    expect(saved()).toBeNull();
+    expect(storedTheme()).toBeNull();
   });
 
   it('uses a saved choice over the OS', () => {
     system = mockSystemTheme('dark');
-    localStorage.setItem(THEME_STORAGE_KEY, 'light');
-    runBootScript();
+    localStorage.setItem(THEME_KEY, 'light');
+    runThemeScript();
     const { result } = renderHook(() => useTheme());
 
     expect(result.current.theme).toBe('light');
   });
 
   it('saves only once the person picks', () => {
-    runBootScript();
+    runThemeScript();
     const { result } = renderHook(() => useTheme());
-    expect(saved()).toBeNull();
+    expect(storedTheme()).toBeNull();
 
     act(() => result.current.setTheme('dark'));
 
-    expect(saved()).toBe('dark');
-    expect(attribute()).toBe('dark');
+    expect(storedTheme()).toBe('dark');
+    expect(htmlTheme()).toBe('dark');
     expect(result.current.theme).toBe('dark');
   });
 
   it('follows OS changes while nothing is saved', () => {
-    runBootScript();
+    runThemeScript();
     const { result } = renderHook(() => useTheme());
 
     act(() => system.change('dark'));
 
     expect(result.current.theme).toBe('dark');
-    expect(attribute()).toBe('dark');
-    expect(saved()).toBeNull();
+    expect(htmlTheme()).toBe('dark');
+    expect(storedTheme()).toBeNull();
   });
 
   it('ignores OS changes after a pick', () => {
-    runBootScript();
+    runThemeScript();
     const { result } = renderHook(() => useTheme());
 
     act(() => result.current.setTheme('light'));
     act(() => system.change('dark'));
 
     expect(result.current.theme).toBe('light');
-    expect(attribute()).toBe('light');
+    expect(htmlTheme()).toBe('light');
   });
 
   it('toggleTheme switches the data-theme attribute and saves it', () => {
-    runBootScript();
+    runThemeScript();
     const { result } = renderHook(() => useTheme());
-    expect(attribute()).toBe('light');
+    expect(htmlTheme()).toBe('light');
 
     act(() => result.current.toggleTheme());
-    expect(attribute()).toBe('dark');
-    expect(saved()).toBe('dark');
+    expect(htmlTheme()).toBe('dark');
+    expect(storedTheme()).toBe('dark');
 
     act(() => result.current.toggleTheme());
-    expect(attribute()).toBe('light');
-    expect(saved()).toBe('light');
+    expect(htmlTheme()).toBe('light');
+    expect(storedTheme()).toBe('light');
   });
 
   it('keeps every component in sync', () => {
-    runBootScript();
+    runThemeScript();
     const first = renderHook(() => useTheme());
     const second = renderHook(() => useTheme());
 
@@ -140,13 +139,13 @@ describe('useTheme', () => {
     });
     system = mockSystemTheme('dark');
 
-    expect(() => runBootScript()).not.toThrow();
-    expect(attribute()).toBe('dark');
+    expect(() => runThemeScript()).not.toThrow();
+    expect(htmlTheme()).toBe('dark');
 
     const { result } = renderHook(() => useTheme());
     act(() => result.current.toggleTheme());
 
-    expect(attribute()).toBe('light');
+    expect(htmlTheme()).toBe('light');
     expect(result.current.theme).toBe('light');
   });
 });

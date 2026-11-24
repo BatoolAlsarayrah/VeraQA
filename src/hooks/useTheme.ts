@@ -2,8 +2,8 @@ import { useCallback, useSyncExternalStore } from 'react';
 
 export type Theme = 'light' | 'dark';
 
-/** localStorage key. The inline script in index.html reads the same key. */
-export const THEME_STORAGE_KEY = 'veraqa-theme';
+// The inline script in index.html reads the same key.
+export const THEME_KEY = 'veraqa-theme';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
 
@@ -14,9 +14,9 @@ function isTheme(value: unknown): value is Theme {
   return value === 'light' || value === 'dark';
 }
 
-function readSaved(): Theme | null {
+function savedTheme(): Theme | null {
   try {
-    const value = localStorage.getItem(THEME_STORAGE_KEY);
+    const value = localStorage.getItem(THEME_KEY);
     return isTheme(value) ? value : null;
   } catch {
     return null;
@@ -29,29 +29,28 @@ function systemTheme(): Theme {
     : 'light';
 }
 
-/** The data-theme attribute on <html> is the single source of truth. */
-function getSnapshot(): Theme {
+// The inline script sets data-theme before React loads, so the attribute is the source of truth.
+function currentTheme(): Theme {
   return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 
-function apply(theme: Theme) {
+function applyTheme(theme: Theme) {
   if (document.documentElement.dataset.theme === theme) return;
   document.documentElement.dataset.theme = theme;
   listeners.forEach((listener) => listener());
 }
 
 function attach() {
-  // Another tab picked a theme (or cleared it).
+  // key is null when another tab calls localStorage.clear().
   const onStorage = (event: StorageEvent) => {
-    if (event.key !== THEME_STORAGE_KEY && event.key !== null) return;
-    apply(readSaved() ?? systemTheme());
+    if (event.key !== THEME_KEY && event.key !== null) return;
+    applyTheme(savedTheme() ?? systemTheme());
   };
   window.addEventListener('storage', onStorage);
 
-  // The OS theme changed: follow it only while nothing is saved.
   const media = typeof window.matchMedia === 'function' ? window.matchMedia(DARK_QUERY) : null;
   const onMedia = () => {
-    if (!readSaved()) apply(systemTheme());
+    if (!savedTheme()) applyTheme(systemTheme());
   };
   media?.addEventListener('change', onMedia);
 
@@ -73,23 +72,21 @@ function subscribe(listener: () => void) {
   };
 }
 
-/** Sets the theme and saves it on this device. */
 function saveTheme(theme: Theme) {
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    localStorage.setItem(THEME_KEY, theme);
   } catch {
-    // Storage can be blocked (private mode). The theme still applies for this visit.
+    // Storage can be blocked (private browsing); the theme still applies for this visit.
   }
-  apply(theme);
+  applyTheme(theme);
 }
 
-/**
- * Light or dark, shared by every component. A first visit follows the OS;
- * the choice is saved in localStorage only once the person picks.
- */
 export function useTheme() {
-  const theme = useSyncExternalStore(subscribe, getSnapshot);
+  const theme = useSyncExternalStore(subscribe, currentTheme);
   const setTheme = useCallback((next: Theme) => saveTheme(next), []);
-  const toggleTheme = useCallback(() => saveTheme(getSnapshot() === 'dark' ? 'light' : 'dark'), []);
+  const toggleTheme = useCallback(
+    () => saveTheme(currentTheme() === 'dark' ? 'light' : 'dark'),
+    [],
+  );
   return { theme, setTheme, toggleTheme };
 }

@@ -7,17 +7,15 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Body type, set once and inherited. Numerals are tabular everywhere. */
   body {
     margin: 0;
     background-color: var(--bg);
     color: var(--text);
-    font-family: var(--f-sans);
+    font-family: var(--font-sans);
     font-size: 14px;
     line-height: 22px;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
-    /* Theme cross-fade. */
     transition:
       background-color 0.28s,
       color 0.28s;
@@ -28,7 +26,6 @@
     color: var(--text);
   }
 
-  /* The 2px iris focus ring. Rail-ground surfaces switch it to on-rail. */
   :focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
@@ -49,7 +46,7 @@
     scrollbar-color: var(--border-2) transparent;
   }
 
-  /* No transitions on first paint: the theme script adds .loading and removes it after load. */
+  /* The inline theme script in index.html adds .loading and removes it after load, so the theme doesn't cross-fade on first paint. */
   :root.loading *,
   :root.loading *::before,
   :root.loading *::after {
@@ -57,13 +54,11 @@
   }
 }
 
-/* The theme cross-fade for any surface that owns its own background. */
 @utility transition-theme {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-duration: 0.28s;
 }
 
-/* Rail-ground surfaces (sidebar, sign-in brand panel): focus ring in on-rail. */
 @utility focus-on-rail {
   & :focus-visible,
   &:focus-visible {
