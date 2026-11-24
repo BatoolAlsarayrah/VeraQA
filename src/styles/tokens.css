@@ -173,8 +173,26 @@
  * so the dark values swap without any dark: classes in components.
  */
 @theme inline {
-  /* Drop Tailwind's default palette: token colors only. */
+  /*
+   * Drop Tailwind's defaults so only our tokens exist. The default spacing
+   * scale stays for layout (gap-2, p-4…).
+   */
   --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-*: initial;
+  --breakpoint-*: initial;
+
+  /*
+   * DESIGN.md responsive tiers, mobile-first. Phone styles take no prefix.
+   * tablet: 901px+ (icon rail) · desktop: 1101px+ (full sidebar) · wide: 1600px+ (1520px cap)
+   */
+  --breakpoint-tablet: 56.3125rem;
+  --breakpoint-desktop: 68.8125rem;
+  --breakpoint-wide: 100rem;
+
   --color-transparent: transparent;
   --color-current: currentColor;
   --color-inherit: inherit;

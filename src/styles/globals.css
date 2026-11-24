@@ -1,2 +1,81 @@
 @import 'tailwindcss';
 @import './tokens.css';
+@import './motion.css';
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Body type, set once and inherited. Numerals are tabular everywhere. */
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--f-sans);
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    /* Theme cross-fade. */
+    transition:
+      background-color 0.28s,
+      color 0.28s;
+  }
+
+  ::selection {
+    background-color: var(--sel-border);
+    color: var(--text);
+  }
+
+  /* The 2px iris focus ring. Rail-ground surfaces switch it to on-rail. */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  a {
+    color: var(--primary);
+    text-underline-offset: 3px;
+  }
+
+  input,
+  textarea {
+    caret-color: var(--primary);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-2) transparent;
+  }
+
+  /* No transitions on first paint: the theme script adds .loading and removes it after load. */
+  :root.loading *,
+  :root.loading *::before,
+  :root.loading *::after {
+    transition: none !important;
+  }
+}
+
+/* The theme cross-fade for any surface that owns its own background. */
+@utility transition-theme {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.28s;
+}
+
+/* Rail-ground surfaces (sidebar, sign-in brand panel): focus ring in on-rail. */
+@utility focus-on-rail {
+  & :focus-visible,
+  &:focus-visible {
+    outline-color: var(--on-rail);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+}
