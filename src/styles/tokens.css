@@ -1,0 +1,291 @@
+:root {
+  color-scheme: light;
+
+  --primary: #4b3f9e;
+  --primary-fill: #4b3f9e;
+  --primary-ledge: #362c7a;
+  --on-p: #ffffff;
+  --sel: #ede9f8;
+  --sel-border: #c9c1ea;
+
+  /* Teal is reserved for AI; logo-end is the one exception. */
+  --ai: #2a7480;
+  --ai-ink: #1f5f69;
+  --ai-bg: #e8f3f4;
+  --ai-border: #8fc0c7;
+  --logo-end: #2a7480;
+
+  --rail: #e9e6f2;
+  --rail-2: #f5f3fa;
+  --rail-3: #d6d1e4;
+  --rail-on: #ffffff;
+  --line: #4b3f9e;
+  --on-rail: #241e3a;
+  --on-rail-2: #4a4361;
+  --on-rail-3: #655e7c;
+  --track: color-mix(in srgb, #655e7c 55%, transparent);
+
+  --bg: #f7f5fa;
+  --surface: #ffffff;
+  --subtle: #f0edf6;
+  --field: #f9f8fc;
+  --neutral-bg: #f0edf6;
+  --border: #e5e1ee;
+  --border-2: #8c85a3;
+  --line-l: #c8c2d8;
+  --text: #241e3a;
+  --text-2: #4f4866;
+  --text-3: #6b6482;
+  --scrim: rgba(36, 30, 58, 0.38);
+
+  --ok: #256b4e;
+  --ok-fill: #256b4e;
+  --ok-bg: #e2f2ea;
+  --on-ok: #ffffff;
+  --st-ok: #1f5f44;
+  --bad: #b03a2e;
+  --bad-fill: #b03a2e;
+  --bad-bg: #fbe9e6;
+  --bad-border: #ebb8b1;
+  --bad-ledge: #8e3229;
+  --on-bad: #ffffff;
+  --st-bad: #98322a;
+  --warn: #7f5310;
+  --warn-fill: #b7791f;
+  --warn-bg: #faf0dc;
+  --st-warn: #7f5310;
+
+  --pop: 0 10px 30px -8px rgba(54, 44, 122, 0.28), 0 2px 6px rgba(54, 44, 122, 0.1);
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --primary: #b3abea;
+  --primary-fill: #5b50b3;
+  --primary-ledge: #40378a;
+  --on-p: #f3f1fb;
+  --sel: #2e2a48;
+  --sel-border: #4b4580;
+
+  --ai: #6fa9b2;
+  --ai-ink: #96c6cd;
+  --ai-bg: #1f3037;
+  --ai-border: #4f8791;
+  --logo-end: #96c6cd;
+
+  --rail: #171622;
+  --rail-2: #242331;
+  --rail-3: #312f43;
+  --rail-on: #2d2b40;
+  --line: #b3abea;
+  --on-rail: #e8e6f1;
+  --on-rail-2: #b9b5c9;
+  --on-rail-3: #9894ac;
+  --track: #4c4966;
+
+  --bg: #1b1a26;
+  --surface: #242331;
+  --subtle: #2c2b3b;
+  --field: #1f1e2a;
+  --neutral-bg: #2c2b3b;
+  --border: #343248;
+  --border-2: #726f8f;
+  --line-l: #4c4966;
+  --text: #e8e6f1;
+  --text-2: #b9b5c9;
+  --text-3: #9894ac;
+  --scrim: rgba(8, 7, 14, 0.62);
+
+  --ok: #9ed2b8;
+  --ok-fill: #62a686;
+  --ok-bg: #1e3229;
+  --on-ok: #0f2219;
+  --st-ok: #9ed2b8;
+  --bad: #e7a9a1;
+  --bad-fill: #b4544a;
+  --bad-bg: #3a2327;
+  --bad-border: #6b3b3d;
+  --bad-ledge: #8a3d35;
+  --on-bad: #ffffff;
+  --st-bad: #e7a9a1;
+  --warn: #dfc08a;
+  --warn-fill: #b9924f;
+  --warn-bg: #352c1c;
+  --st-warn: #dfc08a;
+
+  --pop: 0 12px 32px -8px rgba(6, 5, 12, 0.7), 0 2px 6px rgba(6, 5, 12, 0.4);
+}
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  /* Only token values exist. Tailwind's spacing scale is kept on purpose for layout. */
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-*: initial;
+  --breakpoint-*: initial;
+
+  /* DESIGN.md tiers, mobile-first: 901px, 1101px, 1600px. */
+  --breakpoint-tablet: 56.3125rem;
+  --breakpoint-desktop: 68.8125rem;
+  --breakpoint-wide: 100rem;
+
+  --radius-inner: 4px;
+  --radius-pill: 999px;
+  --radius-control: 8px;
+  --radius-panel: 10px;
+  --radius-sheet: 16px;
+  --radius-full: 50%;
+
+  --spacing-control-gap: 8px;
+  --spacing-row-inline: 16px;
+  --spacing-section-gap: 20px;
+  --spacing-panel-block: 20px;
+  --spacing-panel-inline: 24px;
+  --spacing-page-block: 28px;
+  --spacing-page-inline: 32px;
+
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --text-display: 40px;
+  --text-display--line-height: 48px;
+  --text-display--font-weight: 700;
+  --text-display--letter-spacing: -0.025em;
+  --text-wordmark: 22px;
+  --text-wordmark--line-height: 28px;
+  --text-wordmark--font-weight: 700;
+  --text-wordmark--letter-spacing: -0.01em;
+  --text-metric: 30px;
+  --text-metric--line-height: 38px;
+  --text-metric--font-weight: 700;
+  --text-metric--letter-spacing: -0.02em;
+  --text-headline: 26px;
+  --text-headline--line-height: 32px;
+  --text-headline--font-weight: 700;
+  --text-headline--letter-spacing: -0.02em;
+  --text-statement: 20px;
+  --text-statement--line-height: 30px;
+  --text-statement--font-weight: 400;
+  --text-dialog-title: 18px;
+  --text-dialog-title--line-height: 24px;
+  --text-dialog-title--font-weight: 700;
+  --text-title: 15px;
+  --text-title--line-height: 22px;
+  --text-title--font-weight: 700;
+  --text-body: 14px;
+  --text-body--line-height: 22px;
+  --text-body--font-weight: 400;
+  --text-body-strong: 14px;
+  --text-body-strong--line-height: 22px;
+  --text-body-strong--font-weight: 600;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 20px;
+  --text-body-sm--font-weight: 400;
+  --text-label: 13px;
+  --text-label--line-height: 20px;
+  --text-label--font-weight: 600;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 400;
+  --text-badge: 12px;
+  --text-badge--line-height: 18px;
+  --text-badge--font-weight: 600;
+  --text-micro: 11px;
+  --text-micro--line-height: 16px;
+  --text-micro--font-weight: 600;
+  --text-tab-label: 11px;
+  --text-tab-label--line-height: 14px;
+  --text-tab-label--font-weight: 500;
+}
+
+/* inline makes utilities reference the variables directly, so dark values swap with no dark: classes. */
+@theme inline {
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-inherit: inherit;
+
+  --color-primary: var(--primary);
+  --color-primary-fill: var(--primary-fill);
+  --color-primary-ledge: var(--primary-ledge);
+  --color-on-p: var(--on-p);
+  --color-sel: var(--sel);
+  --color-sel-border: var(--sel-border);
+  --color-ai: var(--ai);
+  --color-ai-ink: var(--ai-ink);
+  --color-ai-bg: var(--ai-bg);
+  --color-ai-border: var(--ai-border);
+  --color-logo-end: var(--logo-end);
+  --color-rail: var(--rail);
+  --color-rail-2: var(--rail-2);
+  --color-rail-3: var(--rail-3);
+  --color-rail-on: var(--rail-on);
+  --color-line: var(--line);
+  --color-on-rail: var(--on-rail);
+  --color-on-rail-2: var(--on-rail-2);
+  --color-on-rail-3: var(--on-rail-3);
+  --color-track: var(--track);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
+  --color-field: var(--field);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-border: var(--border);
+  --color-border-2: var(--border-2);
+  --color-line-l: var(--line-l);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-scrim: var(--scrim);
+  --color-ok: var(--ok);
+  --color-ok-fill: var(--ok-fill);
+  --color-ok-bg: var(--ok-bg);
+  --color-on-ok: var(--on-ok);
+  --color-st-ok: var(--st-ok);
+  --color-bad: var(--bad);
+  --color-bad-fill: var(--bad-fill);
+  --color-bad-bg: var(--bad-bg);
+  --color-bad-border: var(--bad-border);
+  --color-bad-ledge: var(--bad-ledge);
+  --color-on-bad: var(--on-bad);
+  --color-st-bad: var(--st-bad);
+  --color-warn: var(--warn);
+  --color-warn-fill: var(--warn-fill);
+  --color-warn-bg: var(--warn-bg);
+  --color-st-warn: var(--st-warn);
+
+  --color-primary-hover: color-mix(in srgb, var(--primary-fill) 88%, #000);
+  --color-bad-fill-hover: color-mix(in srgb, var(--bad-fill) 88%, #000);
+  --color-ai-hover: color-mix(in srgb, var(--ai-bg) 80%, var(--ai));
+
+  --shadow-ledge-primary: 0 3px 0 var(--primary-ledge);
+  --shadow-ledge-secondary: inset 0 0 0 1px var(--border-2), 0 2px 0 var(--border-2);
+  --shadow-ledge-secondary-pressed: inset 0 0 0 1px var(--border-2);
+  --shadow-ledge-danger: inset 0 0 0 1px var(--bad-border), 0 2px 0 var(--bad-border);
+  --shadow-ledge-danger-pressed: inset 0 0 0 1px var(--bad-border);
+  --shadow-ledge-danger-fill: 0 2px 0 var(--bad-ledge);
+  --shadow-pop: var(--pop);
+  --shadow-card: 0 1px 2px rgba(54, 44, 122, 0.06);
+  --shadow-card-hover: 0 6px 16px -8px rgba(54, 44, 122, 0.35);
+  --shadow-segment: 0 1px 2px rgba(54, 44, 122, 0.12);
+  --shadow-current: 0 1px 0 var(--rail-3);
+  --shadow-halo: 0 0 0 4px var(--sel);
+  --shadow-halo-ai: 0 0 0 5px var(--ai-bg);
+
+  --ease-standard: var(--ease);
+}
+
+/* A --text-* theme value can't set font-family, so the ID style is its own utility. */
+@utility text-id {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  letter-spacing: normal;
+}

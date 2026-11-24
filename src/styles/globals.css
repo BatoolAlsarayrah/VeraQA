@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import './motion.css';
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    transition:
+      background-color 0.28s,
+      color 0.28s;
+  }
+
+  ::selection {
+    background-color: var(--sel-border);
+    color: var(--text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  a {
+    color: var(--primary);
+    text-underline-offset: 3px;
+  }
+
+  input,
+  textarea {
+    caret-color: var(--primary);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-2) transparent;
+  }
+
+  /* The inline theme script in index.html adds .loading and removes it after load, so the theme doesn't cross-fade on first paint. */
+  :root.loading *,
+  :root.loading *::before,
+  :root.loading *::after {
+    transition: none !important;
+  }
+}
+
+@utility transition-theme {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.28s;
+}
+
+@utility transition-press {
+  transition:
+    translate 0.09s ease-out,
+    box-shadow 0.09s ease-out,
+    background-color 0.15s,
+    color 0.15s;
+}
+
+@utility focus-on-rail {
+  & :focus-visible,
+  &:focus-visible {
+    outline-color: var(--on-rail);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+}

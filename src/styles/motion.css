@@ -1,0 +1,68 @@
+@theme {
+  --animate-*: initial;
+
+  --animate-settle: settle 0.36s var(--ease) both;
+  --animate-rise: rise 0.3s var(--ease);
+  --animate-pop-in: pop-in 0.22s var(--ease);
+  --animate-sheet-rise: sheet-rise 0.34s var(--ease);
+  --animate-tab-line: tab-line 0.36s var(--ease);
+  --animate-halo: halo 1.6s var(--ease) infinite;
+  --animate-skeleton: skeleton 1.4s ease-in-out infinite;
+
+  @keyframes settle {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.985);
+    }
+  }
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+  }
+
+  @keyframes sheet-rise {
+    from {
+      transform: translateY(100%);
+    }
+  }
+
+  @keyframes tab-line {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes halo {
+    50% {
+      box-shadow: 0 0 0 9px var(--ai-bg);
+    }
+  }
+
+  @keyframes skeleton {
+    50% {
+      opacity: 0.5;
+    }
+  }
+}
+
+@utility settle-children {
+  & > * {
+    animation: var(--animate-settle);
+  }
+  & > :nth-child(2) {
+    animation-delay: 0.04s;
+  }
+  & > :nth-child(3) {
+    animation-delay: 0.08s;
+  }
+}
