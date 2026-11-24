@@ -182,6 +182,9 @@
   --text-title: 15px;
   --text-title--line-height: 22px;
   --text-title--font-weight: 700;
+  --text-input: 16px;
+  --text-input--line-height: 24px;
+  --text-input--font-weight: 400;
   --text-body: 14px;
   --text-body--line-height: 22px;
   --text-body--font-weight: 400;

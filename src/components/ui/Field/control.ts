@@ -18,4 +18,4 @@ export function useControl(own: Own) {
 }
 
 export const fieldClass =
-  'w-full rounded-sm border border-border-2 text-body text-text transition-theme placeholder:text-text-3 hover:border-text-3 aria-invalid:border-bad-fill aria-invalid:shadow-field-error';
+  'w-full rounded-sm border border-border-2 text-input text-text tablet:text-body transition-theme placeholder:text-text-3 hover:border-text-3 aria-invalid:border-bad-fill aria-invalid:shadow-field-error';

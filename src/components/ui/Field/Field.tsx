@@ -8,12 +8,12 @@ type Props = {
   label: string;
   help?: string;
   error?: string | undefined;
-  required?: boolean;
+  optional?: boolean;
   children: ReactNode;
   className?: string;
 };
 
-export function Field({ label, help, error, required = false, children, className }: Props) {
+export function Field({ label, help, error, optional = false, children, className }: Props) {
   const id = useId();
   const helpId = `${id}-help`;
   const errorId = `${id}-error`;
@@ -22,9 +22,10 @@ export function Field({ label, help, error, required = false, children, classNam
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
       <label htmlFor={id} className="text-label text-text">
-        {label}
+        {optional ? `${label} ` : label}
+        {optional && <span className="font-normal text-text-3">(optional)</span>}
       </label>
-      <FieldContext value={{ id, describedBy, invalid: Boolean(error), required }}>
+      <FieldContext value={{ id, describedBy, invalid: Boolean(error), required: !optional }}>
         {children}
       </FieldContext>
       {error && (

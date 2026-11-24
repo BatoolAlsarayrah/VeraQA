@@ -45,9 +45,9 @@ describe('Field', () => {
     );
   });
 
-  it('marks a required control without triggering browser validation', () => {
+  it('is required by default without triggering browser validation', () => {
     render(
-      <Field label="Project name" required>
+      <Field label="Project name">
         <Input />
       </Field>,
     );
@@ -55,5 +55,16 @@ describe('Field', () => {
 
     expect(input).toHaveAttribute('aria-required', 'true');
     expect(input).not.toHaveAttribute('required');
+  });
+
+  it('marks an optional field in its label and drops aria-required', () => {
+    render(
+      <Field label="Target date" optional>
+        <Input />
+      </Field>,
+    );
+    const input = screen.getByRole('textbox', { name: 'Target date (optional)' });
+
+    expect(input).not.toHaveAttribute('aria-required');
   });
 });
