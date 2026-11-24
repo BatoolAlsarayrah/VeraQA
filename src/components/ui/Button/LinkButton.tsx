@@ -1,6 +1,6 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
-import { Icon, type IconName } from '@/components/domain';
+import { Icon, type IconName } from '@/components/domain/Icon';
 
 import { buttonClass, type Size, type Variant } from './styles';
 

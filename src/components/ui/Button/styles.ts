@@ -5,7 +5,7 @@ export type Size = 'sm' | 'md' | 'lg';
 
 const variants: Record<Variant, string> = {
   primary:
-    'border border-primary bg-primary-fill text-on-p shadow-ledge-primary hover:bg-primary-hover active:translate-y-0.75 active:shadow-none',
+    'border border-primary bg-primary-fill text-on-p shadow-ledge-primary hover:border-primary-hover-edge hover:bg-primary-hover active:translate-y-0.75 active:shadow-none',
   secondary:
     'bg-surface text-text shadow-ledge-secondary hover:bg-subtle active:translate-y-0.5 active:shadow-ledge-secondary-pressed',
   danger:
