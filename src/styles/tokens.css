@@ -158,6 +158,10 @@
   --text-display--line-height: 48px;
   --text-display--font-weight: 700;
   --text-display--letter-spacing: -0.025em;
+  --text-wordmark: 22px;
+  --text-wordmark--line-height: 28px;
+  --text-wordmark--font-weight: 700;
+  --text-wordmark--letter-spacing: -0.01em;
   --text-metric: 30px;
   --text-metric--line-height: 38px;
   --text-metric--font-weight: 700;
@@ -255,6 +259,10 @@
   --color-warn-fill: var(--warn-fill);
   --color-warn-bg: var(--warn-bg);
   --color-st-warn: var(--st-warn);
+
+  --color-primary-hover: color-mix(in srgb, var(--primary-fill) 88%, #000);
+  --color-bad-fill-hover: color-mix(in srgb, var(--bad-fill) 88%, #000);
+  --color-ai-hover: color-mix(in srgb, var(--ai-bg) 80%, var(--ai));
 
   --shadow-ledge-primary: 0 3px 0 var(--primary-ledge);
   --shadow-ledge-secondary: inset 0 0 0 1px var(--border-2), 0 2px 0 var(--border-2);
