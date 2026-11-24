@@ -281,6 +281,7 @@
   --shadow-current: 0 1px 0 var(--rail-3);
   --shadow-halo: 0 0 0 4px var(--sel);
   --shadow-halo-ai: 0 0 0 5px var(--ai-bg);
+  --shadow-field-error: inset 0 0 0 1px var(--bad);
 
   --ease-standard: var(--ease);
 }

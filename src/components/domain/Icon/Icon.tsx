@@ -4,7 +4,7 @@ import { type IconName, type IconPath, icons } from './icons';
 
 type Props = {
   name: IconName;
-  size?: 16 | 18 | 24;
+  size?: 14 | 16 | 18 | 24;
   label?: string;
   className?: string;
 };
