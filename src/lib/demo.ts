@@ -185,3 +185,44 @@ export function demoNotifications(projectId: string): Notice[] {
     unread,
   }));
 }
+
+export type DemoAnalysis = { files: string[]; startedAt: number; done: boolean } | null;
+
+const ANALYSIS_KEY = 'veraqa-analysis';
+export const analysisSteps = 4;
+export const analysisStepMs = 1300;
+export const analysisFound = { requirements: 26, issues: 8 };
+
+function storedAnalysis(): DemoAnalysis {
+  try {
+    const parsed: unknown = JSON.parse(sessionStorage.getItem(ANALYSIS_KEY) ?? 'null');
+    return typeof parsed === 'object' && parsed !== null ? (parsed as DemoAnalysis) : null;
+  } catch {
+    return null;
+  }
+}
+
+let analysis = storedAnalysis();
+const analysisListeners = new Set<() => void>();
+
+export function getDemoAnalysis() {
+  return analysis;
+}
+
+export function setDemoAnalysis(next: DemoAnalysis) {
+  analysis = next;
+  try {
+    if (next) sessionStorage.setItem(ANALYSIS_KEY, JSON.stringify(next));
+    else sessionStorage.removeItem(ANALYSIS_KEY);
+  } catch {
+    // Storage can be blocked; the state still holds for this page.
+  }
+  analysisListeners.forEach((listener) => listener());
+}
+
+export function subscribeDemoAnalysis(listener: () => void) {
+  analysisListeners.add(listener);
+  return () => {
+    analysisListeners.delete(listener);
+  };
+}

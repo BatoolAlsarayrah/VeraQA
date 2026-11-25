@@ -1,7 +1,16 @@
+import { useEffect } from 'react';
 import { Outlet, useLocation, useMatches } from 'react-router';
 
-import { AppShell, PhoneHeader, Sidebar, TabBar, TopBar } from '@/components/layout';
-import { useCollapsedRail, useProject } from '@/hooks';
+import {
+  AnalysisBanner,
+  AppShell,
+  PhoneHeader,
+  Sidebar,
+  TabBar,
+  TopBar,
+} from '@/components/layout';
+import { useAnalysis, useCollapsedRail, useProject } from '@/hooks';
+import { setDemoAnalysis } from '@/lib';
 import type { Capability } from '@/types';
 
 import { deepestHandle, resolve } from './handle';
@@ -11,6 +20,7 @@ export function ShellRoute() {
   const project = useProject();
   const found = deepestHandle(useMatches());
   const { collapsed, toggle } = useCollapsedRail();
+  const analysis = useAnalysis();
   const can = (capability: Capability) => project?.capabilities.includes(capability) ?? false;
   const handle = found?.handle;
   const params = found?.params ?? {};
@@ -19,6 +29,12 @@ export function ShellRoute() {
     label: resolve(handle.back.label, params, can),
     to: handle.back.to(params),
   };
+  const reviewed = handle?.stage === 'requirements' && analysis?.done === true;
+  const showBanner = analysis && project && can('upload') && handle?.stage !== 'srs' && !reviewed;
+
+  useEffect(() => {
+    if (reviewed) setDemoAnalysis(null);
+  }, [reviewed]);
 
   return (
     <AppShell
@@ -29,6 +45,7 @@ export function ShellRoute() {
         <>
           <TopBar stage={handle?.stage} crumb={crumb} />
           <PhoneHeader back={back} />
+          {showBanner && <AnalysisBanner projectId={project.projectId} {...analysis} />}
         </>
       }
       bottom={<TabBar />}

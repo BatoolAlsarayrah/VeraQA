@@ -4,6 +4,7 @@ import { capabilitiesFor } from './permissions';
 
 // Stand-in until Phase 3: the mock API (and later the live API) supplies the session through setSession.
 const KEY = 'veraqa-project';
+const ROLES_KEY = 'veraqa-roles';
 
 const demo: { projectId: string; projectName: string; role: Role }[] = [
   { projectId: 'e-commerce-portal-v2', projectName: 'E-Commerce Portal v2', role: 'qa-lead' },
@@ -12,10 +13,23 @@ const demo: { projectId: string; projectName: string; role: Role }[] = [
   { projectId: 'library-system', projectName: 'Library system', role: 'project-manager' },
 ];
 
-const memberships: Membership[] = demo.map((entry) => ({
-  ...entry,
-  capabilities: capabilitiesFor(entry.role),
-}));
+function storedRoles(): Record<string, Role> {
+  try {
+    const parsed: unknown = JSON.parse(sessionStorage.getItem(ROLES_KEY) ?? '{}');
+    return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, Role>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function membershipsFor(roles: Record<string, Role>): Membership[] {
+  return demo.map((entry) => {
+    const role = roles[entry.projectId] ?? entry.role;
+    return { ...entry, role, capabilities: capabilitiesFor(role) };
+  });
+}
+
+const memberships = membershipsFor(storedRoles());
 
 function stored() {
   try {
@@ -55,6 +69,16 @@ export function subscribeSession(listener: () => void) {
   return () => {
     listeners.delete(listener);
   };
+}
+
+export function setDemoRole(projectId: string, role: Role) {
+  const roles = { ...storedRoles(), [projectId]: role };
+  try {
+    sessionStorage.setItem(ROLES_KEY, JSON.stringify(roles));
+  } catch {
+    // Storage can be blocked; the choice still holds for this page.
+  }
+  setSession({ ...session, memberships: membershipsFor(roles) });
 }
 
 export function setCurrentProject(projectId: string) {
