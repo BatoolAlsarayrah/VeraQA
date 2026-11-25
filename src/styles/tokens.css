@@ -157,10 +157,14 @@
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --text-display: 40px;
-  --text-display--line-height: 48px;
+  --text-display: 46px;
+  --text-display--line-height: 54px;
   --text-display--font-weight: 700;
-  --text-display--letter-spacing: -0.025em;
+  --text-display--letter-spacing: -0.01em;
+  --text-display-sm: 28px;
+  --text-display-sm--line-height: 34px;
+  --text-display-sm--font-weight: 700;
+  --text-display-sm--letter-spacing: -0.01em;
   --text-wordmark: 22px;
   --text-wordmark--line-height: 28px;
   --text-wordmark--font-weight: 700;
@@ -182,9 +186,9 @@
   --text-title: 15px;
   --text-title--line-height: 22px;
   --text-title--font-weight: 700;
-  --text-input: 16px;
-  --text-input--line-height: 24px;
-  --text-input--font-weight: 400;
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-body-lg--font-weight: 400;
   --text-body: 14px;
   --text-body--line-height: 22px;
   --text-body--font-weight: 400;

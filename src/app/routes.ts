@@ -24,6 +24,7 @@ import { GenerateTestCasesPage, TestCasePage, TestCasesPage } from '@/features/t
 import { TraceabilityPage } from '@/features/traceability';
 import { ids, paths } from '@/lib';
 
+import { AuthRoute } from './AuthRoute';
 import { page as title } from './handle';
 import { ProjectHome } from './ProjectHome';
 import { ProjectRoute } from './ProjectRoute';
@@ -53,12 +54,17 @@ export const routes: RouteObject[] = [
     ErrorBoundary: RouteError,
     children: [
       { index: true, loader: () => redirect(paths.projects) },
-      { path: 'signin', Component: SignInPage, handle: title('Sign in') },
-      { path: 'register', Component: RegisterPage, handle: title('Create your account') },
       {
-        path: 'forgot-password',
-        Component: ForgotPasswordPage,
-        handle: title('Reset your password'),
+        Component: AuthRoute,
+        children: [
+          { path: 'signin', Component: SignInPage, handle: title('Sign in') },
+          { path: 'register', Component: RegisterPage, handle: title('Create your account') },
+          {
+            path: 'forgot-password',
+            Component: ForgotPasswordPage,
+            handle: title('Reset your password'),
+          },
+        ],
       },
       { path: 'projects', Component: ProjectsPage, handle: title('Your projects') },
       { path: 'account', Component: AccountPage, handle: title('Account settings') },

@@ -1,5 +1,11 @@
 const styles = [
-  { name: 'display', spec: '40/48 · 700', className: 'text-display', sample: "Ship what's true." },
+  { name: 'display', spec: '46/54 · 700', className: 'text-display', sample: "Ship what's true." },
+  {
+    name: 'display-sm',
+    spec: '28/34 · 700 (phones)',
+    className: 'text-display-sm',
+    sample: "Ship what's true.",
+  },
   { name: 'metric', spec: '30/38 · 700', className: 'text-metric', sample: '21 approved' },
   { name: 'headline', spec: '26/32 · 700', className: 'text-headline', sample: 'Requirements' },
   { name: 'wordmark', spec: '22/28 · 700', className: 'text-wordmark', sample: 'VeraQA' },
@@ -17,10 +23,10 @@ const styles = [
   },
   { name: 'title', spec: '15/22 · 700', className: 'text-title', sample: 'Pending review' },
   {
-    name: 'input',
-    spec: '16/24 · 400 (phones)',
-    className: 'text-input',
-    sample: 'Field text below 901px',
+    name: 'body-lg',
+    spec: '16/24 · 400',
+    className: 'text-body-lg',
+    sample: 'Field text below 901px, and the sign-in subline on phones',
   },
   {
     name: 'body',
