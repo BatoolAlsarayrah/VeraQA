@@ -48,9 +48,15 @@ export function Popover({ label, trigger, align = 'start', children, className }
       }
     }
 
+    function onClick(event: MouseEvent) {
+      if (event.target instanceof Element && event.target.closest('a')) panel?.hidePopover();
+    }
+
     panel.addEventListener('toggle', onToggle);
+    panel.addEventListener('click', onClick);
     return () => {
       panel.removeEventListener('toggle', onToggle);
+      panel.removeEventListener('click', onClick);
       window.removeEventListener('resize', position);
       window.removeEventListener('scroll', position, true);
     };
@@ -66,7 +72,7 @@ export function Popover({ label, trigger, align = 'start', children, className }
         role="dialog"
         aria-label={label}
         className={cn(
-          'inset-auto m-0 max-w-[calc(100vw-1rem)] overflow-hidden rounded-panel border border-border bg-surface p-0 text-text shadow-pop open:animate-pop-in',
+          'inset-auto m-0 max-w-[calc(100vw-1rem)] overflow-hidden rounded-control border border-border bg-surface p-0 text-text shadow-pop open:animate-pop-in',
           align === 'end' ? 'origin-top-right' : 'origin-top-left',
           className,
         )}

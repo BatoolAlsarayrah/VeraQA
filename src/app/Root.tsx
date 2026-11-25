@@ -4,7 +4,7 @@ import { Outlet, ScrollRestoration, useMatches } from 'react-router';
 import { useSession } from '@/hooks';
 import type { Capability } from '@/types';
 
-import { deepestHandle } from './handle';
+import { deepestHandle, resolve } from './handle';
 
 export function Root() {
   const session = useSession();
@@ -12,11 +12,7 @@ export function Root() {
   const projectId = found?.params.projectId ?? session.currentProjectId;
   const membership = session.memberships.find((entry) => entry.projectId === projectId);
   const can = (capability: Capability) => membership?.capabilities.includes(capability) ?? false;
-  const title = found
-    ? typeof found.handle.title === 'function'
-      ? found.handle.title(found.params, can)
-      : found.handle.title
-    : undefined;
+  const title = found ? resolve(found.handle.title, found.params, can) : undefined;
 
   useEffect(() => {
     document.title = title ? `${title} · VeraQA` : 'VeraQA';

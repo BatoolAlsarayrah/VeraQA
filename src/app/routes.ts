@@ -107,33 +107,36 @@ export const routes: RouteObject[] = [
               {
                 path: 'requirements',
                 Component: RequirementsPage,
-                handle: title('Requirements', { can: 'workspace' }),
+                handle: title('Requirements', { can: 'workspace', stage: 'requirements' }),
               },
               {
                 path: 'requirements/new',
                 Component: AddRequirementsPage,
-                handle: title('Add requirements', { can: 'upload', narrow: true }),
+                handle: title('Add requirements', { can: 'upload', narrow: true, stage: 'srs' }),
               },
               {
                 path: 'requirements/analysis',
                 Component: AnalysisPage,
-                handle: title('AI analysis', { can: 'upload', narrow: true }),
+                handle: title('AI analysis', { can: 'upload', narrow: true, stage: 'srs' }),
               },
               {
                 path: 'requirements/:requirementId',
                 Component: RequirementPage,
                 loader: itemId('requirementId', ids.requirement),
-                handle: title((params) => params.requirementId ?? '', { can: 'workspace' }),
+                handle: title((params) => params.requirementId ?? '', {
+                  can: 'workspace',
+                  stage: 'requirements',
+                }),
               },
               {
                 path: 'scenarios',
                 Component: ScenariosPage,
-                handle: title('Test scenarios', { can: 'workspace' }),
+                handle: title('Test scenarios', { can: 'workspace', stage: 'scenarios' }),
               },
               {
                 path: 'scenarios/generate',
                 Component: GenerateScenariosPage,
-                handle: title('Generating test scenarios', { can: 'approve' }),
+                handle: title('Generating test scenarios', { can: 'approve', stage: 'scenarios' }),
               },
               {
                 path: 'scenarios/:scenarioId',
@@ -144,34 +147,40 @@ export const routes: RouteObject[] = [
               {
                 path: 'test-cases',
                 Component: TestCasesPage,
-                handle: title('Test cases', { can: 'workspace' }),
+                handle: title('Test cases', { can: 'workspace', stage: 'test-cases' }),
               },
               {
                 path: 'test-cases/generate',
                 Component: GenerateTestCasesPage,
-                handle: title('Generating test cases', { can: 'approve' }),
+                handle: title('Generating test cases', { can: 'approve', stage: 'test-cases' }),
               },
               {
                 path: 'test-cases/:testCaseId',
                 Component: TestCasePage,
                 loader: itemId('testCaseId', ids.testCase),
-                handle: title((params) => params.testCaseId ?? '', { can: 'workspace' }),
+                handle: title((params) => params.testCaseId ?? '', {
+                  can: 'workspace',
+                  stage: 'test-cases',
+                }),
               },
               {
                 path: 'runs',
                 Component: RunsPage,
-                handle: title('Test runs', { can: 'workspace' }),
+                handle: title('Test runs', { can: 'workspace', stage: 'runs' }),
               },
               {
                 path: 'runs/new',
                 Component: NewRunPage,
-                handle: title('New test run', { can: 'manage' }),
+                handle: title('New test run', { can: 'manage', stage: 'runs' }),
               },
               {
                 path: 'runs/:runId',
                 Component: RunPage,
                 loader: itemId('runId', ids.run),
-                handle: title((params) => `Run ${params.runId ?? ''}`, { can: 'workspace' }),
+                handle: title((params) => `Run ${params.runId ?? ''}`, {
+                  can: 'workspace',
+                  stage: 'runs',
+                }),
               },
               {
                 path: 'runs/:runId/:testCaseId',
@@ -180,12 +189,17 @@ export const routes: RouteObject[] = [
                   itemId('runId', ids.run)(args);
                   return itemId('testCaseId', ids.testCase)(args);
                 },
-                handle: title('Run a test', { can: 'test' }),
+                handle: title('Run a test', {
+                  can: 'test',
+                  crumb: (params) => `Run ${params.runId ?? ''}`,
+                }),
               },
               {
                 path: 'defects',
                 Component: DefectsPage,
-                handle: title((_, can) => (can('workspace') ? 'Defects' : 'Your defects')),
+                handle: title((_, can) => (can('workspace') ? 'Defects' : 'Your defects'), {
+                  stage: 'defects',
+                }),
               },
               {
                 path: 'defects/:defectId',
