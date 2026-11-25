@@ -33,6 +33,7 @@ function withPeople() {
     name: 'Shop',
     description: '',
     solo: false,
+    stage: 'reviewing-requirements',
     createdAt: new Date().toISOString(),
     settings: {
       targetDate: null,
@@ -102,7 +103,7 @@ describe('mock routes', () => {
 describe('mock rules', () => {
   it('answer 401 when nobody is signed in', async () => {
     useRoutes();
-    withPeople();
+    withPeople().signedIn = null;
 
     await expect(
       request('/projects/shop/secret', Ok, { unauthorized: 'throw' }),

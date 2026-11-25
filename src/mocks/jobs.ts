@@ -33,6 +33,7 @@ export function startJob(db: Db, start: Start): JobRecord {
     items: start.items ?? [],
     cancelled: false,
     finished: false,
+    result: null,
   };
   db.jobs.push(job);
   return job;

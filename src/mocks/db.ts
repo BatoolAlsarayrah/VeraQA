@@ -1,6 +1,7 @@
 import type {
   ActivityEntry,
   ActivityType,
+  AnalysisResult,
   Attachment,
   BlockedReason,
   DefectEvent,
@@ -14,11 +15,14 @@ import type {
   Priority,
   ReviewStatus,
   Role,
+  ScenarioGenerationResult,
   ScenarioType,
   Settings,
   Severity,
+  Stage,
   Step,
   StepResult,
+  TestCaseGenerationResult,
   TestCaseType,
   TestDataItem,
   TestResult,
@@ -41,6 +45,7 @@ export type ProjectRecord = {
   name: string;
   description: string;
   solo: boolean;
+  stage: Stage;
   createdAt: string;
   settings: Omit<Settings, 'name' | 'description' | 'prefixes' | 'projectManager'>;
 };
@@ -199,6 +204,7 @@ export type JobRecord = {
   items: string[];
   cancelled: boolean;
   finished: boolean;
+  result: AnalysisResult | ScenarioGenerationResult | TestCaseGenerationResult | null;
 };
 
 export type Db = {

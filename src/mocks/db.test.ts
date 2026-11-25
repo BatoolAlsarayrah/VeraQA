@@ -9,6 +9,7 @@ afterEach(() => {
 describe('mock db', () => {
   it('keeps changes in localStorage until it is reset', () => {
     const db = resetDb();
+    const seeded = db.invitations.length;
     db.signedIn = 'batool-hani';
     db.invitations.push({
       id: 'inv-1',
@@ -25,12 +26,13 @@ describe('mock db', () => {
       invitations: unknown[];
     };
     expect(stored.version).toBe(DB_VERSION);
-    expect(stored.invitations).toHaveLength(1);
+    expect(stored.invitations).toHaveLength(seeded + 1);
   });
 
   it('goes back to the seed on reset, but keeps who is signed in', () => {
     const db = getDb();
-    db.signedIn = 'batool-hani';
+    const seeded = db.invitations.length;
+    db.signedIn = 'maria-ayman';
     db.invitations.push({
       id: 'inv-1',
       projectId: 'p',
@@ -42,8 +44,8 @@ describe('mock db', () => {
 
     const fresh = resetDb();
 
-    expect(fresh.invitations).toHaveLength(0);
-    expect(fresh.signedIn).toBe('batool-hani');
+    expect(fresh.invitations).toHaveLength(seeded);
+    expect(fresh.signedIn).toBe('maria-ayman');
   });
 });
 
