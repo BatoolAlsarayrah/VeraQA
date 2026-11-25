@@ -46,6 +46,10 @@
     scrollbar-color: var(--border-2) transparent;
   }
 
+  html:has(dialog[open]:modal) {
+    overflow: hidden;
+  }
+
   /* The inline theme script in index.html adds .loading and removes it after load, so the theme doesn't cross-fade on first paint. */
   :root.loading *,
   :root.loading *::before,
