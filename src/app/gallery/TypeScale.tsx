@@ -17,6 +17,12 @@ const styles = [
   },
   { name: 'title', spec: '15/22 · 700', className: 'text-title', sample: 'Pending review' },
   {
+    name: 'input',
+    spec: '16/24 · 400 (phones)',
+    className: 'text-input',
+    sample: 'Field text below 901px',
+  },
+  {
     name: 'body',
     spec: '14/22 · 400',
     className: 'text-body',
