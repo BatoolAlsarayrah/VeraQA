@@ -36,6 +36,26 @@ describe('routes', () => {
     expect(router.state.location.pathname).toBe('/projects');
   });
 
+  it('frames each kind of page in its own layout', async () => {
+    visit('/projects');
+    expect(await screen.findByRole('link', { name: 'VeraQA, your projects' })).toBeInTheDocument();
+  });
+
+  it.each([
+    ['/account', true],
+    [`${lead}/requirements/new`, true],
+    [`${lead}/settings`, true],
+    [`${lead}/requirements`, false],
+  ])('sets %s in the narrow column: %s', async (path, narrow) => {
+    visit(path);
+    const heading = await screen.findByRole('heading', { level: 1 });
+    const column = screen.getByRole('main').firstElementChild;
+
+    expect(column).toContainElement(heading);
+    if (narrow) expect(column).toHaveClass('max-w-200');
+    else expect(column).not.toHaveClass('max-w-200');
+  });
+
   it('opens a project at its dashboard and titles the page', async () => {
     const router = visit(lead);
 

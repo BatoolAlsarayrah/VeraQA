@@ -30,6 +30,8 @@ import { ProjectHome } from './ProjectHome';
 import { ProjectRoute } from './ProjectRoute';
 import { Root } from './Root';
 import { RouteError } from './RouteError';
+import { ShellRoute } from './ShellRoute';
+import { SoloRoute } from './SoloRoute';
 
 function itemId(param: string, pattern: RegExp) {
   return ({ params }: LoaderFunctionArgs) => {
@@ -66,114 +68,160 @@ export const routes: RouteObject[] = [
           },
         ],
       },
-      { path: 'projects', Component: ProjectsPage, handle: title('Your projects') },
-      { path: 'account', Component: AccountPage, handle: title('Account settings') },
-      { path: 'search', Component: SearchPage, handle: title('Search') },
-      { path: 'notifications', Component: NotificationsPage, handle: title('Notifications') },
       {
-        path: 'projects/:projectId',
-        Component: ProjectRoute,
+        Component: SoloRoute,
         children: [
-          { index: true, Component: ProjectHome },
-          { path: 'dashboard', Component: DashboardPage, handle: title('Dashboard', 'workspace') },
-          { path: 'my-work', Component: MyWorkPage, handle: title('My work', 'workspace') },
+          { path: 'projects', Component: ProjectsPage, handle: title('Your projects') },
+          ...dev,
+        ],
+      },
+      {
+        Component: ShellRoute,
+        children: [
           {
-            path: 'requirements',
-            Component: RequirementsPage,
-            handle: title('Requirements', 'workspace'),
+            path: 'account',
+            Component: AccountPage,
+            handle: title('Account settings', { narrow: true }),
+          },
+          { path: 'search', Component: SearchPage, handle: title('Search') },
+          {
+            path: 'notifications',
+            Component: NotificationsPage,
+            handle: title('Notifications', { narrow: true }),
           },
           {
-            path: 'requirements/new',
-            Component: AddRequirementsPage,
-            handle: title('Add requirements', 'upload'),
-          },
-          {
-            path: 'requirements/analysis',
-            Component: AnalysisPage,
-            handle: title('AI analysis', 'upload'),
-          },
-          {
-            path: 'requirements/:requirementId',
-            Component: RequirementPage,
-            loader: itemId('requirementId', ids.requirement),
-            handle: title((params) => params.requirementId ?? '', 'workspace'),
-          },
-          {
-            path: 'scenarios',
-            Component: ScenariosPage,
-            handle: title('Test scenarios', 'workspace'),
-          },
-          {
-            path: 'scenarios/generate',
-            Component: GenerateScenariosPage,
-            handle: title('Generating test scenarios', 'approve'),
-          },
-          {
-            path: 'scenarios/:scenarioId',
-            Component: ScenarioPage,
-            loader: itemId('scenarioId', ids.scenario),
-            handle: title((params) => params.scenarioId ?? '', 'workspace'),
-          },
-          {
-            path: 'test-cases',
-            Component: TestCasesPage,
-            handle: title('Test cases', 'workspace'),
-          },
-          {
-            path: 'test-cases/generate',
-            Component: GenerateTestCasesPage,
-            handle: title('Generating test cases', 'approve'),
-          },
-          {
-            path: 'test-cases/:testCaseId',
-            Component: TestCasePage,
-            loader: itemId('testCaseId', ids.testCase),
-            handle: title((params) => params.testCaseId ?? '', 'workspace'),
-          },
-          { path: 'runs', Component: RunsPage, handle: title('Test runs', 'workspace') },
-          { path: 'runs/new', Component: NewRunPage, handle: title('New test run', 'manage') },
-          {
-            path: 'runs/:runId',
-            Component: RunPage,
-            loader: itemId('runId', ids.run),
-            handle: title((params) => `Run ${params.runId ?? ''}`, 'workspace'),
-          },
-          {
-            path: 'runs/:runId/:testCaseId',
-            Component: RunTestPage,
-            loader: (args) => {
-              itemId('runId', ids.run)(args);
-              return itemId('testCaseId', ids.testCase)(args);
-            },
-            handle: title('Run a test', 'test'),
-          },
-          {
-            path: 'defects',
-            Component: DefectsPage,
-            handle: title((_, can) => (can('workspace') ? 'Defects' : 'Your defects')),
-          },
-          {
-            path: 'defects/:defectId',
-            Component: DefectPage,
-            loader: itemId('defectId', ids.defect),
-            handle: title((params) => params.defectId ?? ''),
-          },
-          {
-            path: 'traceability',
-            Component: TraceabilityPage,
-            handle: title('Traceability', 'trace'),
-          },
-          { path: 'reports', Component: ReportsPage, handle: title('Reports', 'manage') },
-          { path: 'members', Component: MembersPage, handle: title('Members', 'manage') },
-          { path: 'activity', Component: ActivityPage, handle: title('Activity log', 'manage') },
-          {
-            path: 'settings',
-            Component: SettingsPage,
-            handle: title('Project settings', 'manage'),
+            path: 'projects/:projectId',
+            Component: ProjectRoute,
+            children: [
+              { index: true, Component: ProjectHome },
+              {
+                path: 'dashboard',
+                Component: DashboardPage,
+                handle: title('Dashboard', { can: 'workspace' }),
+              },
+              {
+                path: 'my-work',
+                Component: MyWorkPage,
+                handle: title('My work', { can: 'workspace' }),
+              },
+              {
+                path: 'requirements',
+                Component: RequirementsPage,
+                handle: title('Requirements', { can: 'workspace' }),
+              },
+              {
+                path: 'requirements/new',
+                Component: AddRequirementsPage,
+                handle: title('Add requirements', { can: 'upload', narrow: true }),
+              },
+              {
+                path: 'requirements/analysis',
+                Component: AnalysisPage,
+                handle: title('AI analysis', { can: 'upload', narrow: true }),
+              },
+              {
+                path: 'requirements/:requirementId',
+                Component: RequirementPage,
+                loader: itemId('requirementId', ids.requirement),
+                handle: title((params) => params.requirementId ?? '', { can: 'workspace' }),
+              },
+              {
+                path: 'scenarios',
+                Component: ScenariosPage,
+                handle: title('Test scenarios', { can: 'workspace' }),
+              },
+              {
+                path: 'scenarios/generate',
+                Component: GenerateScenariosPage,
+                handle: title('Generating test scenarios', { can: 'approve' }),
+              },
+              {
+                path: 'scenarios/:scenarioId',
+                Component: ScenarioPage,
+                loader: itemId('scenarioId', ids.scenario),
+                handle: title((params) => params.scenarioId ?? '', { can: 'workspace' }),
+              },
+              {
+                path: 'test-cases',
+                Component: TestCasesPage,
+                handle: title('Test cases', { can: 'workspace' }),
+              },
+              {
+                path: 'test-cases/generate',
+                Component: GenerateTestCasesPage,
+                handle: title('Generating test cases', { can: 'approve' }),
+              },
+              {
+                path: 'test-cases/:testCaseId',
+                Component: TestCasePage,
+                loader: itemId('testCaseId', ids.testCase),
+                handle: title((params) => params.testCaseId ?? '', { can: 'workspace' }),
+              },
+              {
+                path: 'runs',
+                Component: RunsPage,
+                handle: title('Test runs', { can: 'workspace' }),
+              },
+              {
+                path: 'runs/new',
+                Component: NewRunPage,
+                handle: title('New test run', { can: 'manage' }),
+              },
+              {
+                path: 'runs/:runId',
+                Component: RunPage,
+                loader: itemId('runId', ids.run),
+                handle: title((params) => `Run ${params.runId ?? ''}`, { can: 'workspace' }),
+              },
+              {
+                path: 'runs/:runId/:testCaseId',
+                Component: RunTestPage,
+                loader: (args) => {
+                  itemId('runId', ids.run)(args);
+                  return itemId('testCaseId', ids.testCase)(args);
+                },
+                handle: title('Run a test', { can: 'test' }),
+              },
+              {
+                path: 'defects',
+                Component: DefectsPage,
+                handle: title((_, can) => (can('workspace') ? 'Defects' : 'Your defects')),
+              },
+              {
+                path: 'defects/:defectId',
+                Component: DefectPage,
+                loader: itemId('defectId', ids.defect),
+                handle: title((params) => params.defectId ?? ''),
+              },
+              {
+                path: 'traceability',
+                Component: TraceabilityPage,
+                handle: title('Traceability', { can: 'trace' }),
+              },
+              {
+                path: 'reports',
+                Component: ReportsPage,
+                handle: title('Reports', { can: 'manage' }),
+              },
+              {
+                path: 'members',
+                Component: MembersPage,
+                handle: title('Members', { can: 'manage' }),
+              },
+              {
+                path: 'activity',
+                Component: ActivityPage,
+                handle: title('Activity log', { can: 'manage', narrow: true }),
+              },
+              {
+                path: 'settings',
+                Component: SettingsPage,
+                handle: title('Project settings', { can: 'manage', narrow: true }),
+              },
+            ],
           },
         ],
       },
-      ...dev,
       {
         path: '*',
         loader: () => {

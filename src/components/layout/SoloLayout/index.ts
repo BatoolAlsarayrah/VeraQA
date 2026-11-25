@@ -1,0 +1,1 @@
+export { SoloLayout } from './SoloLayout';

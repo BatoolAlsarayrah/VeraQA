@@ -5,6 +5,7 @@ import type { Capability } from '@/types';
 export type Handle = {
   title: string | ((params: Params, can: (capability: Capability) => boolean) => string);
   can?: Capability;
+  narrow?: boolean;
 };
 
 function isHandle(value: unknown): value is Handle {
@@ -16,6 +17,6 @@ export function deepestHandle(matches: UIMatch[]) {
   return match ? { handle: match.handle as Handle, params: match.params } : null;
 }
 
-export function page(title: Handle['title'], can?: Capability): Handle {
-  return can ? { title, can } : { title };
+export function page(title: Handle['title'], options: Omit<Handle, 'title'> = {}): Handle {
+  return { title, ...options };
 }
