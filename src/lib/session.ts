@@ -1,5 +1,7 @@
 import type { Membership, Role, Session } from '@/types';
 
+type ShellSession = Session & { currentProjectId: string };
+
 import { capabilitiesFor } from './permissions';
 
 // Stand-in until Phase 3: the mock API (and later the live API) supplies the session through setSession.
@@ -40,9 +42,9 @@ function stored() {
   }
 }
 
-export function demoSession(): Session {
+export function demoSession(): ShellSession {
   return {
-    user: { name: 'Batool Hani', email: 'batool.hani@shop-team.com' },
+    user: { id: 'batool-hani', name: 'Batool Hani', email: 'batool.hani@shop-team.com' },
     memberships,
     currentProjectId: stored() ?? 'e-commerce-portal-v2',
   };
@@ -59,7 +61,7 @@ export function getSession() {
   return session;
 }
 
-export function setSession(next: Session) {
+export function setSession(next: ShellSession) {
   session = next;
   notify();
 }

@@ -9,7 +9,7 @@ import { AccountMenu } from './AccountMenu';
 import { NotificationList } from './NotificationList';
 import { NotificationsMenu } from './NotificationsMenu';
 
-const user = { name: 'Batool Hani', email: 'batool.hani@shop-team.com' };
+const user = { id: 'batool-hani', name: 'Batool Hani', email: 'batool.hani@shop-team.com' };
 
 const notices: Notice[] = [
   {
