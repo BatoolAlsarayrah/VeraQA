@@ -1,10 +1,17 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+
+import { demoSession, setSession } from '@/lib';
 
 import { Providers } from './providers';
 import { routes } from './routes';
+
+const lead = '/projects/e-commerce-portal-v2';
+const engineer = '/projects/clinic-booking-app';
+const developer = '/projects/payments-api';
+const manager = '/projects/library-system';
 
 function visit(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -16,6 +23,11 @@ function visit(path: string) {
   return router;
 }
 
+afterEach(() => {
+  sessionStorage.clear();
+  setSession(demoSession());
+});
+
 describe('routes', () => {
   it('sends / to the projects list', async () => {
     const router = visit('/');
@@ -24,50 +36,99 @@ describe('routes', () => {
     expect(router.state.location.pathname).toBe('/projects');
   });
 
-  it('sends a project to its dashboard and titles the page', async () => {
-    visit('/projects/e-commerce-portal-v2');
+  it('opens a project at its dashboard and titles the page', async () => {
+    const router = visit(lead);
 
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`${lead}/dashboard`);
     expect(document.title).toBe('Dashboard · VeraQA');
   });
 
   it.each([
-    ['/projects/p/requirements/REQ-014', 'REQ-014'],
-    ['/projects/p/scenarios/SC-007', 'SC-007'],
-    ['/projects/p/test-cases/TC-031', 'TC-031'],
-    ['/projects/p/runs/12', 'Run 12'],
-    ['/projects/p/runs/12/TC-031', 'Run a test · TC-031'],
-    ['/projects/p/defects/BUG-007', 'BUG-007'],
-    ['/projects/p/requirements/new', 'Add requirements'],
-    ['/projects/p/scenarios/generate', 'Generating test scenarios'],
+    [`${lead}/requirements/REQ-014`, 'REQ-014'],
+    [`${lead}/scenarios/SC-007`, 'SC-007'],
+    [`${lead}/test-cases/TC-031`, 'TC-031'],
+    [`${lead}/runs/12`, 'Run 12'],
+    [`${lead}/runs/12/TC-031`, 'Run a test · TC-031'],
+    [`${lead}/defects/BUG-007`, 'BUG-007'],
+    [`${lead}/requirements/new`, 'Add requirements'],
+    [`${lead}/scenarios/generate`, 'Generating test scenarios'],
   ])('opens %s', async (path, heading) => {
     visit(path);
 
     expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument();
   });
 
-  it('treats the project id as an opaque string', async () => {
-    visit('/projects/Payments%20API/defects');
+  it.each(['/nowhere', `${lead}/requirements/abc`, `${lead}/runs/twelve`, `${lead}/defects/BUG`])(
+    'shows Not found for %s',
+    async (path) => {
+      visit(path);
 
-    expect(await screen.findByRole('heading', { name: 'Defects' })).toBeInTheDocument();
-  });
-
-  it.each([
-    '/nowhere',
-    '/projects/p/requirements/abc',
-    '/projects/p/runs/twelve',
-    '/projects/p/defects/BUG',
-  ])('shows Not found for %s', async (path) => {
-    visit(path);
-
-    expect(
-      await screen.findByRole('heading', { name: 'This stop isn’t on the line' }),
-    ).toBeInTheDocument();
-  });
+      expect(
+        await screen.findByRole('heading', { name: 'This stop isn’t on the line' }),
+      ).toBeInTheDocument();
+    },
+  );
 
   it('opens the component gallery in development', async () => {
     visit('/dev/components');
 
     expect(await screen.findByRole('heading', { name: 'Component gallery' })).toBeInTheDocument();
+  });
+});
+
+describe('route guard', () => {
+  it.each([
+    ['a QA engineer opening Reports', `${engineer}/reports`, `${engineer}/dashboard`],
+    ['a QA engineer adding requirements', `${engineer}/requirements/new`, `${engineer}/dashboard`],
+    [
+      'a QA engineer generating scenarios',
+      `${engineer}/scenarios/generate`,
+      `${engineer}/dashboard`,
+    ],
+    ['a developer opening Requirements', `${developer}/requirements`, `${developer}/defects`],
+    ['a developer opening the dashboard', `${developer}/dashboard`, `${developer}/defects`],
+    ['a developer opening a project', developer, `${developer}/defects`],
+    ['anyone opening a project they are not in', '/projects/someone-else', '/projects'],
+  ])('silently redirects %s', async (_, path, home) => {
+    const router = visit(path);
+
+    await waitFor(() => expect(router.state.location.pathname).toBe(home));
+    expect(
+      screen.queryByRole('heading', { name: 'This stop isn’t on the line' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['a project manager', `${manager}/settings`, 'Project settings'],
+    ['a QA lead', `${lead}/members`, 'Members'],
+    ['a QA engineer', `${engineer}/traceability`, 'Traceability'],
+    ['a developer', `${developer}/defects/BUG-007`, 'BUG-007'],
+  ])('lets %s open what their capabilities allow', async (_, path, heading) => {
+    const router = visit(path);
+
+    expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(path);
+  });
+
+  it('names the defects list for a developer', async () => {
+    visit(`${developer}/defects`);
+
+    expect(await screen.findByRole('heading', { name: 'Your defects' })).toBeInTheDocument();
+    expect(document.title).toBe('Your defects · VeraQA');
+  });
+
+  it('reads capabilities, not the role name', async () => {
+    const session = demoSession();
+    setSession({
+      ...session,
+      memberships: session.memberships.map((entry) =>
+        entry.projectId === 'payments-api' ? { ...entry, capabilities: ['fix', 'manage'] } : entry,
+      ),
+    });
+    const router = visit(`${developer}/reports`);
+
+    expect(await screen.findByRole('heading', { name: 'Reports' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`${developer}/reports`);
   });
 });

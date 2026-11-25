@@ -1,22 +1,21 @@
 import { useEffect } from 'react';
-import { Outlet, type Params, ScrollRestoration, useMatches } from 'react-router';
+import { Outlet, ScrollRestoration, useMatches } from 'react-router';
 
-export type Handle = {
-  title: string | ((params: Params) => string);
-};
+import { useSession } from '@/hooks';
+import type { Capability } from '@/types';
 
-function isHandle(value: unknown): value is Handle {
-  return typeof value === 'object' && value !== null && 'title' in value;
-}
+import { deepestHandle } from './handle';
 
 export function Root() {
-  const matches = useMatches();
-  const match = matches.findLast((entry) => isHandle(entry.handle));
-  const handle = match?.handle as Handle | undefined;
-  const title = handle
-    ? typeof handle.title === 'function'
-      ? handle.title(match?.params ?? {})
-      : handle.title
+  const session = useSession();
+  const found = deepestHandle(useMatches());
+  const projectId = found?.params.projectId ?? session.currentProjectId;
+  const membership = session.memberships.find((entry) => entry.projectId === projectId);
+  const can = (capability: Capability) => membership?.capabilities.includes(capability) ?? false;
+  const title = found
+    ? typeof found.handle.title === 'function'
+      ? found.handle.title(found.params, can)
+      : found.handle.title
     : undefined;
 
   useEffect(() => {

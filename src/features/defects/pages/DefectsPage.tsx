@@ -1,5 +1,7 @@
 import { PageHeader } from '@/components/layout';
+import { useCan } from '@/hooks';
 
 export function DefectsPage() {
-  return <PageHeader title="Defects" />;
+  const workspace = useCan('workspace');
+  return <PageHeader title={workspace ? 'Defects' : 'Your defects'} />;
 }

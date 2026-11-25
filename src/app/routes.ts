@@ -24,12 +24,11 @@ import { GenerateTestCasesPage, TestCasePage, TestCasesPage } from '@/features/t
 import { TraceabilityPage } from '@/features/traceability';
 import { ids, paths } from '@/lib';
 
-import { type Handle, Root } from './Root';
+import { page as title } from './handle';
+import { ProjectHome } from './ProjectHome';
+import { ProjectRoute } from './ProjectRoute';
+import { Root } from './Root';
 import { RouteError } from './RouteError';
-
-function title(value: Handle['title']): Handle {
-  return { title: value };
-}
 
 function itemId(param: string, pattern: RegExp) {
   return ({ params }: LoaderFunctionArgs) => {
@@ -67,57 +66,71 @@ export const routes: RouteObject[] = [
       { path: 'notifications', Component: NotificationsPage, handle: title('Notifications') },
       {
         path: 'projects/:projectId',
+        Component: ProjectRoute,
         children: [
+          { index: true, Component: ProjectHome },
+          { path: 'dashboard', Component: DashboardPage, handle: title('Dashboard', 'workspace') },
+          { path: 'my-work', Component: MyWorkPage, handle: title('My work', 'workspace') },
           {
-            index: true,
-            loader: ({ params }) => redirect(paths.dashboard(params.projectId ?? '')),
+            path: 'requirements',
+            Component: RequirementsPage,
+            handle: title('Requirements', 'workspace'),
           },
-          { path: 'dashboard', Component: DashboardPage, handle: title('Dashboard') },
-          { path: 'my-work', Component: MyWorkPage, handle: title('My work') },
-          { path: 'requirements', Component: RequirementsPage, handle: title('Requirements') },
           {
             path: 'requirements/new',
             Component: AddRequirementsPage,
-            handle: title('Add requirements'),
+            handle: title('Add requirements', 'upload'),
           },
-          { path: 'requirements/analysis', Component: AnalysisPage, handle: title('AI analysis') },
+          {
+            path: 'requirements/analysis',
+            Component: AnalysisPage,
+            handle: title('AI analysis', 'upload'),
+          },
           {
             path: 'requirements/:requirementId',
             Component: RequirementPage,
             loader: itemId('requirementId', ids.requirement),
-            handle: title((params) => params.requirementId ?? ''),
+            handle: title((params) => params.requirementId ?? '', 'workspace'),
           },
-          { path: 'scenarios', Component: ScenariosPage, handle: title('Test scenarios') },
+          {
+            path: 'scenarios',
+            Component: ScenariosPage,
+            handle: title('Test scenarios', 'workspace'),
+          },
           {
             path: 'scenarios/generate',
             Component: GenerateScenariosPage,
-            handle: title('Generating test scenarios'),
+            handle: title('Generating test scenarios', 'approve'),
           },
           {
             path: 'scenarios/:scenarioId',
             Component: ScenarioPage,
             loader: itemId('scenarioId', ids.scenario),
-            handle: title((params) => params.scenarioId ?? ''),
+            handle: title((params) => params.scenarioId ?? '', 'workspace'),
           },
-          { path: 'test-cases', Component: TestCasesPage, handle: title('Test cases') },
+          {
+            path: 'test-cases',
+            Component: TestCasesPage,
+            handle: title('Test cases', 'workspace'),
+          },
           {
             path: 'test-cases/generate',
             Component: GenerateTestCasesPage,
-            handle: title('Generating test cases'),
+            handle: title('Generating test cases', 'approve'),
           },
           {
             path: 'test-cases/:testCaseId',
             Component: TestCasePage,
             loader: itemId('testCaseId', ids.testCase),
-            handle: title((params) => params.testCaseId ?? ''),
+            handle: title((params) => params.testCaseId ?? '', 'workspace'),
           },
-          { path: 'runs', Component: RunsPage, handle: title('Test runs') },
-          { path: 'runs/new', Component: NewRunPage, handle: title('New test run') },
+          { path: 'runs', Component: RunsPage, handle: title('Test runs', 'workspace') },
+          { path: 'runs/new', Component: NewRunPage, handle: title('New test run', 'manage') },
           {
             path: 'runs/:runId',
             Component: RunPage,
             loader: itemId('runId', ids.run),
-            handle: title((params) => `Run ${params.runId ?? ''}`),
+            handle: title((params) => `Run ${params.runId ?? ''}`, 'workspace'),
           },
           {
             path: 'runs/:runId/:testCaseId',
@@ -126,20 +139,32 @@ export const routes: RouteObject[] = [
               itemId('runId', ids.run)(args);
               return itemId('testCaseId', ids.testCase)(args);
             },
-            handle: title('Run a test'),
+            handle: title('Run a test', 'test'),
           },
-          { path: 'defects', Component: DefectsPage, handle: title('Defects') },
+          {
+            path: 'defects',
+            Component: DefectsPage,
+            handle: title((_, can) => (can('workspace') ? 'Defects' : 'Your defects')),
+          },
           {
             path: 'defects/:defectId',
             Component: DefectPage,
             loader: itemId('defectId', ids.defect),
             handle: title((params) => params.defectId ?? ''),
           },
-          { path: 'traceability', Component: TraceabilityPage, handle: title('Traceability') },
-          { path: 'reports', Component: ReportsPage, handle: title('Reports') },
-          { path: 'members', Component: MembersPage, handle: title('Members') },
-          { path: 'activity', Component: ActivityPage, handle: title('Activity log') },
-          { path: 'settings', Component: SettingsPage, handle: title('Project settings') },
+          {
+            path: 'traceability',
+            Component: TraceabilityPage,
+            handle: title('Traceability', 'trace'),
+          },
+          { path: 'reports', Component: ReportsPage, handle: title('Reports', 'manage') },
+          { path: 'members', Component: MembersPage, handle: title('Members', 'manage') },
+          { path: 'activity', Component: ActivityPage, handle: title('Activity log', 'manage') },
+          {
+            path: 'settings',
+            Component: SettingsPage,
+            handle: title('Project settings', 'manage'),
+          },
         ],
       },
       ...dev,
