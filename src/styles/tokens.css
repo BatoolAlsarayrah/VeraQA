@@ -55,7 +55,7 @@
   --warn-bg: #faf0dc;
   --st-warn: #7f5310;
 
-  --pop: 0 10px 30px -8px rgba(54, 44, 122, 0.28), 0 2px 6px rgba(54, 44, 122, 0.1);
+  --pop: 0 8px 24px rgba(54, 44, 122, 0.2), 0 2px 6px rgba(54, 44, 122, 0.1);
   --primary-hover-edge: color-mix(in srgb, var(--primary-fill) 88%, #000);
 
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -117,7 +117,7 @@
   --warn-bg: #352c1c;
   --st-warn: #dfc08a;
 
-  --pop: 0 12px 32px -8px rgba(6, 5, 12, 0.7), 0 2px 6px rgba(6, 5, 12, 0.4);
+  --pop: 0 8px 24px rgba(6, 5, 12, 0.7), 0 2px 6px rgba(6, 5, 12, 0.4);
   --primary-hover-edge: var(--primary);
 }
 

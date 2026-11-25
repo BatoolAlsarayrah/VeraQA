@@ -18,7 +18,7 @@ export function Panel({ title, actions, list = false, level = 2, children, class
     <div
       className={cn(
         'flex flex-wrap items-center justify-between gap-3',
-        list && 'border-b border-border px-4 py-3.75 tablet:px-6',
+        list && 'min-h-13 border-b border-border px-4 py-3.75 tablet:px-6',
       )}
     >
       {title && (

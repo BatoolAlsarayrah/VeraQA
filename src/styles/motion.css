@@ -10,6 +10,7 @@
   --animate-skeleton: skeleton 1.4s ease-in-out infinite;
   --animate-draw: draw 0.34s var(--ease) both;
   --animate-spin: spin 0.8s linear infinite;
+  --animate-toast: fade 0.22s ease-out both, toast-rise 0.32s var(--ease) both;
 
   @keyframes settle {
     from {
@@ -47,6 +48,18 @@
   @keyframes halo {
     50% {
       box-shadow: 0 0 0 9px var(--ai-bg);
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes toast-rise {
+    from {
+      transform: translateY(20px);
     }
   }
 
