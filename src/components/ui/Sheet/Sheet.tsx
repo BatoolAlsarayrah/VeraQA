@@ -8,11 +8,12 @@ type Props = {
   open: boolean;
   onClose: () => void;
   title: string;
+  titleHidden?: boolean;
   children: ReactNode;
   className?: string;
 };
 
-export function Sheet({ open, onClose, title, children, className }: Props) {
+export function Sheet({ open, onClose, title, titleHidden = false, children, className }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   useModal(ref, open, onClose);
@@ -27,7 +28,7 @@ export function Sheet({ open, onClose, title, children, className }: Props) {
       )}
     >
       <span aria-hidden="true" className="mx-auto mb-2.5 block h-1 w-9 rounded-pill bg-border-2" />
-      <h2 id={titleId} className="mb-2 text-title text-text">
+      <h2 id={titleId} className={titleHidden ? 'sr-only' : 'mb-2 text-title text-text'}>
         {title}
       </h2>
       {children}

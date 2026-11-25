@@ -2,7 +2,7 @@ import { cn } from '@/lib';
 
 type Props = {
   name: string;
-  size?: 24 | 32 | 36;
+  size?: 24 | 32 | 36 | 40;
   alt?: string;
   className?: string;
 };
@@ -11,6 +11,7 @@ const sizes = {
   24: 'size-6 text-micro',
   32: 'size-8 text-badge',
   36: 'size-9 text-badge',
+  40: 'size-10 text-label',
 };
 
 function initials(name: string) {

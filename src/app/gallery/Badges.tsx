@@ -77,7 +77,7 @@ export function Badges() {
       </Row>
       <Row label="IDs and avatars">
         <IdTag>REQ-014</IdTag>
-        <IdTag href="#badges">REQ-014</IdTag>
+        <IdTag to="#badges">REQ-014</IdTag>
         <IdTag>Run 12</IdTag>
         <Avatar name="Batool Hani" size={24} />
         <Avatar name="Batool Hani" />

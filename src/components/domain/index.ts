@@ -3,6 +3,7 @@ export { AiSuggestion, FlaggedText } from './AiSuggestion';
 export { Avatar } from './Avatar';
 export { Icon, type IconName, icons } from './Icon';
 export { IdTag } from './IdTag';
+export { IdText } from './IdText';
 export { Logo } from './Logo';
 export { type Priority, PriorityBadge } from './PriorityBadge';
 export { type MarkerState, RowMarker } from './RowMarker';

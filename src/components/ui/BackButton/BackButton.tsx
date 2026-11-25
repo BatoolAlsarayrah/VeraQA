@@ -1,14 +1,14 @@
 import { LinkButton } from '../Button';
 
 type Props = {
-  href: string;
+  to: string;
   label: string;
 };
 
-export function BackButton({ href, label }: Props) {
+export function BackButton({ to, label }: Props) {
   return (
     <LinkButton
-      href={href}
+      to={to}
       icon="arrow-left"
       size="sm"
       aria-label={`Back to ${label}`}

@@ -34,10 +34,10 @@ export function Buttons() {
       <Row label="Icon only, link, back">
         <Button icon="x" aria-label="Close" size="sm" />
         <Button icon="plus" aria-label="Add requirement" />
-        <LinkButton href="#buttons" variant="primary">
+        <LinkButton to="#buttons" variant="primary">
           Review 5 requirements
         </LinkButton>
-        <BackButton href="#buttons" label="Defects" />
+        <BackButton to="#buttons" label="Defects" />
       </Row>
       <Row label="Approve (check draw)">
         <Button variant="primary" approved={approved} onClick={() => setApproved(true)}>

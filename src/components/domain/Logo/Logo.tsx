@@ -3,10 +3,17 @@ import { cn } from '@/lib';
 type Props = {
   size?: 24 | 32 | 40;
   withName?: boolean;
+  tone?: 'color' | 'ink';
   className?: string;
 };
 
-export function Logo({ size = 40, withName = false, className }: Props) {
+const tones = {
+  color: { line: 'stroke-line', node: 'fill-line', end: 'fill-logo-end' },
+  ink: { line: 'stroke-on-rail', node: 'fill-on-rail', end: 'fill-line' },
+};
+
+export function Logo({ size = 40, withName = false, tone = 'color', className }: Props) {
+  const colors = tones[tone];
   const mark = (
     <svg
       width={size}
@@ -22,11 +29,11 @@ export function Logo({ size = 40, withName = false, className }: Props) {
         strokeLinecap="round"
         strokeLinejoin="round"
         opacity=".7"
-        className="stroke-line"
+        className={colors.line}
       />
-      <circle cx="5" cy="16" r="3.6" className="fill-line" />
-      <circle cx="12.5" cy="23.5" r="3.6" className="fill-line" />
-      <circle cx="27" cy="8" r="4.2" className="fill-logo-end" />
+      <circle cx="5" cy="16" r="3.6" className={colors.node} />
+      <circle cx="12.5" cy="23.5" r="3.6" className={colors.node} />
+      <circle cx="27" cy="8" r="4.2" className={colors.end} />
     </svg>
   );
 

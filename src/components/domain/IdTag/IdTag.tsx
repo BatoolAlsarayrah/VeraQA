@@ -1,20 +1,22 @@
+import { Link } from 'react-router';
+
 import { cn } from '@/lib';
 
 type Props = {
   children: string;
-  href?: string;
+  to?: string;
   className?: string;
 };
 
-export function IdTag({ children, href, className }: Props) {
-  if (href) {
+export function IdTag({ children, to, className }: Props) {
+  if (to) {
     return (
-      <a
-        href={href}
+      <Link
+        to={to}
         className={cn('text-id font-medium text-primary no-underline hover:underline', className)}
       >
         {children}
-      </a>
+      </Link>
     );
   }
 

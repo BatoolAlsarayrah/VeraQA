@@ -1,10 +1,12 @@
-import { Gallery } from '@/app/gallery';
-import { ToastProvider } from '@/components/ui';
+import { RouterProvider } from 'react-router/dom';
+
+import { Providers } from './providers';
+import { router } from './router';
 
 export function App() {
   return (
-    <ToastProvider>
-      <Gallery />
-    </ToastProvider>
+    <Providers>
+      <RouterProvider router={router} />
+    </Providers>
   );
 }

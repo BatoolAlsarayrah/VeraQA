@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
 import { IdTag } from './IdTag';
@@ -11,7 +12,11 @@ describe('IdTag', () => {
   });
 
   it('links to the item when given a destination', () => {
-    render(<IdTag href="/requirements/REQ-014">REQ-014</IdTag>);
+    render(
+      <MemoryRouter>
+        <IdTag to="/requirements/REQ-014">REQ-014</IdTag>
+      </MemoryRouter>,
+    );
 
     expect(screen.getByRole('link', { name: 'REQ-014' })).toHaveAttribute(
       'href',

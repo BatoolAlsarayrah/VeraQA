@@ -53,7 +53,7 @@ const content: Record<(typeof sections)[number]['id'], ReactNode> = {
 
 export function Gallery() {
   return (
-    <main className="mx-auto flex max-w-380 settle-children flex-col gap-section-gap px-4 pt-4 pb-10 tablet:px-6 tablet:pt-page-block desktop:px-page-inline">
+    <div className="flex flex-col gap-section-gap">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-3">
           <Logo withName />
@@ -78,6 +78,6 @@ export function Gallery() {
           {content[section.id]}
         </Section>
       ))}
-    </main>
+    </div>
   );
 }

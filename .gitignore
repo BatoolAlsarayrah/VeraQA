@@ -12,7 +12,7 @@ test-results/
 playwright-report/
 playwright/.cache/
 
-# Env files (keep the example)
+# Env files
 .env
 .env.*
 !.env.example
