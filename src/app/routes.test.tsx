@@ -87,6 +87,7 @@ describe('routes', () => {
       expect(
         await screen.findByRole('heading', { name: 'This stop isn’t on the line' }),
       ).toBeInTheDocument();
+      expect(document.title).toBe('Page not found · VeraQA');
     },
   );
 

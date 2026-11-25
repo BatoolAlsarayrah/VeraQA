@@ -32,6 +32,7 @@ import { ids, paths } from '@/lib';
 
 import { AuthRoute } from './AuthRoute';
 import { page as title, type Text } from './handle';
+import { NotFound } from './NotFound';
 import { ProjectHome } from './ProjectHome';
 import { ProjectRoute } from './ProjectRoute';
 import { Root } from './Root';
@@ -71,6 +72,7 @@ export const routes: RouteObject[] = [
   {
     Component: Root,
     ErrorBoundary: RouteError,
+    HydrateFallback: () => null,
     children: [
       { index: true, loader: () => redirect(paths.projects) },
       {
@@ -290,9 +292,8 @@ export const routes: RouteObject[] = [
       },
       {
         path: '*',
-        loader: () => {
-          throw data(null, { status: 404 });
-        },
+        Component: NotFound,
+        handle: title('Page not found'),
       },
     ],
   },
