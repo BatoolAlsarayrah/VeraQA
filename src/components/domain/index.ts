@@ -1,4 +1,5 @@
 export { AiDraftMark } from './AiDraftMark';
+export { AiSuggestion, FlaggedText } from './AiSuggestion';
 export { Avatar } from './Avatar';
 export { Icon, type IconName } from './Icon';
 export { IdTag } from './IdTag';

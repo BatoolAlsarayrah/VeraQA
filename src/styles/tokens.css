@@ -270,6 +270,7 @@
   --color-primary-hover-edge: var(--primary-hover-edge);
   --color-bad-fill-hover: color-mix(in srgb, var(--bad-fill) 88%, #000);
   --color-ai-hover: color-mix(in srgb, var(--ai-bg) 80%, var(--ai));
+  --color-ai-active: color-mix(in srgb, var(--ai-bg) 55%, var(--ai));
 
   --shadow-ledge-primary: 0 3px 0 var(--primary-ledge);
   --shadow-ledge-secondary: inset 0 0 0 1px var(--border-2), 0 2px 0 var(--border-2);
