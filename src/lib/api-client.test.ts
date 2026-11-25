@@ -46,7 +46,7 @@ describe('request', () => {
       myWork: 6,
       openDefects: 7,
     });
-    expect(lastCall().url).toBe('/api/projects/p/counts');
+    expect(lastCall().url).toBe(`${window.location.origin}/api/projects/p/counts`);
     expect(lastCall().init.credentials).toBe('include');
     expect(lastCall().init.method).toBe('GET');
   });
@@ -58,7 +58,9 @@ describe('request', () => {
       query: { status: 'open', assignee: '', q: null, severity: undefined, page: 2 },
     });
 
-    expect(lastCall().url).toBe('/api/projects/p/defects?status=open&page=2');
+    expect(lastCall().url).toBe(
+      `${window.location.origin}/api/projects/p/defects?status=open&page=2`,
+    );
   });
 
   it('sends JSON bodies with a JSON content type', async () => {

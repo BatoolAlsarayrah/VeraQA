@@ -9,14 +9,12 @@ import { useCan, useProject, useSession } from '@/hooks';
 import { demoNotifications, paths, roleLabels } from '@/lib';
 
 import { AccountCard, NotificationList } from '../Menus';
-import { MockChip } from '../MockChip';
 
 type Props = {
   back?: { label: string; to: string } | undefined;
 };
 
-const left =
-  "flex min-w-0 items-center gap-2.5 text-text no-underline before:absolute before:inset-0 before:content-['']";
+const left = 'flex min-h-11 min-w-0 flex-1 items-center gap-2.5 text-text no-underline';
 
 const iconButton =
   'relative grid size-11 shrink-0 cursor-pointer place-items-center rounded-panel text-text-2 active:bg-subtle';
@@ -36,25 +34,22 @@ export function PhoneHeader({ back }: Props) {
 
   return (
     <header className="sticky top-0 z-30 flex min-h-[calc(3.5rem+env(safe-area-inset-top))] items-center gap-1 border-b border-border bg-surface pt-[env(safe-area-inset-top)] pr-1.5 pl-4 text-text transition-theme tablet:hidden">
-      <div className="relative flex min-h-11 min-w-0 flex-1 flex-col justify-center">
-        {back ? (
-          <Link to={back.to} className={left}>
-            <Icon name="chevron-left" size={24} />
-            <span className="truncate text-title font-semibold">{back.label}</span>
-          </Link>
-        ) : (
-          <Link
-            to={paths.projects}
-            aria-label={`Switch project, current project ${project.projectName}`}
-            className={left}
-          >
-            <Logo size={24} />
-            <span className="truncate text-title font-semibold">{project.projectName}</span>
-            <Icon name="caret-up-down" size={16} className="text-text-3" />
-          </Link>
-        )}
-        <MockChip compact className="ml-8.5 self-start" />
-      </div>
+      {back ? (
+        <Link to={back.to} className={left}>
+          <Icon name="chevron-left" size={24} />
+          <span className="truncate text-title font-semibold">{back.label}</span>
+        </Link>
+      ) : (
+        <Link
+          to={paths.projects}
+          aria-label={`Switch project, current project ${project.projectName}`}
+          className={left}
+        >
+          <Logo size={24} />
+          <span className="truncate text-title font-semibold">{project.projectName}</span>
+          <Icon name="caret-up-down" size={16} className="text-text-3" />
+        </Link>
+      )}
       {workspace && (
         <>
           <Link to={paths.search} aria-label="Search" className={iconButton}>

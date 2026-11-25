@@ -11,11 +11,21 @@ import { createRoot } from 'react-dom/client';
 
 import { App } from '@/app/App';
 
-const root = document.getElementById('root');
-if (!root) throw new Error('Root element #root not found');
+async function start() {
+  // Vite replaces VITE_API_MODE at build time, so a live build drops the mock import entirely.
+  if (import.meta.env.VITE_API_MODE === 'mock') {
+    const { startMocks } = await import('./mocks/browser');
+    await startMocks();
+  }
 
-createRoot(root).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+  const root = document.getElementById('root');
+  if (!root) throw new Error('Root element #root not found');
+
+  createRoot(root).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}
+
+void start();

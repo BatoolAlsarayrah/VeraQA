@@ -2,7 +2,6 @@ import { useCan, useProject, useSession } from '@/hooks';
 import { demoNotifications, homePath, paths, roleLabels } from '@/lib';
 
 import { AccountMenu, NotificationsMenu } from '../Menus';
-import { MockChip } from '../MockChip';
 import { Breadcrumb } from './Breadcrumb';
 import { SearchField } from './SearchField';
 import { ThemeButton } from './ThemeButton';
@@ -37,7 +36,6 @@ export function TopBar({ stage, crumb }: Props) {
         )}
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <MockChip className="mr-1" />
         {workspace ? (
           <SearchField label="Search IDs, titles, people" short="Search" />
         ) : (

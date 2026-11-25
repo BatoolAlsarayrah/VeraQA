@@ -69,7 +69,8 @@ function url(path: string, query: Query = {}) {
     if (value !== undefined && value !== null && value !== '') params.set(key, String(value));
   }
   const search = params.toString();
-  return `${import.meta.env.VITE_API_BASE_URL ?? ''}/api${path}${search ? `?${search}` : ''}`;
+  const base = import.meta.env.VITE_API_BASE_URL || window.location.origin;
+  return `${base}/api${path}${search ? `?${search}` : ''}`;
 }
 
 function fieldPath(path: PropertyKey[]) {
