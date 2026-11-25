@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { capabilitiesFor, homePath } from './permissions';
 
 describe('capabilitiesFor', () => {
-  it('gives the project manager every QA and management capability, but not fix', () => {
+  it('gives the project manager every capability, so a solo project can finish a defect', () => {
     expect(capabilitiesFor('project-manager').sort()).toEqual(
-      ['approve', 'edit', 'manage', 'owner', 'test', 'trace', 'upload', 'workspace'].sort(),
+      ['approve', 'edit', 'fix', 'manage', 'owner', 'test', 'trace', 'upload', 'workspace'].sort(),
     );
   });
 

@@ -25,18 +25,18 @@ The frontend never decides permissions from a role name. It shows or hides each 
 | `trace`     | Open traceability and follow trace links                                                                                         |
 | `manage`    | Open reports, members, the activity log and project settings; create test runs and assign work                                   |
 | `owner`     | Use the danger zone: change the project manager, delete the project                                                              |
-| `fix`       | Start fixing an assigned defect, mark it fixed or mark it invalid                                                                |
+| `fix`       | Start fixing a defect assigned to them, mark it fixed or mark it invalid                                                         |
 
 Everyone in a project can open Defects (developers see only the defects assigned to them), Search, Notifications and their account.
 
 The mock assigns these per role:
 
-| Role            | Capabilities                                                                 |
-| --------------- | ---------------------------------------------------------------------------- |
-| Project manager | `workspace`, `upload`, `approve`, `edit`, `test`, `trace`, `manage`, `owner` |
-| QA lead         | `workspace`, `upload`, `approve`, `edit`, `test`, `trace`, `manage`          |
-| QA engineer     | `workspace`, `edit`, `test`, `trace`                                         |
-| Developer       | `fix`                                                                        |
+| Role            | Capabilities                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- |
+| Project manager | `workspace`, `upload`, `approve`, `edit`, `test`, `trace`, `manage`, `owner`, `fix` |
+| QA lead         | `workspace`, `upload`, `approve`, `edit`, `test`, `trace`, `manage`                 |
+| QA engineer     | `workspace`, `edit`, `test`, `trace`                                                |
+| Developer       | `fix`                                                                               |
 
 ## Endpoints
 
@@ -68,4 +68,4 @@ Response `200`:
 
 ## Open questions for the backend
 
-1. **Should the project manager get `fix`?** The product brief says the project manager holds every permission. The mock leaves `fix` out, because it acts on defects assigned to a developer (start fixing, mark fixed, mark invalid). If the project manager should be able to do this, the API only needs to include `fix` in their `capabilities`; the frontend needs no change.
+1. **Should the project manager get `fix`?** Resolved: yes. The project manager holds every permission, so in a solo project they can take a defect through its whole lifecycle. A developer still acts only on defects assigned to them, and so does a project manager acting with `fix`.

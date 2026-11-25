@@ -4,7 +4,17 @@ import { paths } from './paths';
 
 // The live API sends each membership's capabilities. Only the fake session and the mock API build them from here.
 const table: Record<Role, Capability[]> = {
-  'project-manager': ['workspace', 'upload', 'approve', 'edit', 'test', 'trace', 'manage', 'owner'],
+  'project-manager': [
+    'workspace',
+    'upload',
+    'approve',
+    'edit',
+    'test',
+    'trace',
+    'manage',
+    'owner',
+    'fix',
+  ],
   'qa-lead': ['workspace', 'upload', 'approve', 'edit', 'test', 'trace', 'manage'],
   'qa-engineer': ['workspace', 'edit', 'test', 'trace'],
   developer: ['fix'],
