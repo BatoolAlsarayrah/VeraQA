@@ -1,4 +1,10 @@
-import { data, type LoaderFunctionArgs, redirect, type RouteObject } from 'react-router';
+import {
+  data,
+  type LoaderFunctionArgs,
+  type Params,
+  redirect,
+  type RouteObject,
+} from 'react-router';
 
 import { AccountPage } from '@/features/account';
 import { ActivityPage } from '@/features/activity';
@@ -25,13 +31,19 @@ import { TraceabilityPage } from '@/features/traceability';
 import { ids, paths } from '@/lib';
 
 import { AuthRoute } from './AuthRoute';
-import { page as title } from './handle';
+import { page as title, type Text } from './handle';
 import { ProjectHome } from './ProjectHome';
 import { ProjectRoute } from './ProjectRoute';
 import { Root } from './Root';
 import { RouteError } from './RouteError';
 import { ShellRoute } from './ShellRoute';
 import { SoloRoute } from './SoloRoute';
+
+function back(label: Text, to: (projectId: string, params: Params) => string) {
+  return { label, to: (params: Params) => to(params.projectId ?? '', params) };
+}
+
+const defectsLabel: Text = (_, can) => (can('workspace') ? 'Defects' : 'Your defects');
 
 function itemId(param: string, pattern: RegExp) {
   return ({ params }: LoaderFunctionArgs) => {
@@ -112,12 +124,22 @@ export const routes: RouteObject[] = [
               {
                 path: 'requirements/new',
                 Component: AddRequirementsPage,
-                handle: title('Add requirements', { can: 'upload', narrow: true, stage: 'srs' }),
+                handle: title('Add requirements', {
+                  can: 'upload',
+                  narrow: true,
+                  stage: 'srs',
+                  back: back('Requirements', paths.requirements),
+                }),
               },
               {
                 path: 'requirements/analysis',
                 Component: AnalysisPage,
-                handle: title('AI analysis', { can: 'upload', narrow: true, stage: 'srs' }),
+                handle: title('AI analysis', {
+                  can: 'upload',
+                  narrow: true,
+                  stage: 'srs',
+                  back: back('Requirements', paths.requirements),
+                }),
               },
               {
                 path: 'requirements/:requirementId',
@@ -126,6 +148,7 @@ export const routes: RouteObject[] = [
                 handle: title((params) => params.requirementId ?? '', {
                   can: 'workspace',
                   stage: 'requirements',
+                  back: back('Requirements', paths.requirements),
                 }),
               },
               {
@@ -136,13 +159,21 @@ export const routes: RouteObject[] = [
               {
                 path: 'scenarios/generate',
                 Component: GenerateScenariosPage,
-                handle: title('Generating test scenarios', { can: 'approve', stage: 'scenarios' }),
+                handle: title('Generating test scenarios', {
+                  can: 'approve',
+                  stage: 'scenarios',
+                  back: back('Requirements', paths.requirements),
+                }),
               },
               {
                 path: 'scenarios/:scenarioId',
                 Component: ScenarioPage,
                 loader: itemId('scenarioId', ids.scenario),
-                handle: title((params) => params.scenarioId ?? '', { can: 'workspace' }),
+                handle: title((params) => params.scenarioId ?? '', {
+                  can: 'workspace',
+                  stage: 'scenarios',
+                  back: back('Test scenarios', paths.scenarios),
+                }),
               },
               {
                 path: 'test-cases',
@@ -152,7 +183,11 @@ export const routes: RouteObject[] = [
               {
                 path: 'test-cases/generate',
                 Component: GenerateTestCasesPage,
-                handle: title('Generating test cases', { can: 'approve', stage: 'test-cases' }),
+                handle: title('Generating test cases', {
+                  can: 'approve',
+                  stage: 'test-cases',
+                  back: back('Test scenarios', paths.scenarios),
+                }),
               },
               {
                 path: 'test-cases/:testCaseId',
@@ -161,6 +196,7 @@ export const routes: RouteObject[] = [
                 handle: title((params) => params.testCaseId ?? '', {
                   can: 'workspace',
                   stage: 'test-cases',
+                  back: back('Test cases', paths.testCases),
                 }),
               },
               {
@@ -171,7 +207,11 @@ export const routes: RouteObject[] = [
               {
                 path: 'runs/new',
                 Component: NewRunPage,
-                handle: title('New test run', { can: 'manage', stage: 'runs' }),
+                handle: title('New test run', {
+                  can: 'manage',
+                  stage: 'runs',
+                  back: back('Test runs', paths.runs),
+                }),
               },
               {
                 path: 'runs/:runId',
@@ -180,6 +220,7 @@ export const routes: RouteObject[] = [
                 handle: title((params) => `Run ${params.runId ?? ''}`, {
                   can: 'workspace',
                   stage: 'runs',
+                  back: back('Test runs', paths.runs),
                 }),
               },
               {
@@ -191,21 +232,27 @@ export const routes: RouteObject[] = [
                 },
                 handle: title('Run a test', {
                   can: 'test',
+                  stage: 'runs',
                   crumb: (params) => `Run ${params.runId ?? ''}`,
+                  back: back(
+                    (params) => `Run ${params.runId ?? ''}`,
+                    (projectId, params) => paths.run(projectId, params.runId ?? ''),
+                  ),
                 }),
               },
               {
                 path: 'defects',
                 Component: DefectsPage,
-                handle: title((_, can) => (can('workspace') ? 'Defects' : 'Your defects'), {
-                  stage: 'defects',
-                }),
+                handle: title(defectsLabel, { stage: 'defects' }),
               },
               {
                 path: 'defects/:defectId',
                 Component: DefectPage,
                 loader: itemId('defectId', ids.defect),
-                handle: title((params) => params.defectId ?? ''),
+                handle: title((params) => params.defectId ?? '', {
+                  stage: 'defects',
+                  back: back(defectsLabel, paths.defects),
+                }),
               },
               {
                 path: 'traceability',

@@ -12,7 +12,7 @@ type Props = {
 };
 
 const row =
-  'flex min-h-9 items-center rounded-sm px-2.5 text-body no-underline transition-[background-color] duration-150 hover:bg-subtle';
+  'flex min-h-9 max-tablet:min-h-12 items-center rounded-sm px-2.5 text-body no-underline transition-[background-color] duration-150 hover:bg-subtle';
 
 export function AccountCard({ user, role, settings, solo = false }: Props) {
   return (

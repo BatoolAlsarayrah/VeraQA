@@ -1,10 +1,11 @@
 import { useParams } from 'react-router';
 
-import { PageHeader } from '@/components/layout';
+import { PageHeader, usePhoneDetail } from '@/components/layout';
 import { paths } from '@/lib';
 
 export function RequirementPage() {
   const { projectId = '', requirementId = '' } = useParams();
+  usePhoneDetail(true);
   return (
     <PageHeader
       title={requirementId}

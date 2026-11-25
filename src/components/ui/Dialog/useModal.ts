@@ -34,7 +34,8 @@ export function useModal(
       if (isOpen()) close();
     }
     function onClick(event: MouseEvent) {
-      if (event.target === dialog) close();
+      const link = event.target instanceof Element && event.target.closest('a[href]');
+      if (event.target === dialog || link) close();
     }
 
     dialog.addEventListener('cancel', onCancel);

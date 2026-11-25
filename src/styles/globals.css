@@ -78,6 +78,17 @@
   }
 }
 
+@media (width < 56.3125rem) {
+  :root:has([data-shell]) {
+    --toast-offset: 5rem;
+    scroll-padding-top: 4.5rem;
+  }
+
+  :root:has([data-shell][data-detail]) {
+    --toast-offset: 6rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -12,8 +12,8 @@ export function ThemeButton({ className }: { className?: string }) {
       onClick={toggleTheme}
       aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
       className={cn(
-        'grid size-9 shrink-0 cursor-pointer place-items-center rounded-sm text-text-2 transition-[background-color,color] duration-150 hover:bg-subtle hover:text-text',
-        className,
+        'grid shrink-0 cursor-pointer place-items-center text-text-2 transition-[background-color,color] duration-150 hover:bg-subtle hover:text-text',
+        className ?? 'size-9 rounded-sm',
       )}
     >
       <Icon

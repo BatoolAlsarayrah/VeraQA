@@ -55,9 +55,9 @@ describe('TopBar', () => {
       '/projects/payments-api/defects',
     );
     expect(within(crumb).getByText('Your defects')).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveAttribute(
+    expect(screen.getByRole('searchbox', { name: 'Search your defects' })).toHaveAttribute(
       'placeholder',
-      'Search your defects',
+      'Search defects',
     );
   });
 

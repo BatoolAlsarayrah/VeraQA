@@ -9,24 +9,30 @@ type Props = {
   children: ReactNode;
   sidebar?: ReactNode;
   top?: ReactNode;
+  bottom?: ReactNode;
   narrow?: boolean;
   pageKey?: string;
 };
 
-export function AppShell({ children, sidebar, top, narrow = false, pageKey }: Props) {
+export function AppShell({ children, sidebar, top, bottom, narrow = false, pageKey }: Props) {
   const [detail, setDetail] = useState(false);
 
   return (
     <DetailContext value={setDetail}>
       <div
-        className="min-h-dvh bg-bg transition-theme tablet:grid tablet:grid-cols-[auto_minmax(0,1fr)]"
+        className="group min-h-dvh bg-bg transition-theme tablet:grid tablet:grid-cols-[auto_minmax(0,1fr)]"
+        data-shell
         data-detail={detail || undefined}
       >
         <SkipLink />
         {sidebar}
         <div className="flex min-h-dvh min-w-0 flex-col">
           {top}
-          <main id="main" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+          <main
+            id="main"
+            tabIndex={-1}
+            className="flex flex-1 flex-col pb-[calc(5rem+env(safe-area-inset-bottom))] outline-none group-data-detail:pb-0 tablet:pb-0"
+          >
             <div
               key={pageKey}
               className={cn(
@@ -39,6 +45,7 @@ export function AppShell({ children, sidebar, top, narrow = false, pageKey }: Pr
               {children}
             </div>
           </main>
+          {bottom}
         </div>
       </div>
     </DetailContext>

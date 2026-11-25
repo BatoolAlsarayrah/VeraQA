@@ -15,7 +15,11 @@ export function PageHeader({ title, lede, actions, back, className }: Props) {
   return (
     <header className={cn('flex flex-wrap items-end justify-between gap-4', className)}>
       <div className="flex min-w-0 items-center gap-3">
-        {back && <BackButton to={back.to} label={back.label} />}
+        {back && (
+          <div className="max-tablet:hidden">
+            <BackButton to={back.to} label={back.label} />
+          </div>
+        )}
         <div className="min-w-0">
           <h1 className="text-headline text-balance text-text">{title}</h1>
           {lede && <p className="mt-1 max-w-[68ch] text-pretty text-text-2">{lede}</p>}

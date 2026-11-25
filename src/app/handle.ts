@@ -4,7 +4,7 @@ import type { Stage } from '@/components/layout';
 import type { Capability } from '@/types';
 
 type Can = (capability: Capability) => boolean;
-type Text = string | ((params: Params, can: Can) => string);
+export type Text = string | ((params: Params, can: Can) => string);
 
 export type Handle = {
   title: Text;
@@ -12,6 +12,7 @@ export type Handle = {
   can?: Capability;
   narrow?: boolean;
   stage?: Stage;
+  back?: { label: Text; to: (params: Params) => string };
 };
 
 function isHandle(value: unknown): value is Handle {

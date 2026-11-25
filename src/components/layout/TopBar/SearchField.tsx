@@ -2,11 +2,18 @@ import { type FormEvent, useId } from 'react';
 import { useNavigate } from 'react-router';
 
 import { Icon } from '@/components/domain/Icon';
+import { useMediaQuery } from '@/hooks';
 import { paths } from '@/lib';
 
-export function SearchField({ placeholder }: { placeholder: string }) {
+type Props = {
+  label: string;
+  short: string;
+};
+
+export function SearchField({ label, short }: Props) {
   const id = useId();
   const navigate = useNavigate();
+  const desktop = useMediaQuery('(min-width: 68.8125rem)');
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -18,7 +25,7 @@ export function SearchField({ placeholder }: { placeholder: string }) {
   return (
     <form role="search" onSubmit={handleSubmit} className="relative w-40 desktop:w-60">
       <label htmlFor={id} className="sr-only">
-        Search
+        {label}
       </label>
       <Icon
         name="magnifying-glass"
@@ -29,7 +36,7 @@ export function SearchField({ placeholder }: { placeholder: string }) {
         id={id}
         name="q"
         type="search"
-        placeholder={placeholder}
+        placeholder={desktop ? label : short}
         className="h-9 w-full rounded-sm border border-border bg-field pr-3 pl-8.5 text-body-sm text-text transition-theme placeholder:text-text-3 hover:border-text-3"
       />
     </form>

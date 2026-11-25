@@ -36,9 +36,11 @@ export function TopBar({ stage, crumb }: Props) {
         )}
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <SearchField
-          placeholder={workspace ? 'Search IDs, titles, people' : 'Search your defects'}
-        />
+        {workspace ? (
+          <SearchField label="Search IDs, titles, people" short="Search" />
+        ) : (
+          <SearchField label="Search your defects" short="Search defects" />
+        )}
         <ThemeButton />
         <NotificationsMenu
           notices={demoNotifications(id)}

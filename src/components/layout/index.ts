@@ -1,8 +1,11 @@
 export { AppShell, usePhoneDetail } from './AppShell';
 export { AuthLayout } from './AuthLayout';
 export { AccountCard, AccountMenu, NotificationList, NotificationsMenu } from './Menus';
+export { MoreSheet } from './MoreSheet';
 export { PageHeader } from './PageHeader';
+export { PhoneHeader } from './PhoneHeader';
 export { Sidebar } from './Sidebar';
 export { SkipLink } from './SkipLink';
 export { SoloLayout } from './SoloLayout';
+export { TabBar } from './TabBar';
 export { type Stage, ThemeButton, TopBar } from './TopBar';
