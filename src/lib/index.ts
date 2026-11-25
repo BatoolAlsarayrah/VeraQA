@@ -1,4 +1,12 @@
 export { place } from './anchor';
+export {
+  ContractError,
+  HttpError,
+  NetworkError,
+  none,
+  request,
+  setUnauthorizedHandler,
+} from './api-client';
 export { cn } from './cn';
 export {
   analysisFound,
@@ -14,6 +22,7 @@ export {
 } from './demo';
 export { ids, paths } from './paths';
 export { capabilitiesFor, homePath, roleLabels } from './permissions';
+export { createQueryClient, keys, queryClient } from './query';
 export {
   demoSession,
   getSession,

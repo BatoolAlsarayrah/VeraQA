@@ -6,10 +6,35 @@ The frontend never implements backend or AI logic. With `VITE_API_MODE=mock` it 
 
 ## Conventions
 
-- JSON request and response bodies, `camelCase` keys.
-- Item IDs are the human IDs shown in the UI and are unique per project: `REQ-014`, `SC-007`, `TC-031`, `BUG-007`, and run numbers such as `12`.
-- `projectId` is an opaque string. The frontend never parses it; the mock uses readable slugs such as `e-commerce-portal-v2`.
-- Errors: a non-2xx status with `{ "message": string }`. The message is shown to the person, so it should say what happened and what to do.
+- Every path starts with `/api`, on the host in `VITE_API_BASE_URL`. Requests send the session cookie (`credentials: 'include'`).
+- JSON request and response bodies with `camelCase` keys, except the SRS upload, which is `multipart/form-data`.
+- Lists come wrapped as `{ "items": [...] }`, so paging can be added later without changing the shape.
+- Times are ISO 8601 in UTC (`2026-11-25T10:58:00.000Z`). Days without a time are `2026-12-20`.
+- Fixed sets of values are lowercase kebab-case: `pending-review`, `in-progress`, `not-run`, `wrong-input`. The frontend turns them into the labels people see.
+- Item IDs are the human IDs shown in the UI and are unique per project: `REQ-014`, `SC-007`, `TC-031`, `BUG-007`, and run numbers such as `12`. The prefixes `REQ`, `SC`, `TC` and `BUG` are fixed for every project: Project settings shows them, but they can't be changed.
+- `projectId` and person IDs are opaque strings. The frontend never parses them; the mock uses readable slugs such as `e-commerce-portal-v2` and `batool-hani`.
+- The frontend checks every response against its schema. A response that doesn't match shows an error page naming the endpoint and the field, so contract drift is caught straight away instead of breaking a screen quietly.
+
+### Errors
+
+Every error is a non-2xx status with this body:
+
+```json
+{
+  "error": {
+    "code": "validation",
+    "message": "Check the highlighted fields, then try again.",
+    "fields": { "reason": "Write a reason before you reject it." }
+  }
+}
+```
+
+- `code` is a short machine-readable string, such as `validation`, `forbidden`, `not_found`, `conflict` or `invalid_credentials`.
+- `message` is shown to people as written. Say what happened, then what to do, in plain sentences with no exclamation marks.
+- `fields` appears only for validation errors (`422`) and maps a request field to the message shown under it.
+- `401` means there's no valid session. The frontend clears what it holds and goes to Sign in. Sign-in itself answers wrong details with `422 invalid_credentials`, not `401`.
+- `403` means the person's role doesn't allow the action. Data a role must not see is left out of responses rather than refused.
+- `404` shows the Not found page.
 
 ## Permissions
 

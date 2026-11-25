@@ -3,6 +3,8 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach } from 'vitest';
 
+import { queryClient } from '@/lib';
+
 // jsdom has no <dialog> or popover support, so these mimic the browser's open state and events.
 HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
   this.setAttribute('open', '');
@@ -24,6 +26,7 @@ HTMLElement.prototype.hidePopover = function hidePopover(this: HTMLElement) {
 // Globals are off, so React Testing Library can't register its own cleanup.
 afterEach(() => {
   cleanup();
+  queryClient.clear();
   localStorage.clear();
   document.documentElement.removeAttribute('data-theme');
 });
