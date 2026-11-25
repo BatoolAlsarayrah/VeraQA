@@ -58,12 +58,12 @@ const dev: RouteObject[] = import.meta.env.DEV
       {
         path: 'dev',
         handle: title('Dev tools'),
-        lazy: async () => ({ Component: (await import('./dev')).DevPage }),
+        lazy: async () => ({ Component: (await import('../dev')).DevPage }),
       },
       {
         path: 'dev/components',
         handle: title('Component gallery'),
-        lazy: async () => ({ Component: (await import('./gallery')).Gallery }),
+        lazy: async () => ({ Component: (await import('../gallery')).Gallery }),
       },
     ]
   : [];

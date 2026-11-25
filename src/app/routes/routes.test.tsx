@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { demoSession, setSession } from '@/lib';
 
-import { Providers } from './providers';
+import { Providers } from '../providers';
 import { routes } from './routes';
 
 const lead = '/projects/e-commerce-portal-v2';

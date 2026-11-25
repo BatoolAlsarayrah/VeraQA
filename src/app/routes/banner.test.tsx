@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { demoSession, getDemoAnalysis, getSession, setDemoAnalysis, setSession } from '@/lib';
 
-import { Providers } from './providers';
+import { Providers } from '../providers';
 import { routes } from './routes';
 
 const lead = '/projects/e-commerce-portal-v2';
