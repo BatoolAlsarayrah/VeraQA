@@ -35,6 +35,19 @@ export default defineConfig([
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      // React Router loaders throw data() responses (for example a 404) for the error boundary.
+      '@typescript-eslint/only-throw-error': [
+        'error',
+        {
+          allow: [
+            {
+              from: 'package',
+              package: 'react-router',
+              name: ['DataWithResponseInit', 'Response'],
+            },
+          ],
+        },
+      ],
     },
   },
 

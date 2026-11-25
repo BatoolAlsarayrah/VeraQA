@@ -1,4 +1,5 @@
-import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { Link, type LinkProps } from 'react-router';
 
 import { Icon, type IconName } from '@/components/domain/Icon';
 
@@ -8,11 +9,11 @@ type Label =
   | { children: ReactNode; icon?: IconName }
   | { children?: undefined; icon: IconName; 'aria-label': string };
 
-type Props = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'children'> &
+type Props = Omit<LinkProps, 'children' | 'className'> &
   Label & {
-    href: string;
     variant?: Variant;
     size?: Size;
+    className?: string;
   };
 
 export function LinkButton({
@@ -24,12 +25,12 @@ export function LinkButton({
   ...rest
 }: Props) {
   return (
-    <a
+    <Link
       {...rest}
       className={buttonClass({ variant, size, iconOnly: children === undefined, className })}
     >
       {icon && <Icon name={icon} />}
       {children}
-    </a>
+    </Link>
   );
 }
