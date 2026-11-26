@@ -2,7 +2,7 @@ const styles = [
   { name: 'display', spec: '46/54 · 700', className: 'text-display', sample: "Ship what's true." },
   {
     name: 'display-sm',
-    spec: '28/34 · 700 (phones)',
+    spec: '32/38 · 700 (phones)',
     className: 'text-display-sm',
     sample: "Ship what's true.",
   },
