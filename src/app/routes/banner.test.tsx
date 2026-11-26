@@ -38,7 +38,6 @@ function analyze(text = 'The system shall export orders.\nThe cart shall update 
 
 afterEach(() => {
   vi.useRealTimers();
-  sessionStorage.clear();
 });
 
 describe('analysis banner', () => {

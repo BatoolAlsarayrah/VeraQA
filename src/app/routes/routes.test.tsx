@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { keys, queryClient, sessionQuery } from '@/lib';
 import { getDb } from '@/mocks/db';
@@ -26,10 +26,6 @@ function visit(path: string) {
 }
 
 mockServer();
-
-afterEach(() => {
-  sessionStorage.clear();
-});
 
 describe('routes', () => {
   it('sends / to the projects list', async () => {
@@ -64,7 +60,7 @@ describe('routes', () => {
 
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(`${lead}/dashboard`);
-    expect(document.title).toBe('Dashboard · VeraQA');
+    await waitFor(() => expect(document.title).toBe('Dashboard · VeraQA'));
   });
 
   it.each([
@@ -90,7 +86,7 @@ describe('routes', () => {
       expect(
         await screen.findByRole('heading', { name: 'This stop isn’t on the line' }),
       ).toBeInTheDocument();
-      expect(document.title).toBe('Page not found · VeraQA');
+      await waitFor(() => expect(document.title).toBe('Page not found · VeraQA'));
     },
   );
 
@@ -139,7 +135,7 @@ describe('route guard', () => {
     visit(`${developer}/defects`);
 
     expect(await screen.findByRole('heading', { name: 'Your defects' })).toBeInTheDocument();
-    expect(document.title).toBe('Your defects · VeraQA');
+    await waitFor(() => expect(document.title).toBe('Your defects · VeraQA'));
   });
 
   it('reads capabilities, not the role name', async () => {

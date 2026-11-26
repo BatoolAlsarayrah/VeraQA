@@ -35,5 +35,7 @@ afterEach(() => {
   queryClient.clear();
   if (typeof window === 'undefined') return;
   localStorage.clear();
+  sessionStorage.clear();
+  document.title = '';
   document.documentElement.removeAttribute('data-theme');
 });
