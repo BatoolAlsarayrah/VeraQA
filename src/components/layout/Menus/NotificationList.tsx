@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 
-import { IdText } from '@/components/domain/IdText';
+import { TextWithIds } from '@/components/domain/TextWithIds';
 import { cn, paths } from '@/lib';
 
 export type Notice = {
@@ -48,12 +48,12 @@ export function NotificationList({ notices, onOpen, activity }: Props) {
               />
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-body-sm">
-                  <IdText>{notice.title}</IdText>
+                  <TextWithIds>{notice.title}</TextWithIds>
                   {notice.unread && <span className="sr-only">, unread</span>}
                 </span>
                 {notice.detail && (
                   <span className="text-caption text-text-3">
-                    <IdText>{notice.detail}</IdText>
+                    <TextWithIds>{notice.detail}</TextWithIds>
                   </span>
                 )}
                 <span className="text-caption text-text-3">{notice.time}</span>

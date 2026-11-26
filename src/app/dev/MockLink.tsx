@@ -6,6 +6,7 @@ import { paths } from '@/lib';
 type Props = { sent: number };
 
 // There's no email in mock mode, so a development build opens the link the mock just made.
+// app/routes hands it to Check your email, so the auth feature holds no dev-only code.
 function Latest({ sent }: Props) {
   const [token, setToken] = useState<string | null>(null);
 

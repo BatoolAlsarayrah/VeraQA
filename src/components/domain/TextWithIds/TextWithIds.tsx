@@ -1,6 +1,6 @@
 const ID = /((?:REQ|FR|NFR|SC|TC|BUG)-\d+|Run \d+)/;
 
-export function IdText({ children }: { children: string }) {
+export function TextWithIds({ children }: { children: string }) {
   return (
     <>
       {children.split(ID).map((part, index) =>

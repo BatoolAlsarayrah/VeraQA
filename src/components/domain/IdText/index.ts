@@ -1,1 +1,0 @@
-export { IdText } from './IdText';

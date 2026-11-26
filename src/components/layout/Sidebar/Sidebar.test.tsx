@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { RAIL_KEY, useCollapsedRail } from '@/hooks';
-import { counts, renderAt as renderIn } from '@/mocks/render';
 import { mockServer, signIn } from '@/mocks/server';
+import { counts, renderAt as renderIn } from '@/test/render';
 
 import { Sidebar } from './Sidebar';
 

@@ -8,13 +8,7 @@ import {
 
 import { AccountPage } from '@/features/account';
 import { ActivityPage } from '@/features/activity';
-import {
-  ForgotPasswordPage,
-  RegisterPage,
-  ResetPasswordPage,
-  ResetSentPage,
-  SignInPage,
-} from '@/features/auth';
+import { ForgotPasswordPage, RegisterPage, ResetPasswordPage, SignInPage } from '@/features/auth';
 import { DashboardPage } from '@/features/dashboard';
 import { DefectPage, DefectsPage } from '@/features/defects';
 import { MembersPage } from '@/features/members';
@@ -41,11 +35,13 @@ import { page as title, type Text } from './handle';
 import { NotFound } from './NotFound';
 import { ProjectHome } from './ProjectHome';
 import { ProjectRoute } from './ProjectRoute';
+import { requireSession } from './requireSession';
+import { ResetSentRoute } from './ResetSentRoute';
 import { Root } from './Root';
 import { RouteError } from './RouteError';
-import { requireSession, skipIfSignedIn } from './session';
 import { ShellRoute } from './ShellRoute';
 import { SignedOutRoute } from './SignedOutRoute';
+import { skipIfSignedIn } from './skipIfSignedIn';
 import { SoloRoute } from './SoloRoute';
 
 function back(label: Text, to: (projectId: string, params: Params) => string) {
@@ -101,7 +97,7 @@ export const routes: RouteObject[] = [
           },
           {
             path: 'forgot-password/sent',
-            Component: ResetSentPage,
+            Component: ResetSentRoute,
             handle: title('Check your email'),
           },
           {

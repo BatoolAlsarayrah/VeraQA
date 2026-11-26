@@ -85,4 +85,32 @@ describe('dev mock controls', () => {
 
     expect(getFlags().expiredLinks).toBe(true);
   });
+
+  it('signs in as another demo person, even while signed out', async () => {
+    const user = userEvent.setup();
+    getDb().signedIn = null;
+    const router = visit('/dev');
+
+    await user.click(await screen.findByRole('button', { name: 'Sign in as Qays Kaled' }));
+
+    expect(getDb().signedIn).toBe('qays-kaled');
+    expect(await screen.findByRole('heading', { name: 'Your projects' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/projects');
+  });
+
+  it('changes the role in the mock’s memberships', async () => {
+    const user = userEvent.setup();
+    visit('/dev');
+
+    await user.selectOptions(
+      await screen.findByRole('combobox', { name: 'E-Commerce Portal v2' }),
+      'developer',
+    );
+
+    expect(
+      getDb().memberships.find(
+        (entry) => entry.projectId === 'e-commerce-portal-v2' && entry.personId === 'batool-hani',
+      )?.role,
+    ).toBe('developer');
+  });
 });
