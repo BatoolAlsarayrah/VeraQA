@@ -4,9 +4,11 @@ This file lists every endpoint the VeraQA frontend calls: method, path, request,
 
 The frontend never implements backend or AI logic. With `VITE_API_MODE=mock` it runs against an in-browser mock of these endpoints; with `VITE_API_MODE=live` it calls `VITE_API_BASE_URL` with no code changes.
 
+The mock in `src/mocks/` implements every endpoint below, including the permission rules, the defect lifecycle and the AI jobs (with canned drafts). It's a working reference for how each endpoint should behave, and a test checks that this file and the mock list the same endpoints. Its demo accounts are listed in the README.
+
 ## Endpoints at a glance
 
-**Core** endpoints are what the frontend needs for its main flows; build these first. **Later** endpoints are used by the frontend too (it runs on all of them through the mock), but their screens can wait. `{p}` is the `projectId`. Sections below describe each endpoint in full; sections for areas not yet listed are added as the frontend reaches them.
+**Core** endpoints are what the frontend needs for its main flows; build these first. **Later** endpoints are used by the frontend too (it runs on all of them through the mock), but their screens can wait. `{p}` is the `projectId`. The sections under [Endpoints](#endpoints) describe each one in full.
 
 | Area             | Method and path                                             | Tag   |
 | ---------------- | ----------------------------------------------------------- | ----- |

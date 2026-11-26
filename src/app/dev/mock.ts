@@ -1,5 +1,6 @@
 import { queryClient } from '@/lib';
-import { getDb, saveDb } from '@/mocks/db';
+import { getFlags, setFlags } from '@/mocks/api';
+import { getDb, resetDb, saveDb } from '@/mocks/db';
 import type { Role } from '@/types';
 
 export const mockMode = import.meta.env.VITE_API_MODE === 'mock';
@@ -31,3 +32,17 @@ export function setRole(projectId: string, personId: string, role: Role) {
   saveDb();
   void queryClient.invalidateQueries();
 }
+
+export function resetDemo() {
+  resetDb().signedIn = 'batool-hani';
+  saveDb();
+  setFlags({ failNext: false });
+  try {
+    sessionStorage.removeItem('veraqa-analysis');
+  } catch {
+    // Storage can be blocked; the banner then forgets on its own.
+  }
+  queryClient.clear();
+}
+
+export { getFlags, setFlags };
