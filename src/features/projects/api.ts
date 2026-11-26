@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 
 import { keys, none, queryClient, request } from '@/lib';
-import { Counts, Invitation, list, Project } from '@/types';
+import { Counts, Invitation, list, Project, type ProjectInput } from '@/types';
 
 export const countsQuery = (projectId: string) =>
   queryOptions({
@@ -37,4 +37,13 @@ export async function declineInvitation(id: string) {
   queryClient.setQueryData(keys.invitations, (items: Invitation[] | undefined) =>
     items?.filter((entry) => entry.id !== id),
   );
+}
+
+export async function createProject(input: ProjectInput) {
+  const project = await request('/projects', Project, { method: 'POST', body: input });
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: keys.session }),
+    queryClient.invalidateQueries({ queryKey: keys.projects, exact: true }),
+  ]);
+  return project;
 }

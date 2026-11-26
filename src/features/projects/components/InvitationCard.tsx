@@ -7,11 +7,14 @@ import type { Invitation } from '@/types';
 
 import { acceptInvitation, declineInvitation } from '../api';
 
-function joinAs(invitation: Invitation) {
+function asRole(invitation: Invitation) {
   const label = roleLabels[invitation.role];
-  const role = label.startsWith('QA') ? label : label.toLowerCase();
+  return `a ${label.startsWith('QA') ? label : label.toLowerCase()}`;
+}
+
+function joinAs(invitation: Invitation) {
   const about = invitation.project.description.trim().replace(/\.$/, '');
-  return `${about ? `${about}. ` : ''}You’d join as a ${role}.`;
+  return `${about ? `${about}. ` : ''}You’d join as ${asRole(invitation)}.`;
 }
 
 function problem(error: unknown) {
@@ -27,6 +30,7 @@ export function InvitationCard({ invitation }: { invitation: Invitation }) {
     onSuccess: async (project) => {
       const session = await queryClient.fetchQuery(sessionQuery);
       const membership = session.memberships.find((entry) => entry.projectId === project.id);
+      toast(`You joined ${project.name} as ${asRole(invitation)}.`);
       await navigate(homePath(project.id, membership?.capabilities ?? []));
     },
     onError: (error) => toast(problem(error)),

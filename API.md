@@ -34,7 +34,7 @@ The mock in `src/mocks/` implements every endpoint below, including the permissi
 | Project settings | `POST /projects/{p}/transfer`                               | Later |
 | Project settings | `DELETE /projects/{p}`                                      | Later |
 | Members          | `GET /projects/{p}/members`                                 | Core  |
-| Members          | `POST /projects/{p}/invitations`                            | Later |
+| Members          | `POST /projects/{p}/invitations`                            | Core  |
 | Members          | `PATCH /projects/{p}/members/{memberId}`                    | Later |
 | Notifications    | `GET /notifications`                                        | Core  |
 | Notifications    | `POST /notifications/{id}/read`                             | Core  |
@@ -403,7 +403,7 @@ Response `200`: `{ "items": [Member] }`. Everyone with `workspace` gets names an
 
 `workload.unit` is `defects` for developers (defects assigned, and how many are fixed or closed) and `items` for everyone else (tests in active runs and items to review, and how many are done).
 
-#### `POST /projects/{p}/invitations` · Later
+#### `POST /projects/{p}/invitations` · Core
 
 `manage`. Members, Invite people.
 

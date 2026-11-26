@@ -60,7 +60,7 @@ describe('Your projects', () => {
     expect(card).toHaveTextContent('You’d join as a QA engineer.');
   });
 
-  it('opens the project when you accept', async () => {
+  it('opens the project and says so when you accept', async () => {
     const { user, router } = visit();
 
     const card = await screen.findByRole('region', { name: 'Invitation to Mobile banking app' });
@@ -69,6 +69,9 @@ describe('Your projects', () => {
     await waitFor(() =>
       expect(router.state.location.pathname).toBe('/projects/mobile-banking-app/dashboard'),
     );
+    expect(
+      await screen.findByText('You joined Mobile banking app as a QA engineer.'),
+    ).toBeInTheDocument();
     expect(
       getDb().memberships.some(
         (entry) => entry.projectId === 'mobile-banking-app' && entry.personId === 'batool-hani',
