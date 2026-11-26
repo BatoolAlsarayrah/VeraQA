@@ -104,6 +104,15 @@ The frontend never implements backend or AI logic. With `VITE_API_MODE=mock` it 
 - `projectId` and person IDs are opaque strings. The frontend never parses them; the mock uses readable slugs such as `e-commerce-portal-v2` and `batool-hani`.
 - The frontend checks every response against its schema. A response that doesn't match shows an error page naming the endpoint and the field, so contract drift is caught straight away instead of breaking a screen quietly.
 
+### Editing approved items
+
+The two rules differ on purpose, and the backend should apply them exactly as below:
+
+- **Approved requirements can't be edited directly.** Someone with `approve` first returns the requirement to review, then it can be edited and approved again. Changing a requirement's wording changes what is being tested, so the change gets a fresh review.
+- **Approved scenarios and test cases can be edited by someone with `approve`, and they stay approved.** These edits complete the details of something already agreed, such as adding the test data a generation asked for. A QA engineer (`edit` without `approve`) can edit drafts only.
+
+In both cases AI output never overwrites an approved item, and editing a rejected item sends it back to Pending review.
+
 ### Errors
 
 Every error is a non-2xx status with this body:
@@ -771,6 +780,273 @@ Its `items` are the scenarios it reads, with the same `progress` and `drafted` f
 ```
 
 Each drafted test case has numbered steps, an expected result for each step, and the scenario's test data. Errors: `409` when every approved scenario already has test cases, or while another test-case generation is running.
+
+### Test runs
+
+A run is a set of approved test cases run by hand in one environment, named like "Run 12 · Sprint 4 regression". Each test case in a run is an entry with its own assignee and result.
+
+#### `GET /projects/{p}/runs` · Core
+
+`workspace`. Test runs. Response `200`: `{ "items": [RunSummary] }`, newest first.
+
+```json
+{
+  "number": 12,
+  "name": "Sprint 4 regression",
+  "environment": "Staging, Chrome 130",
+  "status": "active",
+  "startedAt": "…",
+  "closedAt": null,
+  "counts": { "passed": 18, "failed": 3, "blocked": 1, "notRun": 12 }
+}
+```
+
+#### `POST /projects/{p}/runs` · Core
+
+`manage`. New test run.
+
+Request:
+
+```json
+{
+  "name": "Sprint 5 regression",
+  "environment": "Staging, Chrome 130",
+  "entries": [{ "testCaseId": "TC-031", "assigneeId": "batool-mahmoud" }]
+}
+```
+
+`assigneeId` may be `null`. Response `201`: the full run. The run gets the next number in the project, and each assignee is notified of their test cases.
+
+Errors: `422 validation` with `fields["entries.0.testCaseId"]` for a test case that isn't approved, or `fields["entries.0.assigneeId"]` for someone who can't run tests.
+
+#### `GET /projects/{p}/runs/{run}` · Core
+
+`workspace`. Run detail. Response `200`: the summary plus `entries`:
+
+```json
+{
+  "testCase": { "id": "TC-040", "title": "Pay with a valid Visa card" },
+  "scenario": { "id": "SC-010", "title": "Pay for an order by credit card" },
+  "assignee": { "id": "batool-hani", "name": "Batool Hani" },
+  "result": "blocked",
+  "blocked": {
+    "step": 2,
+    "reason": "blocked-by-defect",
+    "details": "Card payment fails for Visa numbers with spaces.",
+    "defect": {
+      "id": "BUG-003",
+      "title": "Card payment fails for Visa numbers with spaces",
+      "status": "reopened"
+    }
+  },
+  "readyToRunAgain": false
+}
+```
+
+`readyToRunAgain` turns `true` when the defect that blocked the test is closed. The test then shows under "Ready to run again" in My work, until it's run again.
+
+#### `PATCH /projects/{p}/runs/{run}` · Later
+
+`manage`. Close a run: request `{ "status": "closed" }`. Response `200`: the run. Errors: `409` when it's already closed.
+
+#### `PATCH /projects/{p}/runs/{run}/entries/{tc}` · Later
+
+`manage`. Reassign one test: request `{ "assigneeId": "batool-hani" }` (or `null`). Response `200`: the run. Errors: `409` for a closed run, `422` for someone who can't run tests.
+
+#### `GET /projects/{p}/runs/{run}/tests/{tc}` · Core
+
+`test`. Run a test.
+
+```json
+{
+  "run": { "number": 12, "name": "Sprint 4 regression", "environment": "Staging, Chrome 130" },
+  "testCase": { "id": "TC-031", "title": "…", "precondition": "…", "testData": [], "steps": [] },
+  "scenario": { "id": "SC-007", "title": "…" },
+  "requirement": { "id": "REQ-014", "title": "…" },
+  "assignee": { "id": "batool-mahmoud", "name": "Batool Mahmoud" },
+  "result": "failed",
+  "environment": "Staging, Chrome 130",
+  "steps": [
+    { "n": 3, "result": "failed", "actual": "The account stayed active after the 5th attempt." }
+  ],
+  "blocked": null,
+  "evidence": [{ "id": "…", "name": "TC-031-step-3.png", "size": 253952, "type": "image/png" }],
+  "defect": { "id": "BUG-007", "title": "…", "status": "fixed" },
+  "environments": ["Staging, Chrome 130", "Staging, Firefox 132"],
+  "recordedBy": { "id": "batool-mahmoud", "name": "Batool Mahmoud" },
+  "recordedAt": "…"
+}
+```
+
+`steps` holds the recorded result of each step (empty until the test is run). `defect` is the defect reported from this test in this run, if any. `environments` lists the project's environments to choose from.
+
+#### `PUT /projects/{p}/runs/{run}/tests/{tc}/result` · Core
+
+`test`. Run a test, Save result.
+
+```json
+{
+  "environment": "Staging, Chrome 130",
+  "steps": [
+    { "n": 1, "result": "passed", "actual": null },
+    { "n": 2, "result": "blocked", "actual": null },
+    { "n": 3, "result": "not-run", "actual": null }
+  ],
+  "blocked": { "reason": "blocked-by-defect", "details": "…", "defectId": "BUG-003" }
+}
+```
+
+- There's a result for every step. A failed step needs `actual` (what happened instead).
+- **Blocked means the test couldn't be run, not that it failed.** A blocked step needs `blocked` with a `reason`: `environment-down`, `test-data-missing`, `blocked-by-defect`, `depends-on-test` or `other`. `blocked-by-defect` also needs `defectId` (report a new defect first if there isn't one). The steps after a blocked step are `not-run`.
+- The test's result is `failed` if any step failed, `blocked` if one is blocked, and `passed` only if every step passed.
+
+Response `200`: the Run a test view.
+
+Errors:
+
+- `422 validation`, with `fields.steps` when a step is missing or the test isn't finished, `fields.blocked` when the reason is missing, and `fields["blocked.defectId"]` for a defect that doesn't exist or is already closed.
+- `409` for a closed run.
+
+#### `POST /projects/{p}/runs/{run}/tests/{tc}/evidence` · Later
+
+`test`. Run a test, Evidence. Request: `multipart/form-data` with one `file`, a PNG or JPG image up to 10 MB. Response `201`: the attachment (`{ "id", "name", "size", "type" }`). Errors: `422 validation` with `fields.file`, and `409` for a closed run.
+
+### Defects
+
+A defect follows a fixed lifecycle:
+
+| From              | Action                        | Who                            | To          |
+| ----------------- | ----------------------------- | ------------------------------ | ----------- |
+| Open, Reopened    | `start-fixing`                | the assigned developer (`fix`) | In progress |
+| In progress       | `mark-fixed`, with a fix note | the assigned developer         | Fixed       |
+| Open, In progress | `mark-invalid`, with a reason | the assigned developer         | Invalid     |
+| Fixed             | `start-retest`                | `test`                         | Retest      |
+| Retest            | `retest` passed               | `test`                         | Closed      |
+| Retest            | `retest` failed, with a note  | `test`                         | Reopened    |
+| Closed, Invalid   | `reopen`, with a note         | `test`                         | Reopened    |
+
+`fix` actions are only for the defect's assignee, even for a project manager, who also holds `fix`. Every role sees the full report; fix notes and invalid reasons appear in Developer notes, and every retest is kept.
+
+#### `GET /projects/{p}/defects` · Core
+
+Any member. Defects (the board) and Your defects. Developers (`fix` without `workspace`) only get the defects assigned to them.
+
+Query, all optional: `status`, `severity`, `assignee` (a person ID or `me`) and `search` (ID or title). Response `200`: `{ "items": [DefectSummary] }`.
+
+```json
+{
+  "id": "BUG-007",
+  "title": "Account locks after 6 failed attempts instead of 5",
+  "severity": "high",
+  "status": "fixed",
+  "assignee": { "id": "qays-kaled", "name": "Qays Kaled" },
+  "reporter": { "id": "batool-mahmoud", "name": "Batool Mahmoud" },
+  "testCase": { "id": "TC-031", "title": "Lock the account after 5 consecutive failed logins" },
+  "reportedAt": "…",
+  "updatedAt": "…"
+}
+```
+
+`status` is `open`, `in-progress`, `fixed`, `retest`, `closed`, `reopened` or `invalid`.
+
+#### `GET /projects/{p}/defects/{id}` · Core
+
+Any member who can see the defect. Defect detail.
+
+Response `200`: the summary plus:
+
+```json
+{
+  "steps": ["Open the sign-in page.", "Sign in with the wrong password 4 times."],
+  "expected": "The account locks for 15 minutes.",
+  "actual": "The account stays active. It locks only after the 6th attempt.",
+  "environment": "Staging, Chrome 130",
+  "evidence": [],
+  "source": {
+    "run": { "number": 12, "name": "Sprint 4 regression" },
+    "testCase": { "id": "TC-031", "title": "…" },
+    "step": 3
+  },
+  "trace": {
+    "scenario": { "id": "SC-007", "title": "…" },
+    "requirement": { "id": "REQ-014", "title": "…" }
+  },
+  "notes": [
+    {
+      "kind": "fix",
+      "author": { "id": "qays-kaled", "name": "Qays Kaled" },
+      "text": "Off-by-one in the attempt counter.",
+      "at": "…"
+    }
+  ],
+  "retests": [
+    { "n": 1, "outcome": "failed", "by": { "id": "…", "name": "…" }, "note": "…", "at": "…" }
+  ],
+  "history": [
+    {
+      "at": "…",
+      "actor": { "id": "…", "name": "…" },
+      "action": "marked-fixed",
+      "status": "fixed",
+      "note": "…"
+    }
+  ],
+  "waitingOn": { "id": "batool-mahmoud", "name": "Batool Mahmoud" }
+}
+```
+
+- `source` is where the defect was found (`null` if it was reported outside a run). Developers see it too.
+- `trace` is the chain back to the requirement. It's `null` without the `trace` capability, so developers never get it.
+- `waitingOn` names who the next step waits on: the assignee while it's Open, In progress or Reopened; the reporter while it's Fixed or Invalid; whoever started the retest while it's in Retest; nobody once it's Closed.
+- `history[].action` is `reported`, `assigned`, `started-fixing`, `marked-fixed`, `marked-invalid`, `started-retest`, `retest-passed`, `retest-failed` or `reopened`.
+
+Errors: `404` for a defect that doesn't exist, or that a developer isn't assigned to.
+
+#### `POST /projects/{p}/defects` · Core
+
+`test`. Run a test, Report defect.
+
+```json
+{
+  "title": "Account locks after 6 failed attempts instead of 5",
+  "severity": "high",
+  "assigneeId": "qays-kaled",
+  "steps": ["Open the sign-in page.", "…"],
+  "expected": "…",
+  "actual": "…",
+  "environment": "Staging, Chrome 130",
+  "source": { "run": 12, "testCaseId": "TC-031", "step": 3 }
+}
+```
+
+`source` may be `null`. Response `201`: the full defect, Open, with the next `BUG-` number and the evidence from the test it came from. The developer is notified.
+
+Errors: `422 validation` with `fields.assigneeId` for someone who can't fix defects, or `fields.source` for a test that isn't in that run. `403` for a QA engineer when Project settings has turned off "QA engineers can report defects".
+
+#### Lifecycle actions · Core
+
+`POST /projects/{p}/defects/{id}/{action}`, where the action is one of the following:
+
+- `start-fixing`: no body.
+- `mark-fixed`: `{ "note": "…" }`.
+- `mark-invalid`: `{ "reason": "…" }`.
+- `start-retest`: no body.
+- `retest`: `{ "outcome": "passed" }` or `{ "outcome": "failed", "note": "…" }`.
+- `reopen`: `{ "note": "…" }`.
+
+Each answers `200` with the full defect and notifies the person the defect now waits on. When a retest passes, every test the defect blocked becomes ready to run again, and its tester is notified ("BUG-003 is closed. TC-040 can be run again.").
+
+Errors:
+
+- `403` when the role lacks the capability, or for a `fix` action by someone who isn't the assignee ("BUG-012 is assigned to Lina Saeed, so only Lina Saeed can do that.").
+- `409` when the defect's status doesn't allow the action ("BUG-007 is Fixed, so it can't be marked as invalid now.").
+- `422 validation` for a missing note or reason.
+
+#### `POST /projects/{p}/defects/{id}/assign` · Later
+
+`manage`. Defect detail, Assign. Request: `{ "assigneeId": "qays-kaled" }`. Response `200`: the full defect; the new developer is notified.
+
+Errors: `422` for someone who can't fix defects, and `409` for a defect that's Fixed, in Retest, Closed or Invalid.
 
 ### Jobs
 

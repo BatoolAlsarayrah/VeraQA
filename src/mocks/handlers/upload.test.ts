@@ -3,7 +3,7 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { request } from '@/lib';
-import { Job, JobStart, list, RequirementSummary } from '@/types';
+import { Attachment, Job, JobStart, list, RequirementSummary, RunTest } from '@/types';
 
 import { getDb } from '../db';
 import { mockServer } from '../server';
@@ -64,5 +64,30 @@ describe('SRS upload', () => {
       status: 403,
     });
     await expect(upload('library-system', [['SRS.pdf', 100]])).resolves.toHaveProperty('jobId');
+  });
+});
+
+describe('evidence', () => {
+  const path = '/projects/e-commerce-portal-v2/runs/12/tests/TC-047/evidence';
+
+  function attach(name: string, size: number, type: string) {
+    const form = new FormData();
+    form.append('file', new File(['x'.repeat(size)], name, { type }));
+    return request(path, Attachment, { method: 'POST', form });
+  }
+
+  it('attaches a screenshot to a test in a run', async () => {
+    const attachment = await attach('TC-047-step-2.png', 2048, 'image/png');
+
+    expect(attachment).toMatchObject({ name: 'TC-047-step-2.png', size: 2048, type: 'image/png' });
+    const test = await request('/projects/e-commerce-portal-v2/runs/12/tests/TC-047', RunTest);
+    expect(test.evidence.map((entry) => entry.name)).toEqual(['TC-047-step-2.png']);
+  });
+
+  it('takes PNG or JPG images only', async () => {
+    await expect(attach('notes.pdf', 100, 'application/pdf')).rejects.toMatchObject({
+      status: 422,
+      fields: { file: 'Use a PNG or JPG image.' },
+    });
   });
 });
