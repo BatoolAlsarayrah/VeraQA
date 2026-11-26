@@ -4,6 +4,95 @@ This file lists every endpoint the VeraQA frontend calls: method, path, request,
 
 The frontend never implements backend or AI logic. With `VITE_API_MODE=mock` it runs against an in-browser mock of these endpoints; with `VITE_API_MODE=live` it calls `VITE_API_BASE_URL` with no code changes.
 
+## Endpoints at a glance
+
+**Core** endpoints are what the frontend needs for its main flows; build these first. **Later** endpoints are used by the frontend too (it runs on all of them through the mock), but their screens can wait. `{p}` is the `projectId`. Sections below describe each endpoint in full; sections for areas not yet listed are added as the frontend reaches them.
+
+| Area             | Method and path                                             | Tag   |
+| ---------------- | ----------------------------------------------------------- | ----- |
+| Session          | `GET /session`                                              | Core  |
+| Session          | `POST /auth/sign-in`                                        | Core  |
+| Session          | `POST /auth/register`                                       | Core  |
+| Session          | `POST /auth/forgot-password`                                | Core  |
+| Session          | `POST /auth/sign-out`                                       | Core  |
+| Account          | `PATCH /account/profile`                                    | Later |
+| Account          | `POST /account/password`                                    | Later |
+| Account          | `GET /account/notification-settings`                        | Later |
+| Account          | `PUT /account/notification-settings`                        | Later |
+| Projects         | `GET /projects`                                             | Core  |
+| Projects         | `POST /projects`                                            | Core  |
+| Projects         | `GET /projects/{p}/counts`                                  | Core  |
+| Invitations      | `GET /invitations`                                          | Later |
+| Invitations      | `POST /invitations/{id}/accept`                             | Later |
+| Invitations      | `POST /invitations/{id}/decline`                            | Later |
+| Project settings | `GET /projects/{p}/settings`                                | Later |
+| Project settings | `PATCH /projects/{p}/settings`                              | Later |
+| Project settings | `POST /projects/{p}/transfer`                               | Later |
+| Project settings | `DELETE /projects/{p}`                                      | Later |
+| Members          | `GET /projects/{p}/members`                                 | Core  |
+| Members          | `POST /projects/{p}/invitations`                            | Later |
+| Members          | `PATCH /projects/{p}/members/{memberId}`                    | Later |
+| Notifications    | `GET /notifications`                                        | Core  |
+| Notifications    | `POST /notifications/{id}/read`                             | Core  |
+| Notifications    | `POST /notifications/read-all`                              | Core  |
+| Requirements     | `GET /projects/{p}/requirements`                            | Core  |
+| Requirements     | `GET /projects/{p}/requirements/{id}`                       | Core  |
+| Requirements     | `POST /projects/{p}/srs`                                    | Core  |
+| Requirements     | `POST /projects/{p}/requirements/typed`                     | Core  |
+| Requirements     | `POST /projects/{p}/requirements/{id}/approve`              | Core  |
+| Requirements     | `POST /projects/{p}/requirements/{id}/reject`               | Core  |
+| Requirements     | `PATCH /projects/{p}/requirements/{id}`                     | Core  |
+| Requirements     | `PATCH /projects/{p}/requirements/{id}/priority`            | Core  |
+| Requirements     | `POST /projects/{p}/requirements/{id}/accept-rewrite`       | Later |
+| Requirements     | `POST /projects/{p}/requirements/{id}/return-to-review`     | Later |
+| Requirements     | `POST /projects/{p}/requirements/approve-all`               | Later |
+| Requirements     | `POST /projects/{p}/requirements/{id}/findings/{n}/resolve` | Later |
+| Jobs             | `GET /jobs/{jobId}`                                         | Core  |
+| Jobs             | `GET /projects/{p}/jobs?active=true`                        | Core  |
+| Jobs             | `POST /jobs/{jobId}/cancel`                                 | Later |
+| Scenarios        | `GET /projects/{p}/scenarios`                               | Core  |
+| Scenarios        | `GET /projects/{p}/scenarios/{id}`                          | Core  |
+| Scenarios        | `PATCH /projects/{p}/scenarios/{id}`                        | Core  |
+| Scenarios        | `POST /projects/{p}/scenarios/{id}/approve`                 | Core  |
+| Scenarios        | `POST /projects/{p}/scenarios/{id}/reject`                  | Core  |
+| Scenarios        | `POST /projects/{p}/scenarios/generate`                     | Core  |
+| Scenarios        | `PATCH /projects/{p}/scenarios/{id}/priority`               | Later |
+| Scenarios        | `POST /projects/{p}/scenarios/approve-all`                  | Later |
+| Test cases       | `GET /projects/{p}/test-cases`                              | Core  |
+| Test cases       | `GET /projects/{p}/test-cases/{id}`                         | Core  |
+| Test cases       | `PATCH /projects/{p}/test-cases/{id}`                       | Core  |
+| Test cases       | `POST /projects/{p}/test-cases/{id}/approve`                | Core  |
+| Test cases       | `POST /projects/{p}/test-cases/{id}/reject`                 | Core  |
+| Test cases       | `POST /projects/{p}/test-cases/generate`                    | Core  |
+| Test cases       | `PATCH /projects/{p}/test-cases/{id}/priority`              | Later |
+| Test cases       | `POST /projects/{p}/test-cases/approve-all`                 | Later |
+| Runs             | `GET /projects/{p}/runs`                                    | Core  |
+| Runs             | `POST /projects/{p}/runs`                                   | Core  |
+| Runs             | `GET /projects/{p}/runs/{run}`                              | Core  |
+| Runs             | `GET /projects/{p}/runs/{run}/tests/{tc}`                   | Core  |
+| Runs             | `PUT /projects/{p}/runs/{run}/tests/{tc}/result`            | Core  |
+| Runs             | `PATCH /projects/{p}/runs/{run}`                            | Later |
+| Runs             | `PATCH /projects/{p}/runs/{run}/entries/{tc}`               | Later |
+| Runs             | `POST /projects/{p}/runs/{run}/tests/{tc}/evidence`         | Later |
+| Defects          | `GET /projects/{p}/defects`                                 | Core  |
+| Defects          | `GET /projects/{p}/defects/{id}`                            | Core  |
+| Defects          | `POST /projects/{p}/defects`                                | Core  |
+| Defects          | `POST /projects/{p}/defects/{id}/start-fixing`              | Core  |
+| Defects          | `POST /projects/{p}/defects/{id}/mark-fixed`                | Core  |
+| Defects          | `POST /projects/{p}/defects/{id}/mark-invalid`              | Core  |
+| Defects          | `POST /projects/{p}/defects/{id}/start-retest`              | Core  |
+| Defects          | `POST /projects/{p}/defects/{id}/retest`                    | Core  |
+| Defects          | `POST /projects/{p}/defects/{id}/reopen`                    | Core  |
+| Defects          | `POST /projects/{p}/defects/{id}/assign`                    | Later |
+| Dashboard        | `GET /projects/{p}/dashboard`                               | Core  |
+| My work          | `GET /projects/{p}/my-work`                                 | Core  |
+| My work          | `POST /projects/{p}/assignments`                            | Later |
+| Traceability     | `GET /projects/{p}/traceability`                            | Later |
+| Reports          | `GET /projects/{p}/reports`                                 | Later |
+| Reports          | `GET /projects/{p}/reports/export.csv`                      | Later |
+| Activity         | `GET /projects/{p}/activity`                                | Later |
+| Search           | `GET /projects/{p}/search`                                  | Later |
+
 ## Conventions
 
 - Every path starts with `/api`, on the host in `VITE_API_BASE_URL`. Requests send the session cookie (`credentials: 'include'`).
@@ -65,17 +154,19 @@ The mock assigns these per role:
 
 ## Endpoints
 
-### Session (planned)
+Each endpoint lists its tag, who may call it (a capability, "any member" of the project, or "signed in"), the request, the response, its errors, and the screen that uses it. `{p}` is the `projectId`. Every endpoint can also answer `401` (no session) as described under Errors; it isn't repeated below.
 
-Used by the whole app shell. Until the mock API lands, the frontend uses a built-in stand-in with this shape.
+### Session and sign-in
 
-`GET /session`
+#### `GET /session` · Core
+
+Signed in. Used by every screen: it tells the frontend who the person is and what they may do in each project.
 
 Response `200`:
 
 ```json
 {
-  "user": { "name": "Batool Hani", "email": "batool.hani@shop-team.com" },
+  "user": { "id": "batool-hani", "name": "Batool Hani", "email": "batool.hani@shop-team.com" },
   "memberships": [
     {
       "projectId": "e-commerce-portal-v2",
@@ -83,14 +174,258 @@ Response `200`:
       "role": "qa-lead",
       "capabilities": ["workspace", "upload", "approve", "edit", "test", "trace", "manage"]
     }
-  ],
-  "currentProjectId": "e-commerce-portal-v2"
+  ]
 }
 ```
 
-- `role` is one of `project-manager`, `qa-lead`, `qa-engineer`, `developer`. It is shown as a label only.
-- Errors: `401` when not signed in (the frontend goes to Sign in).
+- `role` is one of `project-manager`, `qa-lead`, `qa-engineer`, `developer`, and is shown as a label only. The frontend decides what to show from `capabilities`.
+- The project someone last opened is kept by the frontend, not the API.
+
+#### `POST /auth/sign-in` · Core
+
+Anyone. Sign in screen.
+
+Request: `{ "email": "batool.hani@shop-team.com", "password": "…" }`. Response `200`: the same body as `GET /session`, and the session cookie is set.
+
+Errors: `422 invalid_credentials` when the email and password don't match ("That email and password don't match. Check them, or reset your password."). Never `401`, which would send the person back to Sign in. `422 validation` for an empty field.
+
+#### `POST /auth/register` · Core
+
+Anyone. Create your account screen. Register doesn't ask for a role: whoever creates a project later becomes its project manager.
+
+Request: `{ "firstName": "Omar", "lastName": "Saleh", "email": "omar@uni.edu", "password": "…" }`. The password has at least 8 characters, with a number.
+
+Response `201`: a session with no memberships, and the person is signed in.
+
+Errors: `422 validation`, with `fields.email` when the email already has an account ("An account with this email already exists. Sign in instead.").
+
+#### `POST /auth/forgot-password` · Core
+
+Anyone. Reset your password screen.
+
+Request: `{ "email": "…" }`. Response `202` with no body, whether or not the email has an account, so the answer doesn't reveal who is registered.
+
+#### `POST /auth/sign-out` · Core
+
+Signed in. The account menu. Response `204`, and the session cookie is cleared.
+
+### Account
+
+#### `PATCH /account/profile` · Later
+
+Signed in. Account settings, Profile.
+
+Request: `{ "firstName", "lastName", "email" }`. Response `200`: the user (`{ "id", "name", "email" }`).
+
+Errors: `422 validation` with `fields.email` when another account uses the email.
+
+#### `POST /account/password` · Later
+
+Signed in. Account settings, Password.
+
+Request: `{ "current": "…", "next": "…" }`. Response `204`.
+
+Errors: `422 validation` with `fields.current` ("That isn't your current password.") or `fields.next` (at least 8 characters, with a number).
+
+#### `GET /account/notification-settings` and `PUT /account/notification-settings` · Later
+
+Signed in. Account settings, Email me when.
+
+Body (both the `PUT` request and both responses): `{ "email": { "defect-assigned": true, "run-started": false } }`. Keys are `analysis-ready`, `test-failed`, `defect-reopened`, `member-joined`, `defect-assigned`, `fix-failed-retest`, `fix-closed`, `tests-assigned`, `retest-ready`, `review-decision` and `run-started`. A key that's left out keeps the server's default. People always see notifications in the app; these switches add email.
+
+### Projects
+
+#### `GET /projects` · Core
+
+Signed in. Your projects screen.
+
+Response `200`: `{ "items": [Project] }`, only the projects the person is a member of.
+
+```json
+{
+  "id": "e-commerce-portal-v2",
+  "name": "E-Commerce Portal v2",
+  "description": "Web shop rebuild: accounts, cart, checkout and payments",
+  "role": "qa-lead",
+  "stage": "reviewing-requirements",
+  "solo": false
+}
+```
+
+`stage` is one of `getting-started`, `reviewing-requirements`, `designing-tests`, `running-tests`, `fixing-defects`, `closing-defects`, shown as a short status on the project card.
+
+#### `POST /projects` · Core
+
+Signed in. Create project dialog on Your projects.
+
+Request: `{ "name": "Thesis tools", "description": "…", "team": "solo" }`, where `team` is `solo` or `team`. Response `201`: the new `Project`. The creator becomes its project manager.
+
+Errors: `422 validation` with `fields.name` ("Give the project a name.").
+
+#### `GET /projects/{p}/counts` · Core
+
+Any member. The sidebar, the phone tab bar and the More sheet.
+
+Response `200`: `{ "myWork": 9, "pendingReview": 5, "openDefects": 7 }`.
+
+- `myWork` counts what is waiting on this person: requirements and AI drafts assigned to them for review, their not-run tests in active runs, their blocked tests that are ready to run again, defects waiting for their retest, and (with `fix`) defects assigned to them that still need fixing.
+- `pendingReview` counts requirements in Pending review, or `0` without `workspace`.
+- `openDefects` counts defects that aren't Closed or Invalid. A developer counts only the defects assigned to them.
+
+Errors: `404` when the project doesn't exist or the person isn't a member.
+
+### Invitations
+
+#### `GET /invitations` · Later
+
+Signed in. Your projects, the invitation cards.
+
+Response `200`: `{ "items": [Invitation] }`, the invitations sent to the person's email.
+
+```json
+{
+  "id": "inv-mobile-banking",
+  "project": { "id": "mobile-banking-app", "name": "Mobile banking app", "description": "…" },
+  "role": "qa-engineer",
+  "invitedBy": { "id": "lina-saeed", "name": "Lina Saeed" },
+  "at": "2026-11-25T08:00:00.000Z"
+}
+```
+
+#### `POST /invitations/{id}/accept` and `POST /invitations/{id}/decline` · Later
+
+Signed in, and the invitation was sent to their email. Your projects.
+
+Accept answers `200` with the joined `Project`, and notifies the person who invited them. Decline answers `204`.
+
+Errors: `404` for an invitation that doesn't exist or isn't theirs.
+
+### Project settings
+
+#### `GET /projects/{p}/settings` · Later
+
+`manage`. Project settings.
+
+```json
+{
+  "name": "E-Commerce Portal v2",
+  "description": "…",
+  "targetDate": "2026-12-20",
+  "prefixes": { "requirement": "REQ", "scenario": "SC", "testCase": "TC", "defect": "BUG" },
+  "environments": ["Staging, Chrome 130", "Staging, Firefox 132"],
+  "rules": { "bulkApproval": true, "rejectReason": true, "engineersReportDefects": true },
+  "ai": {
+    "flagVague": true,
+    "flagMissing": true,
+    "flagContradictions": true,
+    "suggestRewrites": true
+  },
+  "language": "en",
+  "projectManager": { "id": "maria-ayman", "name": "Maria Ayman" }
+}
+```
+
+- `prefixes` are fixed and shown read-only.
+- The two rules that are always on (AI output stays a draft until approved, and a defect is retested before it closes) aren't settings, so they aren't in `rules`.
+- `language` is `en` or `ar`, the language of AI suggestions and test steps.
+
+#### `PATCH /projects/{p}/settings` · Later
+
+`manage`. Project settings, Save changes.
+
+Request: any of `name`, `description`, `targetDate`, `environments`, `rules`, `ai`, `language`. `prefixes` and `projectManager` can't be changed here. Response `200`: the full settings.
+
+#### `POST /projects/{p}/transfer` · Later
+
+`owner`. Project settings, Danger zone, Change project manager.
+
+Request: `{ "memberId": "batool-mahmoud" }`. Response `204`. The chosen member becomes project manager, and the person who made the change stays on as a QA lead.
+
+Errors: `422 validation` with `fields.memberId` when the member isn't in the project or is the person themselves.
+
+#### `DELETE /projects/{p}` · Later
+
+`owner`. Project settings, Danger zone, Delete project.
+
+Request: `{ "confirmName": "E-Commerce Portal v2" }`. Response `204`. Every requirement, test, result, defect and notification in the project is removed for everyone.
+
+Errors: `422 validation` with `fields.confirmName` when the name isn't typed exactly.
+
+### Members
+
+#### `GET /projects/{p}/members` · Core
+
+`workspace`. Members, and every assignee picker (assign work, run assignees, the developer on a defect report).
+
+Response `200`: `{ "items": [Member] }`. Everyone with `workspace` gets names and roles; with `manage`, each member also has `email`, `status` and `workload`, and pending invitations are listed with `status: "invited"`.
+
+```json
+{
+  "id": "batool-hani",
+  "name": "Batool Hani",
+  "role": "qa-lead",
+  "email": "batool.hani@shop-team.com",
+  "status": "active",
+  "workload": { "assigned": 19, "done": 11, "unit": "items" }
+}
+```
+
+`workload.unit` is `defects` for developers (defects assigned, and how many are fixed or closed) and `items` for everyone else (tests in active runs and items to review, and how many are done).
+
+#### `POST /projects/{p}/invitations` · Later
+
+`manage`. Members, Invite people.
+
+Request: `{ "emails": ["name@company.com"], "role": "qa-engineer" }`. `role` is `qa-lead`, `qa-engineer` or `developer`; nobody is invited as project manager. Response `204`.
+
+Errors: `422 validation` with `fields.emails` when an address is invalid or already in the project.
+
+#### `PATCH /projects/{p}/members/{memberId}` · Later
+
+`manage`. Members, the role picker on each row.
+
+Request: `{ "role": "qa-lead" }`. Response `204`.
+
+Errors: `409 conflict` for the project manager (changed only through Change project manager) or for the person's own role.
+
+### Notifications
+
+Notifications belong to a person and are tagged with a project. The bell and the Notifications page show the current project's.
+
+#### `GET /notifications` · Core
+
+Signed in. The bell, the phone notifications sheet and the Notifications page.
+
+Query: `projectId` (optional) and `unread=true` (optional). Response `200`: `{ "items": [Notification] }`, newest first.
+
+```json
+{
+  "id": "note-1",
+  "projectId": "e-commerce-portal-v2",
+  "title": "Qays Kaled marked BUG-007 as fixed",
+  "detail": "Off-by-one in the attempt counter. Waiting for Batool Mahmoud to retest.",
+  "at": "2026-11-25T10:53:00.000Z",
+  "unread": true,
+  "actor": { "type": "person", "id": "qays-kaled", "name": "Qays Kaled" },
+  "target": { "type": "defect", "id": "BUG-007" }
+}
+```
+
+- `actor` is a person or `{ "type": "ai" }`.
+- `target` says what the notification opens: `requirement`, `requirements`, `scenario`, `scenarios`, `test-case`, `test-cases`, `run`, `defect`, `my-work`, `members` or `job`, with the item's ID where there is one. The frontend turns it into a link.
+
+Errors: `404` when `projectId` is a project the person isn't in.
+
+#### `POST /notifications/{id}/read` · Core
+
+Signed in. Opening a notification. Response `204`. Errors: `404` for a notification that isn't the person's.
+
+#### `POST /notifications/read-all` · Core
+
+Signed in. Notifications, Mark all as read. Query: `projectId` (optional) limits it to one project. Response `204`.
 
 ## Open questions for the backend
 
 1. **Should the project manager get `fix`?** Resolved: yes. The project manager holds every permission, so in a solo project they can take a defect through its whole lifecycle. A developer still acts only on defects assigned to them, and so does a project manager acting with `fix`.
+2. **Cookie session or bearer token?** The frontend assumes a cookie session: every request is sent with `credentials: 'include'`, and sign-in sets the cookie. If the backend issues a bearer token instead, only `lib/api-client.ts` changes, to store the token and send an `Authorization` header.
+3. **Paging.** Lists come back whole for now, wrapped as `{ "items": [...] }`. If a project grows too large, the plan is to add `cursor` and `limit` query params and a `nextCursor` next to `items`, which doesn't break the current shape.

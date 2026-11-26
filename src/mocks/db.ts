@@ -262,9 +262,9 @@ export function saveDb() {
 }
 
 export function resetDb() {
-  const signedIn = db?.signedIn ?? null;
+  const previous = db;
   db = fresh();
-  db.signedIn = signedIn;
+  if (previous) db.signedIn = previous.signedIn;
   saveDb();
   return db;
 }

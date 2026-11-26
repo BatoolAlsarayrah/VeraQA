@@ -1,3 +1,11 @@
-import type { RequestHandler } from 'msw';
+import { memberHandlers } from './members';
+import { notificationHandlers } from './notifications';
+import { projectHandlers } from './projects';
+import { sessionHandlers } from './session';
 
-export const handlers: RequestHandler[] = [];
+export const handlers = [
+  ...sessionHandlers,
+  ...projectHandlers,
+  ...memberHandlers,
+  ...notificationHandlers,
+];

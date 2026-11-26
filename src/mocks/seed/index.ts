@@ -44,7 +44,7 @@ export function seed(now: number): Omit<Db, 'version'> {
     return found.title;
   };
 
-  return {
+  return structuredClone({
     signedIn: 'batool-hani',
     people,
     projects: projects(t),
@@ -59,5 +59,5 @@ export function seed(now: number): Omit<Db, 'version'> {
     activity: activity(t, titles),
     jobs: jobs(t, records),
     emailSettings: {},
-  };
+  });
 }

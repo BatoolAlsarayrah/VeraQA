@@ -10,7 +10,7 @@ export const server = setupServer(...handlers);
 export function mockServer() {
   beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
   beforeEach(() => {
-    resetDb();
+    resetDb().signedIn = 'batool-hani';
     setFlags({ instantJobs: true, slowNetwork: false, failNext: false });
   });
   afterEach(() => server.resetHandlers());
