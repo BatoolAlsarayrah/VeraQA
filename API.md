@@ -542,6 +542,236 @@ Errors: `409` when there's no suggestion, or the requirement is approved.
 
 `approve`. Marks one finding as resolved without changing the text. Response `200`: the full requirement. Errors: `404` for a finding that doesn't exist.
 
+### Test scenarios
+
+A scenario belongs to one approved requirement. Like requirements, it has a review status (`pending-review`, `approved`, `rejected`), and AI drafts stay drafts until someone with `approve` approves them. Only approved scenarios move on to test cases.
+
+#### `GET /projects/{p}/scenarios` · Core
+
+`workspace`. Test scenarios (grouped by requirement in the UI).
+
+Query, all optional: `status`, `requirement` (a requirement ID) and `search` (ID or title). Response `200`: `{ "items": [ScenarioSummary] }`.
+
+```json
+{
+  "id": "SC-007",
+  "title": "Lock on the 5th failed login in a row",
+  "type": "negative",
+  "priority": "high",
+  "status": "approved",
+  "origin": "ai",
+  "requirement": {
+    "id": "REQ-014",
+    "title": "Lock the account for 15 minutes after 5 failed logins"
+  },
+  "testCases": [
+    {
+      "id": "TC-031",
+      "title": "Lock the account after 5 consecutive failed logins",
+      "status": "approved",
+      "lastResult": "failed"
+    }
+  ]
+}
+```
+
+`type` is `positive` or `negative`. `lastResult` is the most recently recorded result in any run (`not-run`, `passed`, `failed` or `blocked`), separate from the review status.
+
+#### `GET /projects/{p}/scenarios/{id}` · Core
+
+`workspace`. Scenario detail. Response `200`: the summary fields plus `description`, `precondition` (or `null`), `testData` (`[{ "label": "Email", "value": "test.user@shop.com" }]`), `rejectionReason` and `history` (as for requirements). Errors: `404`.
+
+#### `PATCH /projects/{p}/scenarios/{id}` · Core
+
+`edit`. Scenario detail, Edit.
+
+Request: `{ "title", "description", "precondition", "type", "testData" }`. Response `200`: the full scenario.
+
+- A QA engineer can edit drafts. An approved scenario can be edited only with `approve` (for example to add the test data generation asked for), and it stays approved.
+- Editing a rejected scenario sends it back to Pending review.
+
+Errors: `409` when someone without `approve` edits an approved scenario.
+
+#### `POST /projects/{p}/scenarios/{id}/approve` and `…/reject` · Core
+
+`approve`. Test scenarios and scenario detail. Reject takes `{ "reason": "…" }` (required). Both answer `200` with the full scenario.
+
+Errors: `409` when it's already in that state, or (for reject) when approved test cases are built on it.
+
+#### `PATCH /projects/{p}/scenarios/{id}/priority` · Later
+
+`approve`. Request: `{ "priority": "high" }`. Response `200`: the full scenario.
+
+#### `POST /projects/{p}/scenarios/approve-all` · Later
+
+`approve`. Test scenarios, Approve all pending. Response `200`: `{ "approved": ["SC-004", "SC-009"] }`.
+
+#### `POST /projects/{p}/scenarios/generate` · Core
+
+`approve`. Requirements, "Generate scenarios from 21 approved". Starts a `scenario-generation` [job](#jobs) for the approved requirements that have no scenarios yet. Response `202`: `{ "jobId": "…" }`.
+
+While it runs, the job also has `items`, one per requirement it reads, for the progress page ("9 of 21 requirements read"):
+
+```json
+{
+  "id": "REQ-014",
+  "title": "Lock the account for 15 minutes after 5 failed logins",
+  "progress": "running",
+  "drafted": 0
+}
+```
+
+`progress` is `waiting`, `running` or `done`, and `drafted` counts the scenarios drafted for it so far. When the job is done, `result` is:
+
+```json
+{
+  "drafted": 9,
+  "read": 21,
+  "covered": 19,
+  "tooVague": [
+    {
+      "requirement": { "id": "REQ-021", "title": "Be easy to use" },
+      "reason": "Too vague to test. Say what “easy” means in a way someone can check."
+    }
+  ],
+  "groups": [
+    {
+      "requirement": {
+        "id": "REQ-014",
+        "title": "Lock the account for 15 minutes after 5 failed logins"
+      },
+      "scenarios": [
+        { "id": "SC-007", "title": "Lock on the 5th failed login in a row", "type": "negative" }
+      ]
+    }
+  ]
+}
+```
+
+The drafts are saved as AI drafts in Pending review, and the person who started the job is notified ("9 scenario drafts are ready for review").
+
+Errors: `409` when every approved requirement already has scenarios, or while another scenario generation is running in the project.
+
+### Test cases
+
+A test case belongs to one approved scenario. It carries a review status and, separately, its last result. Only approved test cases can be added to a run.
+
+#### `GET /projects/{p}/test-cases` · Core
+
+`workspace`. Test cases (grouped by scenario in the UI).
+
+Query, all optional: `status`, `result` (the last result), `scenario` (a scenario ID) and `search` (ID or title). Response `200`: `{ "items": [TestCaseSummary] }`.
+
+```json
+{
+  "id": "TC-031",
+  "title": "Lock the account after 5 consecutive failed logins",
+  "type": "limit",
+  "priority": "high",
+  "status": "approved",
+  "origin": "ai",
+  "lastResult": "failed",
+  "scenario": { "id": "SC-007", "title": "Lock on the 5th failed login in a row" },
+  "assignee": { "id": "batool-mahmoud", "name": "Batool Mahmoud" }
+}
+```
+
+`type` is `normal`, `wrong-input` or `limit`. `assignee` is who runs it in the current active run, if anyone.
+
+#### `GET /projects/{p}/test-cases/{id}` · Core
+
+`workspace`. Test case detail, along the line back to its requirement.
+
+Response `200`: the summary fields plus:
+
+```json
+{
+  "requirement": {
+    "id": "REQ-014",
+    "title": "Lock the account for 15 minutes after 5 failed logins"
+  },
+  "precondition": "An active account exists.",
+  "testData": [{ "label": "Email", "value": "test.user@shop.com" }],
+  "steps": [
+    {
+      "n": 3,
+      "action": "Sign in with the wrong password a 5th time.",
+      "expected": "the account locks for 15 minutes."
+    }
+  ],
+  "runs": [
+    { "number": 12, "name": "Sprint 4 regression", "result": "failed", "failedStep": 3, "at": "…" }
+  ],
+  "defects": [
+    {
+      "id": "BUG-007",
+      "title": "Account locks after 6 failed attempts instead of 5",
+      "status": "fixed"
+    }
+  ],
+  "rejectionReason": null,
+  "history": []
+}
+```
+
+`runs` lists every run the test case is in, newest first; `failedStep` is the step that failed or was blocked. Errors: `404`.
+
+#### `PATCH /projects/{p}/test-cases/{id}` · Core
+
+`edit`. Test case detail, Edit.
+
+Request: `{ "title", "type", "precondition", "testData", "steps": [{ "action", "expected" }] }`, with at least one step. The steps are numbered in order. Response `200`: the full test case.
+
+The same editing rules as scenarios apply. Errors: `409` when someone without `approve` edits an approved test case, and `422` with `fields.steps` when there are no steps.
+
+#### `POST /projects/{p}/test-cases/{id}/approve` and `…/reject` · Core
+
+`approve`. Reject takes `{ "reason": "…" }`. Both answer `200` with the full test case.
+
+Errors: `409` when it's already in that state, or (for reject) when it already has results in a run.
+
+#### `PATCH /projects/{p}/test-cases/{id}/priority` · Later
+
+`approve`. Request: `{ "priority": "high" }`. Response `200`: the full test case.
+
+#### `POST /projects/{p}/test-cases/approve-all` · Later
+
+`approve`. Response `200`: `{ "approved": ["TC-045"] }`.
+
+#### `POST /projects/{p}/test-cases/generate` · Core
+
+`approve`. Test scenarios, "Generate test cases from 7 approved". Starts a `test-case-generation` [job](#jobs) for the approved scenarios that have no test cases yet. Response `202`: `{ "jobId": "…" }`.
+
+Its `items` are the scenarios it reads, with the same `progress` and `drafted` fields. When done, `result` is:
+
+```json
+{
+  "drafted": 35,
+  "read": 7,
+  "covered": 6,
+  "needsTestData": [
+    {
+      "scenario": { "id": "SC-002", "title": "Refuse an email that is already registered" },
+      "reason": "The AI needs an account that's already registered to test against. Add it as test data, then generate again."
+    }
+  ],
+  "groups": [
+    {
+      "scenario": { "id": "SC-007", "title": "Lock on the 5th failed login in a row" },
+      "testCases": [
+        {
+          "id": "TC-031",
+          "title": "Lock the account after 5 consecutive failed logins",
+          "type": "limit"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Each drafted test case has numbered steps, an expected result for each step, and the scenario's test data. Errors: `409` when every approved scenario already has test cases, or while another test-case generation is running.
+
 ### Jobs
 
 AI work (SRS analysis, scenario generation and test-case generation) runs as a background job through n8n and the LLM. Starting one answers `202` with `{ "jobId": "…" }`; the frontend then polls `GET /jobs/{jobId}` until the status is `done`, `failed` or `cancelled`. A job keeps running if the person leaves the page; the analysis banner finds it again with `GET /projects/{p}/jobs?active=true`. When a job finishes, the backend adds its drafts (as AI drafts in Pending review) and notifies the person who started it.
@@ -573,7 +803,7 @@ AI work (SRS analysis, scenario generation and test-case generation) runs as a b
 - `error` is `{ "code", "message" }` when the job failed, written for people like any other error.
 - `result` is `null` until the job is done. Its shape depends on `kind`:
   - `analysis` also has `files` (the uploaded file names, empty for typed requirements), and its result is `{ "requirements", "sections", "ambiguous", "missingInformation", "contradictions", "rewrites" }`, all counts.
-  - `scenario-generation` and `test-case-generation` are described with their endpoints.
+  - `scenario-generation` and `test-case-generation` also have `items` and are described with their endpoints, under Test scenarios and Test cases.
 
 #### `GET /jobs/{jobId}` · Core
 

@@ -1,6 +1,6 @@
 import type { AnalysisResult, Finding } from '@/types';
 
-import type { RequirementRecord } from './db';
+import type { RequirementRecord, ScenarioRecord, TestCaseRecord } from './db';
 import { event } from './log';
 
 // Canned stand-ins for what n8n and the LLM return. The mock never reads the uploaded file.
@@ -175,4 +175,83 @@ export function analyze(
     rewrites: pending.filter((entry) => entry.rewrite).length,
   };
   return { pending, result };
+}
+
+const tooVague = /\b(easy|fast|quickly|modern|well|user-friendly|nice|soon)\b/i;
+
+function sentence(text: string) {
+  return text.charAt(0).toLowerCase() + text.slice(1).replace(/\.$/, '');
+}
+
+export function vagueReason(requirement: RequirementRecord) {
+  const word = tooVague.exec(requirement.text)?.[0];
+  if (!word || /\d/.test(requirement.text)) return null;
+  return `Too vague to test. Say what “${word.toLowerCase()}” means in a way someone can check.`;
+}
+
+export function draftScenarios(requirement: RequirementRecord) {
+  const drafts: Pick<ScenarioRecord, 'title' | 'description' | 'type' | 'precondition'>[] = [
+    {
+      title: requirement.title,
+      description: `The normal case: ${sentence(requirement.text)}.`,
+      type: 'positive',
+      precondition: null,
+    },
+  ];
+  if (requirement.type === 'functional') {
+    drafts.push({
+      title: `Refuse what isn’t allowed: ${sentence(requirement.title)}`,
+      description: `Wrong or missing input is refused with a clear message, and nothing changes.`,
+      type: 'negative',
+      precondition: null,
+    });
+  }
+  return drafts;
+}
+
+export function testDataReason(scenario: ScenarioRecord) {
+  if (scenario.testData.length || !scenario.precondition) return null;
+  if (!/\b(already|existing|registered)\b/i.test(scenario.precondition)) return null;
+  return `The AI needs ${sentence(scenario.precondition)} to test against. Add it as test data, then generate again.`;
+}
+
+export function draftTestCases(scenario: ScenarioRecord) {
+  const setup: [string, string] = [
+    scenario.precondition
+      ? `Check that ${sentence(scenario.precondition)}.`
+      : 'Open the page under test.',
+    'everything is ready to start.',
+  ];
+  const drafts: (Pick<TestCaseRecord, 'title' | 'type'> & { steps: [string, string][] })[] = [
+    {
+      title: scenario.title,
+      type: 'normal',
+      steps: [
+        setup,
+        [`Follow the scenario: ${sentence(scenario.title)}.`, sentence(scenario.description)],
+      ],
+    },
+    {
+      title: `${scenario.title}, with wrong input`,
+      type: 'wrong-input',
+      steps: [
+        setup,
+        [
+          'Enter a value that isn’t allowed.',
+          'a clear message says what to fix, and nothing is saved.',
+        ],
+      ],
+    },
+  ];
+  if (scenario.priority === 'high' || scenario.priority === 'critical') {
+    drafts.push({
+      title: `${scenario.title}, at the limit`,
+      type: 'limit',
+      steps: [setup, ['Use the largest value that is still allowed.', 'it’s accepted.']],
+    });
+  }
+  return drafts.map((draft) => ({
+    ...draft,
+    steps: draft.steps.map(([action, expected], index) => ({ n: index + 1, action, expected })),
+  }));
 }

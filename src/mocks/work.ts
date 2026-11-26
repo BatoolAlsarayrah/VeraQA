@@ -1,4 +1,5 @@
 import { capabilitiesFor } from '@/lib/permissions';
+import type { TestResult } from '@/types';
 
 import type { Db, DefectRecord } from './db';
 
@@ -77,4 +78,17 @@ export function work(db: Db, projectId: string, personId: string) {
 export function workCount(db: Db, projectId: string, personId: string) {
   const items = work(db, projectId, personId);
   return Object.values(items).reduce((sum, list) => sum + list.length, 0);
+}
+
+export function entriesFor(db: Db, projectId: string, testCaseId: string) {
+  return db.entries
+    .filter((entry) => entry.projectId === projectId && entry.testCaseId === testCaseId)
+    .sort((a, b) => b.run - a.run);
+}
+
+export function lastResult(db: Db, projectId: string, testCaseId: string): TestResult {
+  const recorded = entriesFor(db, projectId, testCaseId)
+    .filter((entry) => entry.result !== 'not-run' && entry.recordedAt)
+    .sort((a, b) => (b.recordedAt ?? '').localeCompare(a.recordedAt ?? ''));
+  return recorded[0]?.result ?? 'not-run';
 }
