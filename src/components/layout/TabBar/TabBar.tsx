@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { useCan, useProject } from '@/hooks';
-import { demoCounts, paths } from '@/lib';
+import { paths } from '@/lib';
+import type { Counts } from '@/types';
 
 import { MoreSheet } from '../MoreSheet';
 import { Tab, tabLook, TabMark } from './Tab';
 
-export function TabBar() {
+export function TabBar({ counts }: { counts?: Counts | undefined }) {
   const { pathname } = useLocation();
   const project = useProject();
   const workspace = useCan('workspace');
@@ -16,7 +17,6 @@ export function TabBar() {
 
   if (!project) return null;
   const id = project.projectId;
-  const counts = demoCounts(id);
   const inTabs = [
     paths.dashboard,
     paths.myWork,
@@ -34,18 +34,24 @@ export function TabBar() {
       {workspace ? (
         <>
           <Tab to={paths.dashboard(id)} icon="squares-four" label="Home" />
-          <Tab to={paths.myWork(id)} icon="list-checks" label="My work" count={counts.myWork} />
+          <Tab to={paths.myWork(id)} icon="list-checks" label="My work" count={counts?.myWork} />
           {approve ? (
             <Tab
               to={paths.requirements(id)}
               icon="file-text"
               label="Requirements"
-              count={counts.pendingReview}
+              count={counts?.pendingReview}
             />
           ) : (
             <Tab to={paths.runs(id)} icon="play-circle" label="Test runs" />
           )}
-          <Tab to={paths.defects(id)} icon="bug" label="Defects" count={counts.openDefects} alert />
+          <Tab
+            to={paths.defects(id)}
+            icon="bug"
+            label="Defects"
+            count={counts?.openDefects}
+            alert
+          />
           <button
             type="button"
             aria-haspopup="dialog"
@@ -57,7 +63,7 @@ export function TabBar() {
             <TabMark icon="dots" />
             More
           </button>
-          <MoreSheet open={more} onClose={() => setMore(false)} />
+          <MoreSheet open={more} onClose={() => setMore(false)} counts={counts} />
         </>
       ) : (
         <>

@@ -26,6 +26,20 @@ npm run dev
 | `VITE_API_MODE`     | `mock` uses the in-browser mock API, `live` uses the real backend |
 | `VITE_API_BASE_URL` | The backend URL when `VITE_API_MODE=live`                         |
 
+## Demo accounts
+
+These accounts exist only in the mock API (`VITE_API_MODE=mock`). They are demo data for the mock only: the password works nowhere else. Every account uses the password `VeraQA#2026`.
+
+| Person         | Email                          | E-Commerce Portal v2 | Clinic booking app | Payments API    | Library system  | Mobile banking app     |
+| -------------- | ------------------------------ | -------------------- | ------------------ | --------------- | --------------- | ---------------------- |
+| Batool Hani    | `batool.hani@shop-team.com`    | QA lead              | QA engineer        | Developer       | Project manager | Invited as QA engineer |
+| Batool Mahmoud | `batool.mahmoud@shop-team.com` | QA engineer          | QA lead            | QA lead         |                 |                        |
+| Qays Kaled     | `qays.kaled@shop-team.com`     | Developer            | Developer          | Developer       |                 |                        |
+| Lina Saeed     | `lina.saeed@shop-team.com`     | Developer            | Project manager    |                 |                 | Project manager        |
+| Maria Ayman    | `maria.ayman@shop-team.com`    | Project manager      |                    | Project manager |                 |                        |
+
+The mock starts signed in as Batool Hani. Its data lives in the browser's localStorage until it's reset.
+
 ## Scripts
 
 | Command                | What it does                                  |

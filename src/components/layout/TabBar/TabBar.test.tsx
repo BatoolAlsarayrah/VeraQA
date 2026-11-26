@@ -1,20 +1,22 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import { counts, renderAt as renderIn } from '@/mocks/render';
+import { mockServer, signIn } from '@/mocks/server';
 
 import { TabBar } from './TabBar';
 
 function renderAt(path: string) {
-  render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/projects/:projectId/*" element={<TabBar />} />
-      </Routes>
-    </MemoryRouter>,
-  );
+  renderIn(path, <TabBar counts={counts} />);
   return screen.getByRole('navigation', { name: 'Main' });
 }
+
+mockServer();
+
+beforeEach(async () => {
+  await signIn();
+});
 
 describe('TabBar', () => {
   it('gives a QA lead Home, My work, Requirements, Defects and More, with counts in the names', () => {

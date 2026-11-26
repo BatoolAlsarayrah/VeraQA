@@ -1,8 +1,7 @@
 import { useCan, useProject, useSession } from '@/hooks';
-import { demoNotifications, homePath, paths, roleLabels } from '@/lib';
+import { homePath, paths, roleLabels } from '@/lib';
 
-import { AccountMenu, NotificationsMenu } from '../Menus';
-import { MockChip } from '../MockChip';
+import { AccountMenu, type Notice, NotificationsMenu } from '../Menus';
 import { Breadcrumb } from './Breadcrumb';
 import { SearchField } from './SearchField';
 import { ThemeButton } from './ThemeButton';
@@ -11,9 +10,11 @@ import { type Stage, WorkflowStrip } from './WorkflowStrip';
 type Props = {
   stage?: Stage | undefined;
   crumb: string;
+  notices: Notice[];
+  onOpen?: ((id: string) => void) | undefined;
 };
 
-export function TopBar({ stage, crumb }: Props) {
+export function TopBar({ stage, crumb, notices, onOpen }: Props) {
   const { user } = useSession();
   const project = useProject();
   const workspace = useCan('workspace');
@@ -37,7 +38,6 @@ export function TopBar({ stage, crumb }: Props) {
         )}
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <MockChip className="mr-1" />
         {workspace ? (
           <SearchField label="Search IDs, titles, people" short="Search" />
         ) : (
@@ -45,7 +45,8 @@ export function TopBar({ stage, crumb }: Props) {
         )}
         <ThemeButton />
         <NotificationsMenu
-          notices={demoNotifications(id)}
+          notices={notices}
+          onOpen={onOpen}
           activity={manage ? paths.activity(id) : undefined}
         />
         <AccountMenu

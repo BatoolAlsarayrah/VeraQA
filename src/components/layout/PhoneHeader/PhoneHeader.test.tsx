@@ -1,21 +1,23 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import { notices, renderAt as renderIn } from '@/mocks/render';
+import { mockServer, signIn } from '@/mocks/server';
 
 import { PhoneHeader } from './PhoneHeader';
 
 type Back = { label: string; to: string };
 
 function renderAt(path: string, back?: Back) {
-  render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/projects/:projectId/*" element={<PhoneHeader back={back} />} />
-      </Routes>
-    </MemoryRouter>,
-  );
+  renderIn(path, <PhoneHeader back={back} notices={notices(10, 7)} />);
 }
+
+mockServer();
+
+beforeEach(async () => {
+  await signIn();
+});
 
 describe('PhoneHeader', () => {
   it('shows the project as a link to switch projects', () => {
@@ -58,9 +60,6 @@ describe('PhoneHeader', () => {
     await user.click(screen.getByRole('button', { name: 'Account, Batool Hani' }));
 
     const sheet = screen.getByRole('dialog', { name: 'Account' });
-    expect(within(sheet).getByRole('link', { name: 'Sign out' })).toHaveAttribute(
-      'href',
-      '/signin',
-    );
+    expect(within(sheet).getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
   });
 });

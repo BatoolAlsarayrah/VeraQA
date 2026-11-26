@@ -1,7 +1,7 @@
-import { useSyncExternalStore } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
-import { getSession, subscribeSession } from '@/lib';
+import { sessionQuery } from '@/lib';
 
 export function useSession() {
-  return useSyncExternalStore(subscribeSession, getSession);
+  return useSuspenseQuery(sessionQuery).data;
 }
