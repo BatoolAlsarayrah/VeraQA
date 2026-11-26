@@ -1,14 +1,24 @@
 import { Link } from 'react-router';
 
 import { IdText } from '@/components/domain/IdText';
-import { cn, type Notice, paths } from '@/lib';
+import { cn, paths } from '@/lib';
+
+export type Notice = {
+  id: string;
+  title: string;
+  detail?: string | null;
+  time: string;
+  to: string;
+  unread: boolean;
+};
 
 type Props = {
   notices: Notice[];
+  onOpen?: ((id: string) => void) | undefined;
   activity?: string | undefined;
 };
 
-export function NotificationList({ notices, activity }: Props) {
+export function NotificationList({ notices, onOpen, activity }: Props) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
@@ -21,9 +31,12 @@ export function NotificationList({ notices, activity }: Props) {
       </div>
       <ul>
         {notices.slice(0, 6).map((notice) => (
-          <li key={notice.title}>
+          <li key={notice.id}>
             <Link
               to={notice.to}
+              onClick={() => {
+                if (notice.unread) onOpen?.(notice.id);
+              }}
               className="flex items-start gap-2.5 px-4 py-2.5 text-text no-underline transition-[background-color] duration-150 hover:bg-subtle"
             >
               <span

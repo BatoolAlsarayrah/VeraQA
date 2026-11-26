@@ -112,7 +112,7 @@ onJobDone('scenario-generation', (db, job) => {
     title: `${String(drafts.length)} scenario drafts are ready for review`,
     detail: `From ${String(result?.read ?? job.items.length)} approved requirements`,
     actor: { type: 'ai' },
-    target: { type: 'job', id: job.id },
+    target: { type: 'scenario-generation', id: job.id },
   });
   const first = result?.groups[0]?.requirement;
   if (first) {

@@ -1,29 +1,51 @@
+import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes } from 'react-router';
+import { describe, expect, it, vi } from 'vitest';
 
-import type { Notice } from '@/lib';
+import { queryClient } from '@/lib';
+import { getDb } from '@/mocks/db';
+import { mockServer } from '@/mocks/server';
 
 import { AccountCard } from './AccountCard';
 import { AccountMenu } from './AccountMenu';
-import { NotificationList } from './NotificationList';
+import { type Notice, NotificationList } from './NotificationList';
 import { NotificationsMenu } from './NotificationsMenu';
 
 const user = { id: 'batool-hani', name: 'Batool Hani', email: 'batool.hani@shop-team.com' };
 
 const notices: Notice[] = [
   {
+    id: 'note-1',
     title: 'Qays Kaled marked BUG-007 as fixed',
     detail: 'Start the retest when you’re ready.',
     time: '5 minutes ago',
     to: '/projects/p/defects/BUG-007',
     unread: true,
   },
-  { title: 'BUG-004 is ready for retest', time: 'Yesterday, 11:05', to: '/b', unread: false },
+  {
+    id: 'note-2',
+    title: 'BUG-004 is ready for retest',
+    time: 'Yesterday, 11:05',
+    to: '/b',
+    unread: false,
+  },
 ];
 
+mockServer();
+
 function inRouter(node: React.ReactNode) {
-  return render(<MemoryRouter>{node}</MemoryRouter>);
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <Routes>
+          <Route path="/" element={node} />
+          <Route path="/signin" element={<h1>Sign in</h1>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
 }
 
 describe('NotificationList', () => {
@@ -47,9 +69,11 @@ describe('NotificationList', () => {
     expect(screen.queryByRole('link', { name: 'All activity' })).not.toBeInTheDocument();
 
     rerender(
-      <MemoryRouter>
-        <NotificationList notices={notices} activity="/projects/p/activity" />
-      </MemoryRouter>,
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <NotificationList notices={notices} activity="/projects/p/activity" />
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
     expect(screen.getByRole('link', { name: 'All activity' })).toHaveAttribute(
       'href',
@@ -57,8 +81,19 @@ describe('NotificationList', () => {
     );
   });
 
+  it('marks an unread notice as read when it’s opened', async () => {
+    const person = userEvent.setup();
+    const onOpen = vi.fn();
+    inRouter(<NotificationList notices={notices} onOpen={onOpen} />);
+
+    await person.click(screen.getByRole('link', { name: /Qays Kaled marked BUG-007 as fixed/ }));
+
+    expect(onOpen).toHaveBeenCalledWith('note-1');
+  });
+
   it('shows at most six notices', () => {
     const many = Array.from({ length: 9 }, (_, index) => ({
+      id: String(index),
       title: `Notice ${index}`,
       time: 'Today',
       to: '/x',
@@ -76,9 +111,11 @@ describe('NotificationsMenu', () => {
     expect(screen.getByRole('button', { name: 'Notifications, 1 unread' })).toBeInTheDocument();
 
     rerender(
-      <MemoryRouter>
-        <NotificationsMenu notices={notices.map((notice) => ({ ...notice, unread: false }))} />
-      </MemoryRouter>,
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <NotificationsMenu notices={notices.map((notice) => ({ ...notice, unread: false }))} />
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
     expect(screen.getByRole('button', { name: 'Notifications' })).toBeInTheDocument();
   });
@@ -108,9 +145,21 @@ describe('AccountCard', () => {
 
   it('keeps only Account settings and Sign out outside a project', () => {
     inRouter(<AccountCard user={user} solo />);
-    const names = screen.getAllByRole('link').map((link) => link.textContent);
 
-    expect(names).toEqual(['Account settings', 'Sign out']);
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      'Account settings',
+    ]);
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
+  });
+
+  it('signs out through the API and goes to Sign in', async () => {
+    const person = userEvent.setup();
+    inRouter(<AccountCard user={user} solo />);
+
+    await person.click(screen.getByRole('button', { name: 'Sign out' }));
+
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+    expect(getDb().signedIn).toBeNull();
   });
 });
 
@@ -121,9 +170,8 @@ describe('AccountMenu', () => {
     const panel = document.getElementById(trigger.getAttribute('popovertarget') ?? '');
     if (!panel) throw new Error('No account popover');
 
-    expect(within(panel).getByRole('link', { name: 'Sign out', hidden: true })).toHaveAttribute(
-      'href',
-      '/signin',
-    );
+    expect(
+      within(panel).getByRole('button', { name: 'Sign out', hidden: true }),
+    ).toBeInTheDocument();
   });
 });

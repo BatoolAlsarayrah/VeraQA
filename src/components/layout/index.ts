@@ -1,7 +1,13 @@
 export { AnalysisBanner } from './AnalysisBanner';
 export { AppShell, usePhoneDetail } from './AppShell';
 export { AuthLayout } from './AuthLayout';
-export { AccountCard, AccountMenu, NotificationList, NotificationsMenu } from './Menus';
+export {
+  AccountCard,
+  AccountMenu,
+  type Notice,
+  NotificationList,
+  NotificationsMenu,
+} from './Menus';
 export { MoreSheet } from './MoreSheet';
 export { PageHeader } from './PageHeader';
 export { PhoneHeader } from './PhoneHeader';

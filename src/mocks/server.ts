@@ -1,6 +1,8 @@
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest';
 
+import { queryClient, sessionQuery } from '@/lib';
+
 import { setFlags } from './api';
 import { resetDb } from './db';
 import { handlers } from './handlers';
@@ -15,4 +17,8 @@ export function mockServer() {
   });
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
+}
+
+export function signIn() {
+  return queryClient.fetchQuery(sessionQuery);
 }

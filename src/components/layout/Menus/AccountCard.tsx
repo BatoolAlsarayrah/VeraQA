@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 
 import { Avatar } from '@/components/domain/Avatar';
+import { useSignOut } from '@/hooks';
 import { paths } from '@/lib';
 import type { User } from '@/types';
 
@@ -15,6 +16,8 @@ const row =
   'flex min-h-9 max-tablet:min-h-12 items-center rounded-sm px-2.5 text-body no-underline transition-[background-color] duration-150 hover:bg-subtle';
 
 export function AccountCard({ user, role, settings, solo = false }: Props) {
+  const signOut = useSignOut();
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-2.5">
@@ -45,9 +48,14 @@ export function AccountCard({ user, role, settings, solo = false }: Props) {
         )}
       </div>
       <div className="flex flex-col p-1.5">
-        <Link to={paths.signin} className={`${row} text-bad hover:bg-bad-bg`}>
+        <button
+          type="button"
+          onClick={() => signOut.mutate()}
+          disabled={signOut.isPending}
+          className={`${row} w-full cursor-pointer text-left text-bad hover:bg-bad-bg`}
+        >
           Sign out
-        </Link>
+        </button>
       </div>
     </div>
   );

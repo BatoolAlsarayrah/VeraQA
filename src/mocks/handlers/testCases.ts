@@ -128,7 +128,7 @@ onJobDone('test-case-generation', (db, job) => {
     title: `${String(drafts.length)} test case drafts are ready for review`,
     detail: `From ${String(result?.read ?? job.items.length)} approved scenarios`,
     actor: { type: 'ai' },
-    target: { type: 'job', id: job.id },
+    target: { type: 'test-case-generation', id: job.id },
   });
   const first = result?.groups[0]?.scenario;
   if (first) {

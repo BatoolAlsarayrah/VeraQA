@@ -9,8 +9,6 @@ import '@/styles/globals.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { App } from '@/app/App';
-
 async function start() {
   // Vite replaces VITE_API_MODE at build time, so a live build drops the mock import entirely.
   if (import.meta.env.VITE_API_MODE === 'mock') {
@@ -18,6 +16,9 @@ async function start() {
     await startMocks();
   }
 
+  // The router runs the first page's loaders as soon as it's created, so the app is loaded only
+  // after the mock worker is ready to answer them.
+  const { App } = await import('@/app/App');
   const root = document.getElementById('root');
   if (!root) throw new Error('Root element #root not found');
 

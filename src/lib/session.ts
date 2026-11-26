@@ -1,95 +1,54 @@
-import type { Membership, Role, Session } from '@/types';
+import { queryOptions } from '@tanstack/react-query';
 
-type ShellSession = Session & { currentProjectId: string };
+import { Session } from '@/types';
 
-import { capabilitiesFor } from './permissions';
+import { none, request } from './api-client';
+import { keys, queryClient } from './query';
 
-// Stand-in until Phase 3: the mock API (and later the live API) supplies the session through setSession.
+// A 401 here is handled by the route guard (go to Sign in) or ignored (the /dev page), so the
+// global 401 redirect stays out of it.
+export const sessionQuery = queryOptions({
+  queryKey: keys.session,
+  queryFn: () => request('/session', Session, { unauthorized: 'throw' }),
+  staleTime: 5 * 60_000,
+});
+
+export async function signOut() {
+  await request('/auth/sign-out', none, { method: 'POST', unauthorized: 'throw' });
+  queryClient.clear();
+}
+
 const KEY = 'veraqa-project';
-const ROLES_KEY = 'veraqa-roles';
+const listeners = new Set<() => void>();
 
-const demo: { projectId: string; projectName: string; role: Role }[] = [
-  { projectId: 'e-commerce-portal-v2', projectName: 'E-Commerce Portal v2', role: 'qa-lead' },
-  { projectId: 'clinic-booking-app', projectName: 'Clinic booking app', role: 'qa-engineer' },
-  { projectId: 'payments-api', projectName: 'Payments API', role: 'developer' },
-  { projectId: 'library-system', projectName: 'Library system', role: 'project-manager' },
-];
-
-function storedRoles(): Record<string, Role> {
+function read() {
   try {
-    const parsed: unknown = JSON.parse(sessionStorage.getItem(ROLES_KEY) ?? '{}');
-    return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, Role>) : {};
-  } catch {
-    return {};
-  }
-}
-
-function membershipsFor(roles: Record<string, Role>): Membership[] {
-  return demo.map((entry) => {
-    const role = roles[entry.projectId] ?? entry.role;
-    return { ...entry, role, capabilities: capabilitiesFor(role) };
-  });
-}
-
-const memberships = membershipsFor(storedRoles());
-
-function stored() {
-  try {
-    const id = sessionStorage.getItem(KEY);
-    return memberships.some((entry) => entry.projectId === id) ? id : null;
+    return sessionStorage.getItem(KEY);
   } catch {
     return null;
   }
 }
 
-export function demoSession(): ShellSession {
-  return {
-    user: { id: 'batool-hani', name: 'Batool Hani', email: 'batool.hani@shop-team.com' },
-    memberships,
-    currentProjectId: stored() ?? 'e-commerce-portal-v2',
-  };
-}
+let current = read();
 
-let session = demoSession();
-const listeners = new Set<() => void>();
-
-function notify() {
-  listeners.forEach((listener) => listener());
-}
-
-export function getSession() {
-  return session;
-}
-
-export function setSession(next: ShellSession) {
-  session = next;
-  notify();
-}
-
-export function subscribeSession(listener: () => void) {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
-export function setDemoRole(projectId: string, role: Role) {
-  const roles = { ...storedRoles(), [projectId]: role };
-  try {
-    sessionStorage.setItem(ROLES_KEY, JSON.stringify(roles));
-  } catch {
-    // Storage can be blocked; the choice still holds for this page.
-  }
-  setSession({ ...session, memberships: membershipsFor(roles) });
+export function getCurrentProject() {
+  return current;
 }
 
 export function setCurrentProject(projectId: string) {
-  if (session.currentProjectId === projectId) return;
-  if (!session.memberships.some((entry) => entry.projectId === projectId)) return;
+  if (current === projectId) return;
+  current = projectId;
   try {
     sessionStorage.setItem(KEY, projectId);
   } catch {
     // Storage can be blocked; the choice still holds for this page.
   }
-  setSession({ ...session, currentProjectId: projectId });
+  listeners.forEach((listener) => listener());
+}
+
+export function subscribeCurrentProject(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }

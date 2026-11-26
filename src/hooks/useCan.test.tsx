@@ -1,24 +1,32 @@
+import { QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import { afterEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import { demoSession, setSession } from '@/lib';
+import { keys, queryClient } from '@/lib';
+import { mockServer, signIn } from '@/mocks/server';
 
 import { useCan } from './useCan';
 
+mockServer();
+
+beforeEach(async () => {
+  await signIn();
+});
+
 function at(path: string) {
   return ({ children }: { children: ReactNode }) => (
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/projects/:projectId/*" element={children} />
-        <Route path="*" element={children} />
-      </Routes>
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/projects/:projectId/*" element={children} />
+          <Route path="*" element={children} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 }
-
-afterEach(() => setSession(demoSession()));
 
 describe('useCan', () => {
   it('reads the capabilities of the project in the URL', () => {
@@ -37,15 +45,15 @@ describe('useCan', () => {
     expect(result.current).toBe(false);
   });
 
-  it('falls back to the current project outside a project URL', () => {
+  it('falls back to the first project outside a project URL', () => {
     const { result } = renderHook(() => useCan('fix'), { wrapper: at('/account') });
 
     expect(result.current).toBe(false);
   });
 
-  it('trusts the capabilities array over the role name', () => {
-    const session = demoSession();
-    setSession({
+  it('trusts the capabilities array over the role name', async () => {
+    const session = await signIn();
+    queryClient.setQueryData(keys.session, {
       ...session,
       memberships: session.memberships.map((entry) =>
         entry.projectId === 'payments-api' ? { ...entry, capabilities: [] } : entry,

@@ -1,20 +1,28 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import { type Notice } from '@/components/layout/Menus';
+import { notices, renderAt as renderIn } from '@/mocks/render';
+import { mockServer, signIn } from '@/mocks/server';
 
 import { TopBar } from './TopBar';
 import type { Stage } from './WorkflowStrip';
 
-function renderAt(path: string, stage: Stage | undefined, crumb: string) {
-  render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/projects/:projectId/*" element={<TopBar stage={stage} crumb={crumb} />} />
-      </Routes>
-    </MemoryRouter>,
-  );
+function renderAt(
+  path: string,
+  stage: Stage | undefined,
+  crumb: string,
+  items: Notice[] = notices(10, 7),
+) {
+  renderIn(path, <TopBar stage={stage} crumb={crumb} notices={items} />);
 }
+
+mockServer();
+
+beforeEach(async () => {
+  await signIn();
+});
 
 function popover(name: string) {
   const trigger = screen.getByRole('button', { name });
@@ -76,7 +84,7 @@ describe('TopBar', () => {
   });
 
   it('leaves All activity and Project settings out for a QA engineer', () => {
-    renderAt('/projects/clinic-booking-app/dashboard', undefined, 'Dashboard');
+    renderAt('/projects/clinic-booking-app/dashboard', undefined, 'Dashboard', notices(4, 2));
 
     expect(
       within(popover('Notifications, 2 unread')).queryByRole('link', {
@@ -89,10 +97,9 @@ describe('TopBar', () => {
     expect(
       within(account).queryByRole('link', { name: 'Project settings', hidden: true }),
     ).not.toBeInTheDocument();
-    expect(within(account).getByRole('link', { name: 'Sign out', hidden: true })).toHaveAttribute(
-      'href',
-      '/signin',
-    );
+    expect(
+      within(account).getByRole('button', { name: 'Sign out', hidden: true }),
+    ).toBeInTheDocument();
   });
 
   it('switches the theme', async () => {

@@ -243,7 +243,13 @@ describe('seed notifications, activity and jobs', () => {
           ),
         ).toBe(true);
       }
-      if (type === 'job') expect(db.jobs.some((job) => job.id === id)).toBe(true);
+      if (
+        type === 'analysis' ||
+        type === 'scenario-generation' ||
+        type === 'test-case-generation'
+      ) {
+        expect(db.jobs.some((job) => job.id === id && job.kind === type)).toBe(true);
+      }
     }
   });
 

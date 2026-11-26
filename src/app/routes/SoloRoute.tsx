@@ -1,14 +1,16 @@
+import { useQuery } from '@tanstack/react-query';
 import { Outlet, useLocation } from 'react-router';
 
 import { AccountMenu, SoloLayout } from '@/components/layout';
-import { useSession } from '@/hooks';
+import { sessionQuery } from '@/lib';
 
 export function SoloRoute() {
   const { pathname } = useLocation();
-  const { user } = useSession();
+  const session = useQuery(sessionQuery);
+  const user = session.data?.user;
 
   return (
-    <SoloLayout pageKey={pathname} end={<AccountMenu user={user} solo />}>
+    <SoloLayout pageKey={pathname} end={user && <AccountMenu user={user} solo />}>
       <Outlet />
     </SoloLayout>
   );

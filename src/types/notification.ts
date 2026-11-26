@@ -14,7 +14,9 @@ export const NotificationTarget = z.object({
     'defect',
     'my-work',
     'members',
-    'job',
+    'analysis',
+    'scenario-generation',
+    'test-case-generation',
   ]),
   id: z.string().nullable(),
 });

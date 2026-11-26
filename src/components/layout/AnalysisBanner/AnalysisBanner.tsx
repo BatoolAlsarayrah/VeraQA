@@ -11,10 +11,14 @@ type Props = {
   found: { requirements: number; issues: number };
 };
 
+function count(n: number, noun: string) {
+  return `${String(n)} ${noun}${n === 1 ? '' : 's'}`;
+}
+
 export function AnalysisBanner({ projectId, files, step, total, done, found }: Props) {
-  const subject = files.length > 1 ? `${files.length} files` : (files[0] ?? 'your file');
+  const subject = files.length > 1 ? `${files.length} files` : (files[0] ?? 'your requirements');
   const text = done
-    ? `Analysis complete: ${found.requirements} requirements, ${found.issues} issues`
+    ? `Analysis complete: ${count(found.requirements, 'requirement')}, ${count(found.issues, 'issue')}`
     : `Analyzing ${subject}, step ${step} of ${total}`;
 
   return (

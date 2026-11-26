@@ -1,20 +1,22 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { counts, renderAt as renderIn } from '@/mocks/render';
+import { mockServer, signIn } from '@/mocks/server';
 
 import { MoreSheet } from './MoreSheet';
 
 function renderAt(path: string, onClose = vi.fn()) {
-  render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/projects/:projectId/*" element={<MoreSheet open onClose={onClose} />} />
-      </Routes>
-    </MemoryRouter>,
-  );
+  renderIn(path, <MoreSheet open onClose={onClose} counts={counts} />);
   return screen.getByRole('dialog', { name: 'More' });
 }
+
+mockServer();
+
+beforeEach(async () => {
+  await signIn();
+});
 
 describe('MoreSheet', () => {
   it('lists the testing stages with the counts a QA lead acts on', () => {

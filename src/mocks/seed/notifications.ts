@@ -16,7 +16,8 @@ type Spec = [
 ];
 
 const defect = (id: string): NotificationTarget => ({ type: 'defect', id });
-const job = (id: string): NotificationTarget => ({ type: 'job', id });
+const scenarioJob = (id: string): NotificationTarget => ({ type: 'scenario-generation', id });
+const caseJob = (id: string): NotificationTarget => ({ type: 'test-case-generation', id });
 
 export function notifications(t: Clock): NotificationRecord[] {
   const specs: Spec[] = [
@@ -108,7 +109,7 @@ export function notifications(t: Clock): NotificationRecord[] {
       t.daysAgo(2, 9, 40),
       false,
       'ai',
-      job('job-ecom-cases'),
+      caseJob('job-ecom-cases'),
     ],
     [
       'batool-hani',
@@ -118,7 +119,7 @@ export function notifications(t: Clock): NotificationRecord[] {
       t.daysAgo(3, 15),
       false,
       'ai',
-      job('job-ecom-scenarios'),
+      scenarioJob('job-ecom-scenarios'),
     ],
     [
       'batool-hani',
@@ -218,7 +219,7 @@ export function notifications(t: Clock): NotificationRecord[] {
       t.daysAgo(22),
       false,
       'ai',
-      job('job-lib-scenarios'),
+      scenarioJob('job-lib-scenarios'),
     ],
     [
       'batool-mahmoud',

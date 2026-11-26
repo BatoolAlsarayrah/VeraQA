@@ -37,6 +37,7 @@ import { ProjectHome } from './ProjectHome';
 import { ProjectRoute } from './ProjectRoute';
 import { Root } from './Root';
 import { RouteError } from './RouteError';
+import { requireSession } from './session';
 import { ShellRoute } from './ShellRoute';
 import { SoloRoute } from './SoloRoute';
 
@@ -90,12 +91,18 @@ export const routes: RouteObject[] = [
       {
         Component: SoloRoute,
         children: [
-          { path: 'projects', Component: ProjectsPage, handle: title('Your projects') },
+          {
+            path: 'projects',
+            Component: ProjectsPage,
+            loader: requireSession,
+            handle: title('Your projects'),
+          },
           ...dev,
         ],
       },
       {
         Component: ShellRoute,
+        loader: requireSession,
         children: [
           {
             path: 'account',

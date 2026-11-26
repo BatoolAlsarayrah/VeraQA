@@ -421,7 +421,7 @@ Query: `projectId` (optional) and `unread=true` (optional). Response `200`: `{ "
 ```
 
 - `actor` is a person or `{ "type": "ai" }`.
-- `target` says what the notification opens: `requirement`, `requirements`, `scenario`, `scenarios`, `test-case`, `test-cases`, `run`, `defect`, `my-work`, `members` or `job`, with the item's ID where there is one. The frontend turns it into a link.
+- `target` says what the notification opens: `requirement`, `requirements`, `scenario`, `scenarios`, `test-case`, `test-cases`, `run`, `defect`, `my-work`, `members`, or a finished AI job (`analysis`, `scenario-generation` or `test-case-generation`, with the job ID), with the item's ID where there is one. The frontend turns it into a link.
 
 Errors: `404` when `projectId` is a project the person isn't in.
 

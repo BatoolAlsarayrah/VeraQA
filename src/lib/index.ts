@@ -8,26 +8,14 @@ export {
   setUnauthorizedHandler,
 } from './api-client';
 export { cn } from './cn';
-export {
-  analysisFound,
-  analysisStepMs,
-  analysisSteps,
-  type DemoAnalysis,
-  demoCounts,
-  demoNotifications,
-  getDemoAnalysis,
-  type Notice,
-  setDemoAnalysis,
-  subscribeDemoAnalysis,
-} from './demo';
+export { when } from './format';
 export { ids, paths } from './paths';
 export { capabilitiesFor, homePath, roleLabels } from './permissions';
 export { createQueryClient, keys, queryClient } from './query';
 export {
-  demoSession,
-  getSession,
+  getCurrentProject,
+  sessionQuery,
   setCurrentProject,
-  setDemoRole,
-  setSession,
-  subscribeSession,
+  signOut,
+  subscribeCurrentProject,
 } from './session';

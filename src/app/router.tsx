@@ -7,7 +7,8 @@ import { routes } from './routes';
 export const router = createBrowserRouter(routes);
 
 setUnauthorizedHandler(() => {
-  if (router.state.location.pathname === paths.signin) return;
+  const { pathname } = router.state.location;
+  if (pathname === paths.signin || pathname.startsWith(paths.dev)) return;
   queryClient.clear();
   void router.navigate(paths.signin, { replace: true });
 });

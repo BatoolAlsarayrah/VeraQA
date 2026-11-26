@@ -3,7 +3,9 @@ import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { demoSession, setSession } from '@/lib';
+import { keys, queryClient, sessionQuery } from '@/lib';
+import { getDb } from '@/mocks/db';
+import { mockServer } from '@/mocks/server';
 
 import { Providers } from '../providers';
 import { routes } from './routes';
@@ -23,9 +25,10 @@ function visit(path: string) {
   return router;
 }
 
+mockServer();
+
 afterEach(() => {
   sessionStorage.clear();
-  setSession(demoSession());
 });
 
 describe('routes', () => {
@@ -140,8 +143,8 @@ describe('route guard', () => {
   });
 
   it('reads capabilities, not the role name', async () => {
-    const session = demoSession();
-    setSession({
+    const session = await queryClient.fetchQuery(sessionQuery);
+    queryClient.setQueryData(keys.session, {
       ...session,
       memberships: session.memberships.map((entry) =>
         entry.projectId === 'payments-api' ? { ...entry, capabilities: ['fix', 'manage'] } : entry,
@@ -151,5 +154,23 @@ describe('route guard', () => {
 
     expect(await screen.findByRole('heading', { name: 'Reports' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(`${developer}/reports`);
+  });
+
+  it('sends someone who isn’t signed in to Sign in, with a way into the dev tools', async () => {
+    getDb().signedIn = null;
+    const router = visit(`${lead}/dashboard`);
+
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/signin');
+    expect(screen.getByRole('link', { name: 'open dev tools' })).toHaveAttribute('href', '/dev');
+  });
+
+  it('keeps the dev tools open while signed out, so nobody gets locked out', async () => {
+    getDb().signedIn = null;
+    const router = visit('/dev');
+
+    expect(await screen.findByRole('heading', { name: 'Dev tools' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign in as Batool Hani' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/dev');
   });
 });

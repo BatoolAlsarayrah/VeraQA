@@ -1,13 +1,20 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { demoSession, getDemoAnalysis, getSession, setDemoAnalysis, setSession } from '@/lib';
+import { rememberAnalysis } from '@/features/requirements';
+import { request } from '@/lib';
+import { setFlags } from '@/mocks/api';
+import { getDb } from '@/mocks/db';
+import { mockServer } from '@/mocks/server';
+import { JobStart } from '@/types';
 
 import { Providers } from '../providers';
 import { routes } from './routes';
+
+mockServer();
 
 const lead = '/projects/e-commerce-portal-v2';
 
@@ -25,36 +32,33 @@ function visit(path: string) {
   return router;
 }
 
+function analyze(text = 'The system shall export orders.\nThe cart shall update quickly.') {
+  return request(`${lead}/requirements/typed`, JobStart, { method: 'POST', body: { text } });
+}
+
 afterEach(() => {
   vi.useRealTimers();
-  setDemoAnalysis(null);
   sessionStorage.clear();
-  setSession(demoSession());
 });
 
 describe('analysis banner', () => {
-  it('counts through the steps, then turns into Analysis complete with Review', async () => {
+  it('follows a running analysis through its steps, then says what it found', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    setDemoAnalysis({
-      files: ['SRS_v2.pdf', 'Checkout_flow.docx'],
-      startedAt: Date.now(),
-      done: false,
-    });
+    setFlags({ instantJobs: false });
+    await analyze();
     visit(`${lead}/dashboard`);
 
-    await screen.findByText('Analyzing 2 files, step 1 of 4');
-    const strip = banner();
-    if (!(strip instanceof HTMLElement)) throw new Error('No banner');
-    expect(within(strip).getByRole('link', { name: 'Open analysis' })).toHaveAttribute(
+    expect(await screen.findByText('Analyzing your requirements, step 1 of 4')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open analysis' })).toHaveAttribute(
       'href',
       `${lead}/requirements/analysis`,
     );
 
-    await act(() => vi.advanceTimersByTimeAsync(1500));
-    expect(strip).toHaveTextContent('step 2 of 4');
+    await act(() => vi.advanceTimersByTimeAsync(11_000));
 
-    await act(() => vi.advanceTimersByTimeAsync(4000));
-    expect(banner()).toHaveTextContent('Analysis complete: 26 requirements, 8 issues');
+    expect(
+      await screen.findByText('Analysis complete: 2 requirements, 1 issue'),
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Review' })).toHaveAttribute(
       'href',
       `${lead}/requirements`,
@@ -62,7 +66,8 @@ describe('analysis banner', () => {
   });
 
   it('stays off the Add requirements and AI analysis pages', async () => {
-    setDemoAnalysis({ files: ['SRS_v2.pdf'], startedAt: Date.now(), done: false });
+    setFlags({ instantJobs: false });
+    await analyze();
     visit(`${lead}/requirements/new`);
 
     expect(await screen.findByRole('heading', { name: 'Add requirements' })).toBeInTheDocument();
@@ -70,25 +75,41 @@ describe('analysis banner', () => {
   });
 
   it('stays off for someone who cannot add requirements', async () => {
-    setDemoAnalysis({ files: ['SRS_v2.pdf'], startedAt: Date.now(), done: false });
-    visit('/projects/clinic-booking-app/dashboard');
+    getDb().signedIn = 'batool-mahmoud';
+    setFlags({ instantJobs: false });
+    visit(`${lead}/dashboard`);
 
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     expect(banner()).toBeNull();
   });
 
-  it('clears once a finished analysis is seen on Requirements', async () => {
-    setDemoAnalysis({ files: ['SRS_v2.pdf'], startedAt: 0, done: true });
+  it('goes away once a finished analysis is seen on Requirements', async () => {
+    const { jobId } = await analyze();
+    rememberAnalysis('e-commerce-portal-v2', jobId);
     visit(`${lead}/requirements`);
 
     expect(await screen.findByRole('heading', { name: 'Requirements' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(sessionStorage.getItem('veraqa-analysis')).toBe('{}');
+    });
     expect(banner()).toBeNull();
-    expect(getDemoAnalysis()).toBeNull();
   });
 });
 
 describe('dev page', () => {
-  it('switches the role for a project', async () => {
+  it('signs in as another demo person, even while signed out', async () => {
+    const user = userEvent.setup();
+    getDb().signedIn = null;
+    const router = visit('/dev');
+
+    await user.click(await screen.findByRole('button', { name: 'Sign in as Qays Kaled' }));
+
+    expect(getDb().signedIn).toBe('qays-kaled');
+    expect(await screen.findByRole('heading', { name: 'Your projects' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/projects');
+  });
+
+  it('changes the role in the mock’s memberships', async () => {
     const user = userEvent.setup();
     visit('/dev');
 
@@ -97,19 +118,10 @@ describe('dev page', () => {
       'developer',
     );
 
-    const membership = getSession().memberships.find(
-      (entry) => entry.projectId === 'e-commerce-portal-v2',
-    );
-    expect(membership?.role).toBe('developer');
-    expect(membership?.capabilities).toEqual(['fix']);
-  });
-
-  it('starts an analysis', async () => {
-    const user = userEvent.setup();
-    visit('/dev');
-
-    await user.click(await screen.findByRole('button', { name: 'Start with 1 file' }));
-
-    expect(getDemoAnalysis()?.files).toEqual(['SRS_v2.pdf']);
+    expect(
+      getDb().memberships.find(
+        (entry) => entry.projectId === 'e-commerce-portal-v2' && entry.personId === 'batool-hani',
+      )?.role,
+    ).toBe('developer');
   });
 });

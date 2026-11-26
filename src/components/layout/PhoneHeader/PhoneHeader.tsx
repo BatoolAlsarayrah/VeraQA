@@ -6,12 +6,14 @@ import { Icon } from '@/components/domain/Icon';
 import { Logo } from '@/components/domain/Logo';
 import { Sheet } from '@/components/ui/Sheet';
 import { useCan, useProject, useSession } from '@/hooks';
-import { demoNotifications, paths, roleLabels } from '@/lib';
+import { paths, roleLabels } from '@/lib';
 
-import { AccountCard, NotificationList } from '../Menus';
+import { AccountCard, type Notice, NotificationList } from '../Menus';
 
 type Props = {
   back?: { label: string; to: string } | undefined;
+  notices: Notice[];
+  onOpen?: ((id: string) => void) | undefined;
 };
 
 const left = 'flex min-h-11 min-w-0 flex-1 items-center gap-2.5 text-text no-underline';
@@ -19,7 +21,7 @@ const left = 'flex min-h-11 min-w-0 flex-1 items-center gap-2.5 text-text no-und
 const iconButton =
   'relative grid size-11 shrink-0 cursor-pointer place-items-center rounded-panel text-text-2 active:bg-subtle';
 
-export function PhoneHeader({ back }: Props) {
+export function PhoneHeader({ back, notices, onOpen }: Props) {
   const { user } = useSession();
   const project = useProject();
   const workspace = useCan('workspace');
@@ -28,7 +30,6 @@ export function PhoneHeader({ back }: Props) {
 
   if (!project) return null;
   const id = project.projectId;
-  const notices = demoNotifications(id);
   const unread = notices.filter((notice) => notice.unread).length;
   const close = () => setOpen(null);
 
@@ -81,7 +82,11 @@ export function PhoneHeader({ back }: Props) {
       </button>
       <Sheet open={open === 'notifications'} onClose={close} title="Notifications" titleHidden>
         <div className="-mx-4">
-          <NotificationList notices={notices} activity={manage ? paths.activity(id) : undefined} />
+          <NotificationList
+            notices={notices}
+            onOpen={onOpen}
+            activity={manage ? paths.activity(id) : undefined}
+          />
         </div>
       </Sheet>
       <Sheet open={open === 'account'} onClose={close} title="Account" titleHidden>

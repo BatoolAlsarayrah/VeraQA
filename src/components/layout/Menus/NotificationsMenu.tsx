@@ -1,15 +1,15 @@
 import { Icon } from '@/components/domain/Icon';
 import { Popover } from '@/components/ui/Popover';
-import type { Notice } from '@/lib';
 
-import { NotificationList } from './NotificationList';
+import { type Notice, NotificationList } from './NotificationList';
 
 type Props = {
   notices: Notice[];
+  onOpen?: ((id: string) => void) | undefined;
   activity?: string | undefined;
 };
 
-export function NotificationsMenu({ notices, activity }: Props) {
+export function NotificationsMenu({ notices, onOpen, activity }: Props) {
   const unread = notices.filter((notice) => notice.unread).length;
 
   return (
@@ -34,7 +34,7 @@ export function NotificationsMenu({ notices, activity }: Props) {
         </button>
       )}
     >
-      <NotificationList notices={notices} activity={activity} />
+      <NotificationList notices={notices} onOpen={onOpen} activity={activity} />
     </Popover>
   );
 }

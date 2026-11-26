@@ -2,7 +2,8 @@ import { Link } from 'react-router';
 
 import { Logo } from '@/components/domain/Logo';
 import { useCan, useMediaQuery, useProject, useSession } from '@/hooks';
-import { cn, demoCounts, paths, roleLabels } from '@/lib';
+import { cn, paths, roleLabels } from '@/lib';
+import type { Counts } from '@/types';
 
 import { ProjectSwitcher } from './ProjectSwitcher';
 import { SidebarFooter } from './SidebarFooter';
@@ -11,6 +12,7 @@ import { SidebarLink } from './SidebarLink';
 type Props = {
   collapsed: boolean;
   onToggle: () => void;
+  counts?: Counts | undefined;
 };
 
 function Divider({ compact }: { compact: boolean }) {
@@ -21,7 +23,7 @@ function Divider({ compact }: { compact: boolean }) {
   );
 }
 
-export function Sidebar({ collapsed, onToggle }: Props) {
+export function Sidebar({ collapsed, onToggle, counts }: Props) {
   const { user } = useSession();
   const project = useProject();
   const desktop = useMediaQuery('(min-width: 68.8125rem)');
@@ -33,7 +35,6 @@ export function Sidebar({ collapsed, onToggle }: Props) {
 
   if (!project) return null;
   const id = project.projectId;
-  const counts = demoCounts(id);
   const link = { compact };
 
   return (
@@ -66,7 +67,7 @@ export function Sidebar({ collapsed, onToggle }: Props) {
               to={paths.myWork(id)}
               icon="list-checks"
               label="My work"
-              count={counts.myWork}
+              count={counts?.myWork}
             />
             <Divider compact={compact} />
             <SidebarLink
@@ -74,7 +75,7 @@ export function Sidebar({ collapsed, onToggle }: Props) {
               to={paths.requirements(id)}
               icon="file-text"
               label="Requirements"
-              count={approve ? counts.pendingReview : undefined}
+              count={approve ? counts?.pendingReview : undefined}
               line
             />
             <SidebarLink
@@ -97,7 +98,7 @@ export function Sidebar({ collapsed, onToggle }: Props) {
               to={paths.defects(id)}
               icon="bug"
               label="Defects"
-              count={counts.openDefects}
+              count={counts?.openDefects}
               alert
             />
             {trace && (

@@ -1,9 +1,10 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { RAIL_KEY, useCollapsedRail } from '@/hooks';
+import { counts, renderAt as renderIn } from '@/mocks/render';
+import { mockServer, signIn } from '@/mocks/server';
 
 import { Sidebar } from './Sidebar';
 
@@ -22,20 +23,19 @@ function setWidth(desktop: boolean) {
 
 function Shell() {
   const { collapsed, toggle } = useCollapsedRail();
-  return <Sidebar collapsed={collapsed} onToggle={toggle} />;
+  return <Sidebar collapsed={collapsed} onToggle={toggle} counts={counts} />;
 }
 
 function renderAt(path: string) {
-  render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/projects/:projectId/*" element={<Shell />} />
-      </Routes>
-    </MemoryRouter>,
-  );
+  renderIn(path, <Shell />);
   return screen.getByRole('navigation', { name: 'Main' });
 }
 
+mockServer();
+
+beforeEach(async () => {
+  await signIn();
+});
 beforeEach(() => setWidth(true));
 afterEach(() => Reflect.deleteProperty(window, 'matchMedia'));
 

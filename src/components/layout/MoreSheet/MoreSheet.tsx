@@ -4,7 +4,8 @@ import { Avatar } from '@/components/domain/Avatar';
 import { Icon } from '@/components/domain/Icon';
 import { Sheet } from '@/components/ui/Sheet';
 import { useCan, useProject, useSession } from '@/hooks';
-import { demoCounts, paths, roleLabels } from '@/lib';
+import { paths, roleLabels } from '@/lib';
+import type { Counts } from '@/types';
 
 import { ThemeButton } from '../TopBar';
 import { MoreLink } from './MoreLink';
@@ -12,9 +13,10 @@ import { MoreLink } from './MoreLink';
 type Props = {
   open: boolean;
   onClose: () => void;
+  counts?: Counts | undefined;
 };
 
-export function MoreSheet({ open, onClose }: Props) {
+export function MoreSheet({ open, onClose, counts }: Props) {
   const { user } = useSession();
   const project = useProject();
   const approve = useCan('approve');
@@ -23,7 +25,6 @@ export function MoreSheet({ open, onClose }: Props) {
 
   if (!project) return null;
   const id = project.projectId;
-  const counts = demoCounts(id);
 
   return (
     <Sheet open={open} onClose={onClose} title="More" titleHidden>
@@ -57,7 +58,7 @@ export function MoreSheet({ open, onClose }: Props) {
             to={paths.requirements(id)}
             icon="file-text"
             label="Requirements"
-            count={approve ? counts.pendingReview : undefined}
+            count={approve ? counts?.pendingReview : undefined}
             line
           />
           <MoreLink to={paths.scenarios(id)} icon="flow-arrow" label="Test scenarios" line />
@@ -67,7 +68,7 @@ export function MoreSheet({ open, onClose }: Props) {
             to={paths.defects(id)}
             icon="bug"
             label="Defects"
-            count={counts.openDefects}
+            count={counts?.openDefects}
             alert
           />
         </div>
