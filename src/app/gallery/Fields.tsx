@@ -4,7 +4,9 @@ import {
   Checkbox,
   ChoiceCard,
   Field,
+  FormError,
   Input,
+  PasswordInput,
   Segmented,
   Select,
   Switch,
@@ -25,6 +27,10 @@ export function Fields() {
       <Field label="Project name" error="The name is empty. Type a name for the project.">
         <Input />
       </Field>
+      <Field label="Password" help="At least 8 characters, with a number.">
+        <PasswordInput autoComplete="new-password" />
+      </Field>
+      <FormError message="That email and password don’t match. Check them, or reset your password." />
       <Field label="Test run">
         <Select defaultValue="">
           <option value="" disabled>

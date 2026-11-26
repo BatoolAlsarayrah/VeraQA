@@ -1,9 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach } from 'vitest';
 
 import { queryClient } from '@/lib';
+
+// Route tests load the whole app and mock server; a full parallel run can outlast the 1s default.
+configure({ asyncUtilTimeout: 3000 });
 
 // jsdom has no <dialog> or popover support, so these mimic the browser's open state and events.
 // The guard lets the few tests that need Node's own fetch, FormData and File run without jsdom.

@@ -38,8 +38,12 @@ describe('form inputs', () => {
     const short = RegisterInput.safeParse({ ...base, password: 'abc1' });
     const noNumber = RegisterInput.safeParse({ ...base, password: 'abcdefgh' });
 
-    expect(short.error?.issues[0]?.message).toBe('Use at least 8 characters.');
-    expect(noNumber.error?.issues[0]?.message).toBe('Add at least one number.');
+    expect(short.error?.issues[0]?.message).toBe(
+      'That password is too short. Use at least 8 characters, with a number.',
+    );
+    expect(noNumber.error?.issues[0]?.message).toBe(
+      'Add a number. Use at least 8 characters, with a number.',
+    );
     expect(PasswordInput.safeParse({ current: 'x', next: 'Correct#456' }).success).toBe(true);
   });
 

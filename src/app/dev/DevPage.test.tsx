@@ -1,11 +1,11 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { request } from '@/lib';
+import { queryClient, request } from '@/lib';
 import { getFlags } from '@/mocks/api';
 import { getDb } from '@/mocks/db';
 import { mockServer } from '@/mocks/server';
@@ -46,8 +46,10 @@ describe('dev mock controls', () => {
   it('fails the next request once', async () => {
     const user = userEvent.setup();
     visit('/dev');
+    const button = await screen.findByRole('button', { name: 'Fail the next request' });
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
 
-    await user.click(await screen.findByRole('button', { name: 'Fail the next request' }));
+    await user.click(button);
 
     expect(screen.getByText('The next request will fail with a server error.')).toBeInTheDocument();
     expect(getFlags().failNext).toBe(true);
