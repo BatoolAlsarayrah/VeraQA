@@ -37,7 +37,7 @@ import { ProjectHome } from './ProjectHome';
 import { ProjectRoute } from './ProjectRoute';
 import { Root } from './Root';
 import { RouteError } from './RouteError';
-import { requireSession } from './session';
+import { requireSession, skipIfSignedIn } from './session';
 import { ShellRoute } from './ShellRoute';
 import { SignedOutRoute } from './SignedOutRoute';
 import { SoloRoute } from './SoloRoute';
@@ -82,6 +82,7 @@ export const routes: RouteObject[] = [
         children: [
           {
             Component: SignedOutRoute,
+            loader: skipIfSignedIn,
             children: [
               { path: 'signin', Component: SignInPage, handle: title('Sign in') },
               { path: 'register', Component: RegisterPage, handle: title('Create your account') },

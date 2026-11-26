@@ -1,7 +1,7 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { useEffect, useSyncExternalStore } from 'react';
 
-import { keys, queryClient, request } from '@/lib';
+import { keys, onForgetSession, queryClient, request } from '@/lib';
 import { Job, JobStart, list } from '@/types';
 
 export type Analysis = Extract<Job, { kind: 'analysis' }>;
@@ -56,6 +56,8 @@ function subscribe(listener: () => void) {
     listeners.delete(listener);
   };
 }
+
+onForgetSession(() => write({}));
 
 export function rememberAnalysis(projectId: string, jobId: string) {
   if (seen[projectId] !== jobId) write({ ...seen, [projectId]: jobId });

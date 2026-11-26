@@ -15,7 +15,7 @@ export const sessionQuery = queryOptions({
 
 export async function signOut() {
   await request('/auth/sign-out', none, { method: 'POST', unauthorized: 'throw' });
-  queryClient.clear();
+  forgetSession();
 }
 
 const KEY = 'veraqa-project';
@@ -51,4 +51,28 @@ export function subscribeCurrentProject(listener: () => void) {
   return () => {
     listeners.delete(listener);
   };
+}
+
+function clearCurrentProject() {
+  current = null;
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {
+    // Storage can be blocked; the choice is already gone from memory.
+  }
+  listeners.forEach((listener) => listener());
+}
+
+const forgetters = new Set<() => void>();
+
+export function onForgetSession(forget: () => void) {
+  forgetters.add(forget);
+}
+
+// The tab can switch people (sign out, then someone else signs in), so nothing the last person
+// chose or saw running may carry over.
+export function forgetSession() {
+  queryClient.clear();
+  clearCurrentProject();
+  forgetters.forEach((forget) => forget());
 }

@@ -13,7 +13,9 @@ export { ids, isOpen, paths, returnTo, signinFrom } from './paths';
 export { capabilitiesFor, homePath, roleLabels } from './permissions';
 export { createQueryClient, keys, queryClient } from './query';
 export {
+  forgetSession,
   getCurrentProject,
+  onForgetSession,
   sessionQuery,
   setCurrentProject,
   signOut,

@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { Providers } from '@/app/providers';
 import { routes } from '@/app/routes';
+import { queryClient, sessionQuery } from '@/lib';
 import { getDb } from '@/mocks/db';
 import { DEMO_PASSWORD } from '@/mocks/seed/people';
 import { mockServer } from '@/mocks/server';
@@ -107,4 +108,25 @@ describe('Sign in', () => {
     expect(await screen.findByRole('heading', { name: 'Your projects' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/projects');
   });
+
+  it.each(['/signin', '/register'])(
+    'leaves %s at once, without showing the form, when the session is already known',
+    async (path) => {
+      getDb().signedIn = 'batool-hani';
+      await queryClient.fetchQuery(sessionQuery);
+      const seen: string[] = [];
+      const watch = new MutationObserver(() => {
+        const title = document.querySelector('h1')?.textContent ?? '';
+        if (title === 'Sign in' || title === 'Create your account') seen.push(title);
+      });
+      watch.observe(document.body, { childList: true, subtree: true });
+
+      const { router } = visit(path);
+
+      expect(await screen.findByRole('heading', { name: 'Your projects' })).toBeInTheDocument();
+      watch.disconnect();
+      expect(seen).toEqual([]);
+      expect(router.state.location.pathname).toBe('/projects');
+    },
+  );
 });
