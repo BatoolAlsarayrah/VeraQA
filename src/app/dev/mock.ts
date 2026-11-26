@@ -41,3 +41,7 @@ export function resetDemo() {
 }
 
 export { getFlags, setFlags };
+
+export function resetLink() {
+  return getDb().resetLink ?? null;
+}

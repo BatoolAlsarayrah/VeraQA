@@ -5,6 +5,8 @@ export const paths = {
   signin: '/signin',
   register: '/register',
   forgotPassword: '/forgot-password',
+  resetSent: '/forgot-password/sent',
+  resetPassword: (token: string) => `/reset-password/${encodeURIComponent(token)}`,
   projects: '/projects',
   account: '/account',
   search: '/search',
@@ -45,7 +47,7 @@ export const ids = {
   defect: /^BUG-\d+$/,
 };
 
-const open = [paths.signin, paths.register, paths.forgotPassword, paths.dev];
+const open = [paths.signin, paths.register, paths.forgotPassword, '/reset-password', paths.dev];
 
 export function isOpen(pathname: string) {
   return open.some((path) => pathname === path || pathname.startsWith(`${path}/`));

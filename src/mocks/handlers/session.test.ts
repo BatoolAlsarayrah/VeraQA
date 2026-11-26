@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { none, request } from '@/lib';
 import { NotificationSettings, Session, User } from '@/types';
 
+import { setFlags } from '../api';
 import { getDb } from '../db';
 import { DEMO_PASSWORD } from '../seed';
 import { mockServer } from '../server';
@@ -105,6 +106,68 @@ describe('register and forgot password', () => {
     await expect(
       request('/auth/forgot-password', none, post({ email: 'nobody@nowhere.com' })),
     ).resolves.toBeUndefined();
+  });
+});
+
+describe('password reset', () => {
+  const ask = (email: string) => request('/auth/forgot-password', none, post({ email }));
+  const check = (token: string) =>
+    request(`/auth/reset-password/${token}`, none, { unauthorized: 'throw' });
+  const reset = (token: string, password: string) =>
+    request('/auth/reset-password', none, post({ token, password }));
+  const token = () => getDb().resetLink?.token ?? '';
+
+  it('keeps a link only for an email that has an account', async () => {
+    await ask('nobody@nowhere.com');
+    expect(getDb().resetLink).toBeUndefined();
+
+    await ask('Lina.Saeed@shop-team.com');
+    expect(getDb().resetLink).toMatchObject({ email: 'lina.saeed@shop-team.com', used: false });
+  });
+
+  it('sets the new password once, then the link is used up', async () => {
+    await ask('lina.saeed@shop-team.com');
+    const link = token();
+
+    await expect(check(link)).resolves.toBeUndefined();
+    await reset(link, 'Fresh#2027');
+
+    expect(getDb().people.find((person) => person.id === 'lina-saeed')?.password).toBe(
+      'Fresh#2027',
+    );
+    await expect(check(link)).rejects.toMatchObject({ status: 410, code: 'link_expired' });
+    await expect(reset(link, 'Again#2028')).rejects.toMatchObject({ status: 410 });
+  });
+
+  it('answers unknown, replaced and hour-old links the same way', async () => {
+    await expect(check('not-a-token')).rejects.toMatchObject({ status: 410 });
+
+    await ask('lina.saeed@shop-team.com');
+    const first = token();
+    await ask('lina.saeed@shop-team.com');
+    await expect(check(first)).rejects.toMatchObject({ status: 410 });
+
+    const link = getDb().resetLink;
+    if (link) link.createdAt = new Date(Date.now() - 61 * 60_000).toISOString();
+    await expect(check(token())).rejects.toMatchObject({ status: 410 });
+  });
+
+  it('treats every link as expired while the dev switch is on', async () => {
+    await ask('lina.saeed@shop-team.com');
+    setFlags({ expiredLinks: true });
+
+    await expect(check(token())).rejects.toMatchObject({ status: 410 });
+  });
+
+  it('refuses a weak password and signs the account out everywhere', async () => {
+    await ask('batool.hani@shop-team.com');
+
+    await expect(reset(token(), 'short')).rejects.toMatchObject({
+      status: 422,
+      fields: { password: 'That password is too short. Use at least 8 characters, with a number.' },
+    });
+    await reset(token(), 'Fresh#2027');
+    expect(getDb().signedIn).toBeNull();
   });
 });
 

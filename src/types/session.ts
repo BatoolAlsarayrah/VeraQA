@@ -63,6 +63,20 @@ export const ForgotPasswordInput = z.object({
 });
 export type ForgotPasswordInput = z.infer<typeof ForgotPasswordInput>;
 
+export const ResetPasswordInput = z.object({
+  token: z.string().min(1),
+  password,
+});
+export type ResetPasswordInput = z.infer<typeof ResetPasswordInput>;
+
+export const NewPassword = z
+  .object({ password, confirm: z.string() })
+  .refine((value) => value.password === value.confirm, {
+    path: ['confirm'],
+    message: 'The two passwords don’t match. Type the new one again.',
+  });
+export type NewPassword = z.infer<typeof NewPassword>;
+
 export const ProfileInput = RegisterInput.pick({ firstName: true, lastName: true, email: true });
 export type ProfileInput = z.infer<typeof ProfileInput>;
 

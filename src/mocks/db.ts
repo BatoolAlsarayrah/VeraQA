@@ -208,9 +208,12 @@ export type JobRecord = {
   pending: (RequirementRecord | ScenarioRecord | TestCaseRecord)[];
 };
 
+export type ResetLinkRecord = { email: string; token: string; createdAt: string; used: boolean };
+
 export type Db = {
   version: number;
   signedIn: string | null;
+  resetLink?: ResetLinkRecord | null;
   people: PersonRecord[];
   projects: ProjectRecord[];
   memberships: MembershipRecord[];

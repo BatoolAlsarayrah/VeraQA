@@ -66,4 +66,23 @@ describe('dev mock controls', () => {
 
     expect(getFlags()).toMatchObject({ instantJobs: false, slowNetwork: true });
   });
+
+  it('shows the latest reset link and can make links expired', async () => {
+    const user = userEvent.setup();
+    getDb().resetLink = {
+      email: 'lina.saeed@shop-team.com',
+      token: 'abc-123',
+      createdAt: new Date().toISOString(),
+      used: false,
+    };
+    visit('/dev');
+
+    expect(await screen.findByRole('link', { name: '/reset-password/abc-123' })).toHaveAttribute(
+      'href',
+      '/reset-password/abc-123',
+    );
+    await user.click(screen.getByRole('switch', { name: /Make reset links expired/ }));
+
+    expect(getFlags().expiredLinks).toBe(true);
+  });
 });

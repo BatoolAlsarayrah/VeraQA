@@ -16,6 +16,8 @@ The mock in `src/mocks/` implements every endpoint below, including the permissi
 | Session          | `POST /auth/sign-in`                                        | Core  |
 | Session          | `POST /auth/register`                                       | Core  |
 | Session          | `POST /auth/forgot-password`                                | Core  |
+| Session          | `GET /auth/reset-password/{token}`                          | Core  |
+| Session          | `POST /auth/reset-password`                                 | Core  |
 | Session          | `POST /auth/sign-out`                                       | Core  |
 | Account          | `PATCH /account/profile`                                    | Later |
 | Account          | `POST /account/password`                                    | Later |
@@ -129,7 +131,7 @@ Every error is a non-2xx status with this body:
 }
 ```
 
-- `code` is a short machine-readable string, such as `validation`, `forbidden`, `not_found`, `conflict` or `invalid_credentials`.
+- `code` is a short machine-readable string, such as `validation`, `forbidden`, `not_found`, `conflict`, `invalid_credentials` or `link_expired`.
 - `message` is shown to people as written. Say what happened, then what to do, in plain sentences with no exclamation marks.
 - `fields` appears only for validation errors (`422`) and maps a request field to the message shown under it.
 - `401` means there's no valid session. The frontend clears what it holds and goes to Sign in. Sign-in itself answers wrong details with `422 invalid_credentials`, not `401`.
@@ -215,6 +217,24 @@ Errors: `422 validation`, with `fields.email` when the email already has an acco
 Anyone. Reset your password screen.
 
 Request: `{ "email": "…" }`. Response `202` with no body, whether or not the email has an account, so the answer doesn't reveal who is registered.
+
+When the email has an account, the backend emails a link to `{frontend}/reset-password/{token}`. A token works for 1 hour and only once, and asking again replaces any earlier token for that account. The Check your email screen's "Send it again" calls this endpoint again with the same email.
+
+#### `GET /auth/reset-password/{token}` · Core
+
+Anyone. Choose a new password screen, as it opens, so a dead link shows This link has expired straight away instead of after the person has typed a new password.
+
+Response `204` when the token can still be used.
+
+Errors: `410 link_expired` when the token is expired, already used or unknown. All three answer the same, so a token never reveals which it was.
+
+#### `POST /auth/reset-password` · Core
+
+Anyone. Choose a new password screen.
+
+Request: `{ "token": "…", "password": "…" }`. The password has at least 8 characters, with a number. Response `204`. The token is used up, and every session of that account ends, including one in this browser, so the person signs in again with the new password (the Password changed screen says they've been signed out on other devices).
+
+Errors: `410 link_expired`, as for `GET /auth/reset-password/{token}`. `422 validation` with `fields.password` for a password that breaks the rules.
 
 #### `POST /auth/sign-out` · Core
 

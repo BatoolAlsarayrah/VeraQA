@@ -8,7 +8,13 @@ import {
 
 import { AccountPage } from '@/features/account';
 import { ActivityPage } from '@/features/activity';
-import { ForgotPasswordPage, RegisterPage, SignInPage } from '@/features/auth';
+import {
+  ForgotPasswordPage,
+  RegisterPage,
+  ResetPasswordPage,
+  ResetSentPage,
+  SignInPage,
+} from '@/features/auth';
 import { DashboardPage } from '@/features/dashboard';
 import { DefectPage, DefectsPage } from '@/features/defects';
 import { MembersPage } from '@/features/members';
@@ -92,6 +98,16 @@ export const routes: RouteObject[] = [
             path: 'forgot-password',
             Component: ForgotPasswordPage,
             handle: title('Reset your password'),
+          },
+          {
+            path: 'forgot-password/sent',
+            Component: ResetSentPage,
+            handle: title('Check your email'),
+          },
+          {
+            path: 'reset-password/:token',
+            Component: ResetPasswordPage,
+            handle: title('Choose a new password'),
           },
         ],
       },
