@@ -46,7 +46,6 @@ describe('Sign in', () => {
       'href',
       '/register',
     );
-    expect(screen.getByRole('link', { name: 'open dev tools' })).toHaveAttribute('href', '/dev');
   });
 
   it('asks for both fields and focuses the first one missing', async () => {

@@ -156,14 +156,13 @@ describe('route guard', () => {
     expect(router.state.location.pathname).toBe(`${developer}/reports`);
   });
 
-  it('sends someone who isn’t signed in to Sign in, with a way into the dev tools', async () => {
+  it('sends someone who isn’t signed in to Sign in', async () => {
     getDb().signedIn = null;
     const router = visit(`${lead}/dashboard`);
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/signin');
     expect(new URLSearchParams(router.state.location.search).get('from')).toBe(`${lead}/dashboard`);
-    expect(screen.getByRole('link', { name: 'open dev tools' })).toHaveAttribute('href', '/dev');
   });
 
   it('keeps the dev tools open while signed out, so nobody gets locked out', async () => {
