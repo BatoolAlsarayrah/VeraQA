@@ -39,6 +39,7 @@ import { Root } from './Root';
 import { RouteError } from './RouteError';
 import { requireSession } from './session';
 import { ShellRoute } from './ShellRoute';
+import { SignedOutRoute } from './SignedOutRoute';
 import { SoloRoute } from './SoloRoute';
 
 function back(label: Text, to: (projectId: string, params: Params) => string) {
@@ -79,8 +80,13 @@ export const routes: RouteObject[] = [
       {
         Component: AuthRoute,
         children: [
-          { path: 'signin', Component: SignInPage, handle: title('Sign in') },
-          { path: 'register', Component: RegisterPage, handle: title('Create your account') },
+          {
+            Component: SignedOutRoute,
+            children: [
+              { path: 'signin', Component: SignInPage, handle: title('Sign in') },
+              { path: 'register', Component: RegisterPage, handle: title('Create your account') },
+            ],
+          },
           {
             path: 'forgot-password',
             Component: ForgotPasswordPage,

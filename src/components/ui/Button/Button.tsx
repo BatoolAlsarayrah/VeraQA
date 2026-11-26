@@ -1,6 +1,7 @@
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react';
 
 import { Icon, type IconName } from '@/components/domain/Icon';
+import { cn } from '@/lib';
 
 import { buttonClass, type Size, type Variant } from './styles';
 
@@ -50,7 +51,7 @@ export function Button({
       onClick={handleClick}
       className={buttonClass({ variant, size, iconOnly, disabled, className })}
     >
-      <span className={loading ? 'invisible inline-flex items-center gap-2' : 'contents'}>
+      <span className={cn('inline-flex items-center gap-2', loading && 'invisible')}>
         {approved ? (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path

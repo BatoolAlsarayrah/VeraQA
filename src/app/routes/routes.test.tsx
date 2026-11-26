@@ -162,6 +162,7 @@ describe('route guard', () => {
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/signin');
+    expect(new URLSearchParams(router.state.location.search).get('from')).toBe(`${lead}/dashboard`);
     expect(screen.getByRole('link', { name: 'open dev tools' })).toHaveAttribute('href', '/dev');
   });
 

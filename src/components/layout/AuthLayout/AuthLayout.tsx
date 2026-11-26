@@ -23,7 +23,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         id="main"
         className="flex justify-center px-4 py-7 tablet:items-center tablet:px-6 tablet:py-8"
       >
-        <div className="flex w-full max-w-95 flex-col gap-6">{children}</div>
+        <div className="flex w-full max-w-95 flex-col gap-4">{children}</div>
       </main>
     </div>
   );

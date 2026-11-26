@@ -1,14 +1,14 @@
 import { createBrowserRouter } from 'react-router';
 
-import { paths, queryClient, setUnauthorizedHandler } from '@/lib';
+import { isOpen, queryClient, setUnauthorizedHandler, signinFrom } from '@/lib';
 
 import { routes } from './routes';
 
 export const router = createBrowserRouter(routes);
 
 setUnauthorizedHandler(() => {
-  const { pathname } = router.state.location;
-  if (pathname === paths.signin || pathname.startsWith(paths.dev)) return;
+  const { pathname, search } = router.state.location;
+  if (isOpen(pathname)) return;
   queryClient.clear();
-  void router.navigate(paths.signin, { replace: true });
+  void router.navigate(signinFrom(pathname + search), { replace: true });
 });
