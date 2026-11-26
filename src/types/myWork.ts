@@ -22,6 +22,7 @@ export const WorkGroup = z.object({
     'tests-to-run',
     'ready-to-run-again',
     'retests',
+    'defects-to-fix',
   ]),
   items: z.array(WorkItem),
 });

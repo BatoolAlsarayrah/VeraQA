@@ -92,3 +92,23 @@ export function lastResult(db: Db, projectId: string, testCaseId: string): TestR
     .sort((a, b) => (b.recordedAt ?? '').localeCompare(a.recordedAt ?? ''));
   return recorded[0]?.result ?? 'not-run';
 }
+
+export function currentRun(db: Db, projectId: string) {
+  const size = (number: number) =>
+    db.entries.filter((entry) => entry.projectId === projectId && entry.run === number).length;
+  return db.runs
+    .filter((run) => run.projectId === projectId && run.status === 'active')
+    .sort((a, b) => size(b.number) - size(a.number) || b.number - a.number)[0];
+}
+
+export function bySeverity(defects: DefectRecord[]) {
+  const open = defects.filter(isOpen);
+  const count = (severity: DefectRecord['severity']) =>
+    open.filter((defect) => defect.severity === severity).length;
+  return {
+    critical: count('critical'),
+    high: count('high'),
+    medium: count('medium'),
+    low: count('low'),
+  };
+}

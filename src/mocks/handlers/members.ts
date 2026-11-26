@@ -4,7 +4,7 @@ import { api, fail } from '../api';
 import type { Db } from '../db';
 import { body, can, found, fullName, inProject } from '../rules';
 
-function workload(db: Db, projectId: string, personId: string, role: Member['role']) {
+export function workload(db: Db, projectId: string, personId: string, role: Member['role']) {
   if (role === 'developer') {
     const mine = db.defects.filter(
       (defect) => defect.projectId === projectId && defect.assigneeId === personId,

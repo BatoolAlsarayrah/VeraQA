@@ -1048,6 +1048,281 @@ Errors:
 
 Errors: `422` for someone who can't fix defects, and `409` for a defect that's Fixed, in Retest, Closed or Invalid.
 
+### Dashboard
+
+#### `GET /projects/{p}/dashboard` · Core
+
+`workspace`. Dashboard.
+
+```json
+{
+  "targetDate": "2026-12-20",
+  "stages": {
+    "srs": { "files": 2 },
+    "requirements": { "total": 26, "approved": 21, "pending": 5 },
+    "scenarios": { "total": 13, "approved": 11, "pending": 2 },
+    "testCases": { "total": 35, "approved": 34, "pending": 1 },
+    "run": { "number": 12, "name": "Sprint 4 regression", "total": 34, "ran": 22 },
+    "defects": { "open": 7, "critical": 1 }
+  },
+  "attention": [
+    { "kind": "review-requirements", "count": 5, "item": null, "run": null, "defect": null },
+    {
+      "kind": "blocked-test",
+      "count": null,
+      "item": { "type": "test-case", "id": "TC-040", "title": "Pay with a valid Visa card" },
+      "run": { "number": 12, "name": "Sprint 4 regression" },
+      "defect": { "id": "BUG-003", "title": "…", "status": "reopened" }
+    }
+  ],
+  "run": {
+    "number": 12,
+    "name": "Sprint 4 regression",
+    "counts": { "passed": 18, "failed": 3, "blocked": 1, "notRun": 12 }
+  },
+  "defects": { "critical": 1, "high": 3, "medium": 2, "low": 1 },
+  "activity": []
+}
+```
+
+- **The current run** (`stages.run` and `run`) is the active run with the most tests.
+- **`attention`** lists what needs someone, in this order:
+  - with `approve`: counts of requirements, scenarios and test cases in Pending review (`review-requirements`, `approve-scenarios`, `approve-test-cases`)
+  - `run-tests`: the person's own tests not yet run
+  - `failed-test` and `blocked-test`: each failed or blocked test in the current run, with the defect reported from it or blocking it
+  - `retest`: each Fixed defect waiting for a retest, with its test case
+- **The counts:** `defects` counts open defects by severity. `activity` has the four latest [activity entries](#activity-log).
+
+### My work
+
+#### `GET /projects/{p}/my-work` · Core
+
+`workspace`. My work. Response `200`: `{ "groups": [WorkGroup] }`. Empty groups are left out, and the total number of items equals `myWork` in `GET /projects/{p}/counts`.
+
+```json
+{
+  "kind": "tests-to-run",
+  "items": [
+    {
+      "item": {
+        "type": "test-case",
+        "id": "TC-032",
+        "title": "Reset the failed-attempt count after a successful sign-in"
+      },
+      "due": "2026-11-26",
+      "run": { "number": 12, "name": "Sprint 4 regression" },
+      "assignedBy": null,
+      "openFindings": null,
+      "draftedFor": null,
+      "blockedBy": null,
+      "fixedBy": null,
+      "retest": null
+    }
+  ]
+}
+```
+
+| `kind`                   | Items                                                                             | Extra fields                                      |
+| ------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `requirements-to-review` | Requirements in Pending review assigned to the person                             | `due`, `openFindings`                             |
+| `drafts-to-approve`      | Scenarios and test cases in Pending review assigned to the person                 | `due`, `draftedFor` (its requirement or scenario) |
+| `tests-to-run`           | The person's not-run tests in active runs                                         | `due`, `run`                                      |
+| `ready-to-run-again`     | The person's blocked tests whose blocking defect closed                           | `run`, `blockedBy`                                |
+| `retests`                | Fixed defects, or defects in Retest, waiting on the person                        | `fixedBy`, `retest` (the test case to run again)  |
+| `defects-to-fix`         | With `fix`: defects assigned to the person that are Open, In progress or Reopened | none                                              |
+
+#### `POST /projects/{p}/assignments` · Later
+
+`manage`. My work, Assign work.
+
+```json
+{
+  "items": [
+    { "type": "requirement", "id": "REQ-023" },
+    { "type": "defect", "id": "BUG-012" }
+  ],
+  "assigneeId": "maria-ayman",
+  "due": "2026-12-01"
+}
+```
+
+`type` is `requirement`, `scenario`, `test-case` or `defect`, and `due` may be `null`. Response `204`; the assignee is notified.
+
+Errors: `422 validation` when an item doesn't exist, an item in Pending review goes to someone without `approve`, a defect goes to someone without `fix`, or a defect is already past fixing.
+
+### Traceability
+
+#### `GET /projects/{p}/traceability` · Later
+
+`trace`. Traceability. Developers never get it.
+
+Response `200`:
+
+```json
+{
+  "requirements": [
+    {
+      "id": "REQ-014",
+      "title": "Lock the account for 15 minutes after 5 failed logins",
+      "text": "The system shall lock the account for 15 minutes after 5 consecutive failed logins.",
+      "scenarios": [
+        {
+          "id": "SC-007",
+          "title": "…",
+          "status": "approved",
+          "testCases": [
+            {
+              "id": "TC-031",
+              "title": "…",
+              "status": "approved",
+              "lastResult": "failed",
+              "defects": [{ "id": "BUG-007", "title": "…", "status": "fixed" }]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "gaps": {
+    "failedOrBlocked": [
+      {
+        "id": "TC-040",
+        "title": "…",
+        "result": "blocked",
+        "blockedBy": { "id": "BUG-003", "title": "…", "status": "reopened" }
+      }
+    ],
+    "scenariosWithoutTests": [
+      { "id": "SC-002", "title": "Refuse an email that is already registered" }
+    ],
+    "notRun": [{ "id": "TC-046", "title": "…" }],
+    "pendingRequirements": 5
+  }
+}
+```
+
+- `requirements` holds approved requirements only; pending ones can't be traced until they're approved.
+- **`gaps`:**
+  - `failedOrBlocked`: approved test cases whose last result is Failed or Blocked
+  - `scenariosWithoutTests`: approved scenarios with no test cases
+  - `notRun`: approved test cases never run, or whose last result is Not run
+  - `pendingRequirements`: how many requirements are still waiting for review
+
+### Reports
+
+#### `GET /projects/{p}/reports` · Later
+
+`manage`. Reports. Query: `period` is `sprint` (the default: active runs), `30d` (runs started in the last 30 days) or `all`; it only changes `runs`.
+
+```json
+{
+  "period": "sprint",
+  "requirements": { "total": 26, "approved": 21, "pending": 5 },
+  "scenarioCoverage": { "covered": 7, "total": 21 },
+  "testCaseCoverage": { "covered": 7, "total": 21 },
+  "passRate": { "run": 12, "passed": 18, "ran": 22, "total": 34 },
+  "openDefects": { "critical": 1, "high": 3, "medium": 2, "low": 1 },
+  "runs": [{ "number": 12, "passed": 18, "failed": 3, "blocked": 1, "notRun": 12 }],
+  "coverage": [
+    {
+      "requirement": { "id": "REQ-014", "title": "…" },
+      "scenarios": 2,
+      "testCases": 5,
+      "passed": 4,
+      "openDefects": 1
+    }
+  ],
+  "ai": { "accepted": 34, "edited": 12, "rejected": 6 },
+  "workload": [
+    {
+      "person": { "id": "batool-hani", "name": "Batool Hani" },
+      "role": "qa-lead",
+      "done": 11,
+      "total": 19
+    }
+  ]
+}
+```
+
+- **Coverage:** `scenarioCoverage` and `testCaseCoverage` count approved requirements that have at least one approved scenario or test case.
+- **Pass rate:** `passRate` covers the current run and counts only tests that were run (`passed` out of `ran`).
+- **The coverage table:** `coverage` has one row per approved requirement. `passed` counts its approved test cases whose last result is Passed, and `openDefects` counts the open defects reported from them.
+- **AI drafts:** `ai` counts what reviewers did with the AI's drafts:
+  - accepted: approved with no edits
+  - edited: approved after an edit or an accepted rewrite
+  - rejected
+- **Workload:** `workload` matches each member's workload on the Members screen.
+
+#### `GET /projects/{p}/reports/export.csv` · Later
+
+`manage`. Reports, Download CSV. Response `200` with `Content-Type: text/csv` and `Content-Disposition: attachment; filename="{projectId}-coverage.csv"`, holding the coverage table:
+
+```
+Requirement,Title,Scenarios,Test cases,Passed,Open defects
+REQ-014,Lock the account for 15 minutes after 5 failed logins,2,5,4,1
+```
+
+### Activity log
+
+#### `GET /projects/{p}/activity` · Later
+
+`manage`. Activity log, and the dashboard's recent activity. Query, all optional: `person` (a person ID, or `ai`) and `type`. Response `200`: `{ "items": [ActivityEntry] }`, newest first.
+
+```json
+{
+  "id": "act-1",
+  "at": "…",
+  "actor": { "type": "person", "id": "qays-kaled", "name": "Qays Kaled" },
+  "type": "defects",
+  "action": "marked-fixed",
+  "item": {
+    "type": "defect",
+    "id": "BUG-007",
+    "title": "Account locks after 6 failed attempts instead of 5"
+  },
+  "count": null
+}
+```
+
+- **`type`, the filter:** `srs`, `requirements`, `scenarios`, `test-cases`, `runs`, `defects`, `invalid`, `blocked` or `ai`.
+- **`action`, what happened:**
+  - files and AI: `uploaded`, `analyzed`, `flagged`, `drafted`
+  - review: `approved`, `rejected`, `edited`
+  - runs: `started-run`, `passed`, `failed`, `blocked`
+  - defects: `reported`, `started-fixing`, `marked-fixed`, `marked-invalid`, `retest-passed`, `retest-failed`, `reopened`
+  - members: `joined`
+- `item.type` may also be `file` (an uploaded SRS) or `run`. `count` is set when one entry covers several items ("drafted 3 scenarios for REQ-014", "flagged 8 issues in SRS_v2.pdf").
+
+### Search
+
+#### `GET /projects/{p}/search` · Later
+
+Any member. Search, and the search field in the top bar.
+
+Query, all optional:
+
+- `q`: matches the ID or title, and a requirement's text.
+- `type`: `requirement`, `scenario`, `test-case` or `defect`.
+- `priority`: severity for defects.
+- `status` and `assignee`: a person ID or `me`.
+
+Response `200`: `{ "items": [SearchResult] }`.
+
+```json
+{
+  "item": {
+    "type": "test-case",
+    "id": "TC-031",
+    "title": "Lock the account after 5 consecutive failed logins"
+  },
+  "status": "failed",
+  "priority": "high",
+  "assignee": { "id": "batool-mahmoud", "name": "Batool Mahmoud" }
+}
+```
+
+`status` is the review status for requirements, scenarios and test cases still in review, the last result for approved test cases, and the defect status for defects. Developers only find the defects assigned to them.
+
 ### Jobs
 
 AI work (SRS analysis, scenario generation and test-case generation) runs as a background job through n8n and the LLM. Starting one answers `202` with `{ "jobId": "…" }`; the frontend then polls `GET /jobs/{jobId}` until the status is `done`, `failed` or `cancelled`. A job keeps running if the person leaves the page; the analysis banner finds it again with `GET /projects/{p}/jobs?active=true`. When a job finishes, the backend adds its drafts (as AI drafts in Pending review) and notifies the person who started it.
@@ -1100,3 +1375,4 @@ Errors: `409` when the job already finished.
 1. **Should the project manager get `fix`?** Resolved: yes. The project manager holds every permission, so in a solo project they can take a defect through its whole lifecycle. A developer still acts only on defects assigned to them, and so does a project manager acting with `fix`.
 2. **Cookie session or bearer token?** The frontend assumes a cookie session: every request is sent with `credentials: 'include'`, and sign-in sets the cookie. If the backend issues a bearer token instead, only `lib/api-client.ts` changes, to store the token and send an `Authorization` header.
 3. **Paging.** Lists come back whole for now, wrapped as `{ "items": [...] }`. If a project grows too large, the plan is to add `cursor` and `limit` query params and a `nextCursor` next to `items`, which doesn't break the current shape.
+4. **Report PDFs.** Reports offers Download CSV from the API. Download PDF currently uses the browser's print dialog on the Reports page. If the backend would rather render the PDF, a `GET /projects/{p}/reports/export.pdf` with the same `period` query would slot in next to the CSV export.
