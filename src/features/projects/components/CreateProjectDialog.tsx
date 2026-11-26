@@ -31,7 +31,8 @@ export function CreateProjectDialog({ open, onClose, onCreated }: Props) {
         </Field>
         <Field label="Description" optional error={errors.description?.message}>
           <Textarea
-            rows={2}
+            rows={1}
+            className="min-h-11"
             placeholder="What is being tested, in one line"
             {...form.register('description')}
           />

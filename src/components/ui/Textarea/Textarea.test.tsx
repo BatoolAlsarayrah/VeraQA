@@ -19,4 +19,16 @@ describe('Textarea', () => {
 
     expect(textarea).toHaveValue('The system shall\nUsers shall');
   });
+
+  it('keeps its roomy default height unless rows are given', () => {
+    render(
+      <>
+        <Textarea aria-label="Notes" />
+        <Textarea aria-label="Description" rows={1} />
+      </>,
+    );
+
+    expect(screen.getByRole('textbox', { name: 'Notes' })).toHaveClass('min-h-24');
+    expect(screen.getByRole('textbox', { name: 'Description' })).not.toHaveClass('min-h-24');
+  });
 });
