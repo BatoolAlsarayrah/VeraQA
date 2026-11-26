@@ -1,11 +1,11 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { request } from '@/lib';
+import { queryClient, request } from '@/lib';
 import { getFlags } from '@/mocks/api';
 import { getDb } from '@/mocks/db';
 import { mockServer } from '@/mocks/server';
@@ -46,8 +46,10 @@ describe('dev mock controls', () => {
   it('fails the next request once', async () => {
     const user = userEvent.setup();
     visit('/dev');
+    const button = await screen.findByRole('button', { name: 'Fail the next request' });
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
 
-    await user.click(await screen.findByRole('button', { name: 'Fail the next request' }));
+    await user.click(button);
 
     expect(screen.getByText('The next request will fail with a server error.')).toBeInTheDocument();
     expect(getFlags().failNext).toBe(true);
@@ -63,5 +65,52 @@ describe('dev mock controls', () => {
     await user.click(screen.getByRole('switch', { name: /Slow network/ }));
 
     expect(getFlags()).toMatchObject({ instantJobs: false, slowNetwork: true });
+  });
+
+  it('shows the latest reset link and can make links expired', async () => {
+    const user = userEvent.setup();
+    getDb().resetLink = {
+      email: 'lina.saeed@shop-team.com',
+      token: 'abc-123',
+      createdAt: new Date().toISOString(),
+      used: false,
+    };
+    visit('/dev');
+
+    expect(await screen.findByRole('link', { name: '/reset-password/abc-123' })).toHaveAttribute(
+      'href',
+      '/reset-password/abc-123',
+    );
+    await user.click(screen.getByRole('switch', { name: /Make reset links expired/ }));
+
+    expect(getFlags().expiredLinks).toBe(true);
+  });
+
+  it('signs in as another demo person, even while signed out', async () => {
+    const user = userEvent.setup();
+    getDb().signedIn = null;
+    const router = visit('/dev');
+
+    await user.click(await screen.findByRole('button', { name: 'Sign in as Qays Kaled' }));
+
+    expect(getDb().signedIn).toBe('qays-kaled');
+    expect(await screen.findByRole('heading', { name: 'Your projects' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/projects');
+  });
+
+  it('changes the role in the mock’s memberships', async () => {
+    const user = userEvent.setup();
+    visit('/dev');
+
+    await user.selectOptions(
+      await screen.findByRole('combobox', { name: 'E-Commerce Portal v2' }),
+      'developer',
+    );
+
+    expect(
+      getDb().memberships.find(
+        (entry) => entry.projectId === 'e-commerce-portal-v2' && entry.personId === 'batool-hani',
+      )?.role,
+    ).toBe('developer');
   });
 });

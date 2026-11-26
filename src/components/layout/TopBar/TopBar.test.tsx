@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { type Notice } from '@/components/layout/Menus';
-import { notices, renderAt as renderIn } from '@/mocks/render';
 import { mockServer, signIn } from '@/mocks/server';
+import { notices, renderAt as renderIn } from '@/test/render';
 
 import { TopBar } from './TopBar';
 import type { Stage } from './WorkflowStrip';

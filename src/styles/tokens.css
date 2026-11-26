@@ -161,8 +161,12 @@
   --text-display--line-height: 54px;
   --text-display--font-weight: 700;
   --text-display--letter-spacing: -0.01em;
-  --text-display-sm: 28px;
-  --text-display-sm--line-height: 34px;
+  --text-display-md: 34px;
+  --text-display-md--line-height: 42px;
+  --text-display-md--font-weight: 700;
+  --text-display-md--letter-spacing: -0.02em;
+  --text-display-sm: 32px;
+  --text-display-sm--line-height: 38px;
   --text-display-sm--font-weight: 700;
   --text-display-sm--letter-spacing: -0.01em;
   --text-wordmark: 22px;

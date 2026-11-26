@@ -1,4 +1,4 @@
-import { queryClient } from '@/lib';
+import { forgetSession, queryClient } from '@/lib';
 import { getFlags, setFlags } from '@/mocks/api';
 import { getDb, resetDb, saveDb } from '@/mocks/db';
 import type { Role } from '@/types';
@@ -20,7 +20,7 @@ export function signedInAs() {
 export function signInAs(personId: string) {
   getDb().signedIn = personId;
   saveDb();
-  queryClient.clear();
+  forgetSession();
 }
 
 export function setRole(projectId: string, personId: string, role: Role) {
@@ -37,12 +37,11 @@ export function resetDemo() {
   resetDb().signedIn = 'batool-hani';
   saveDb();
   setFlags({ failNext: false });
-  try {
-    sessionStorage.removeItem('veraqa-analysis');
-  } catch {
-    // Storage can be blocked; the banner then forgets on its own.
-  }
-  queryClient.clear();
+  forgetSession();
 }
 
 export { getFlags, setFlags };
+
+export function resetLink() {
+  return getDb().resetLink ?? null;
+}

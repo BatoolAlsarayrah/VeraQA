@@ -16,6 +16,8 @@ The mock in `src/mocks/` implements every endpoint below, including the permissi
 | Session          | `POST /auth/sign-in`                                        | Core  |
 | Session          | `POST /auth/register`                                       | Core  |
 | Session          | `POST /auth/forgot-password`                                | Core  |
+| Session          | `GET /auth/reset-password/{token}`                          | Core  |
+| Session          | `POST /auth/reset-password`                                 | Core  |
 | Session          | `POST /auth/sign-out`                                       | Core  |
 | Account          | `PATCH /account/profile`                                    | Later |
 | Account          | `POST /account/password`                                    | Later |
@@ -24,15 +26,15 @@ The mock in `src/mocks/` implements every endpoint below, including the permissi
 | Projects         | `GET /projects`                                             | Core  |
 | Projects         | `POST /projects`                                            | Core  |
 | Projects         | `GET /projects/{p}/counts`                                  | Core  |
-| Invitations      | `GET /invitations`                                          | Later |
-| Invitations      | `POST /invitations/{id}/accept`                             | Later |
-| Invitations      | `POST /invitations/{id}/decline`                            | Later |
+| Invitations      | `GET /invitations`                                          | Core  |
+| Invitations      | `POST /invitations/{id}/accept`                             | Core  |
+| Invitations      | `POST /invitations/{id}/decline`                            | Core  |
 | Project settings | `GET /projects/{p}/settings`                                | Later |
 | Project settings | `PATCH /projects/{p}/settings`                              | Later |
 | Project settings | `POST /projects/{p}/transfer`                               | Later |
 | Project settings | `DELETE /projects/{p}`                                      | Later |
 | Members          | `GET /projects/{p}/members`                                 | Core  |
-| Members          | `POST /projects/{p}/invitations`                            | Later |
+| Members          | `POST /projects/{p}/invitations`                            | Core  |
 | Members          | `PATCH /projects/{p}/members/{memberId}`                    | Later |
 | Notifications    | `GET /notifications`                                        | Core  |
 | Notifications    | `POST /notifications/{id}/read`                             | Core  |
@@ -129,7 +131,7 @@ Every error is a non-2xx status with this body:
 }
 ```
 
-- `code` is a short machine-readable string, such as `validation`, `forbidden`, `not_found`, `conflict` or `invalid_credentials`.
+- `code` is a short machine-readable string, such as `validation`, `forbidden`, `not_found`, `conflict`, `invalid_credentials` or `link_expired`.
 - `message` is shown to people as written. Say what happened, then what to do, in plain sentences with no exclamation marks.
 - `fields` appears only for validation errors (`422`) and maps a request field to the message shown under it.
 - `401` means there's no valid session. The frontend clears what it holds and goes to Sign in. Sign-in itself answers wrong details with `422 invalid_credentials`, not `401`.
@@ -216,6 +218,24 @@ Anyone. Reset your password screen.
 
 Request: `{ "email": "…" }`. Response `202` with no body, whether or not the email has an account, so the answer doesn't reveal who is registered.
 
+When the email has an account, the backend emails a link to `{frontend}/reset-password/{token}`. A token works for 1 hour and only once, and asking again replaces any earlier token for that account. The Check your email screen's "Send it again" calls this endpoint again with the same email.
+
+#### `GET /auth/reset-password/{token}` · Core
+
+Anyone. Choose a new password screen, as it opens, so a dead link shows This link has expired straight away instead of after the person has typed a new password.
+
+Response `204` when the token can still be used.
+
+Errors: `410 link_expired` when the token is expired, already used or unknown. All three answer the same, so a token never reveals which it was.
+
+#### `POST /auth/reset-password` · Core
+
+Anyone. Choose a new password screen.
+
+Request: `{ "token": "…", "password": "…" }`. The password has at least 8 characters, with a number. Response `204`. The token is used up, and every session of that account ends, including one in this browser, so the person signs in again with the new password (the Password changed screen says they've been signed out on other devices).
+
+Errors: `410 link_expired`, as for `GET /auth/reset-password/{token}`. `422 validation` with `fields.password` for a password that breaks the rules.
+
 #### `POST /auth/sign-out` · Core
 
 Signed in. The account menu. Response `204`, and the session cookie is cleared.
@@ -287,7 +307,7 @@ Errors: `404` when the project doesn't exist or the person isn't a member.
 
 ### Invitations
 
-#### `GET /invitations` · Later
+#### `GET /invitations` · Core
 
 Signed in. Your projects, the invitation cards.
 
@@ -303,7 +323,7 @@ Response `200`: `{ "items": [Invitation] }`, the invitations sent to the person'
 }
 ```
 
-#### `POST /invitations/{id}/accept` and `POST /invitations/{id}/decline` · Later
+#### `POST /invitations/{id}/accept` and `POST /invitations/{id}/decline` · Core
 
 Signed in, and the invitation was sent to their email. Your projects.
 
@@ -383,7 +403,7 @@ Response `200`: `{ "items": [Member] }`. Everyone with `workspace` gets names an
 
 `workload.unit` is `defects` for developers (defects assigned, and how many are fixed or closed) and `items` for everyone else (tests in active runs and items to review, and how many are done).
 
-#### `POST /projects/{p}/invitations` · Later
+#### `POST /projects/{p}/invitations` · Core
 
 `manage`. Members, Invite people.
 

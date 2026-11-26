@@ -7,13 +7,15 @@ import {
   PasswordInput,
   ProfileInput,
   RegisterInput,
+  ResetPasswordInput,
   type Session,
   SignInInput,
   type User,
 } from '@/types';
 
-import { api, created, fail } from '../api';
+import { api, created, fail, getFlags } from '../api';
 import type { Db, PersonRecord } from '../db';
+import { now } from '../log';
 import { body, fullName, signedIn } from '../rules';
 
 const emailDefaults: NotificationSettings['email'] = {
@@ -60,6 +62,20 @@ function slug(db: Db, first: string, last: string) {
   return id;
 }
 
+const LINK_LIFE = 60 * 60_000;
+
+function expired() {
+  return fail(410, 'link_expired', 'This reset link has expired. Ask for a new one.');
+}
+
+// Unknown, used and expired tokens all answer the same, so a token never reveals which it was.
+function resetLink(db: Db, token: string) {
+  const link = db.resetLink;
+  if (!link || link.token !== token || link.used || getFlags().expiredLinks) throw expired();
+  if (Date.now() - Date.parse(link.createdAt) > LINK_LIFE) throw expired();
+  return link;
+}
+
 export const sessionHandlers = [
   api.get('/session', ({ db }) => sessionOf(db, signedIn(db))),
 
@@ -96,9 +112,32 @@ export const sessionHandlers = [
     return created(sessionOf(db, person));
   }),
 
-  api.post('/auth/forgot-password', async ({ request }) => {
-    await body(request, ForgotPasswordInput);
+  api.post('/auth/forgot-password', async ({ db, request }) => {
+    const input = await body(request, ForgotPasswordInput);
+    const person = byEmail(db, input.email);
+    if (person) {
+      db.resetLink = {
+        email: person.email,
+        token: crypto.randomUUID(),
+        createdAt: now(),
+        used: false,
+      };
+    }
     return new HttpResponse(null, { status: 202 });
+  }),
+
+  api.get('/auth/reset-password/:token', ({ db, params }) => {
+    resetLink(db, params.token ?? '');
+  }),
+
+  api.post('/auth/reset-password', async ({ db, request }) => {
+    const input = await body(request, ResetPasswordInput);
+    const link = resetLink(db, input.token);
+    const person = byEmail(db, link.email);
+    if (!person) throw expired();
+    person.password = input.password;
+    link.used = true;
+    if (db.signedIn === person.id) db.signedIn = null;
   }),
 
   api.post('/auth/sign-out', ({ db }) => {

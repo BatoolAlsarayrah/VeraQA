@@ -11,7 +11,12 @@ export function Textarea({ className, ...props }: ComponentProps<'textarea'>) {
     <textarea
       {...props}
       {...control}
-      className={cn(fieldClass, 'min-h-24 resize-y bg-field px-3 py-2.5', className)}
+      className={cn(
+        fieldClass,
+        'resize-y bg-field px-3 py-2.5',
+        props.rows === undefined && 'min-h-24',
+        className,
+      )}
     />
   );
 }

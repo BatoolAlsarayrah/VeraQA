@@ -9,6 +9,7 @@ import { getCurrentProject, paths, sessionQuery, subscribeCurrentProject } from 
 import { AnalysisSwitcher } from './AnalysisSwitcher';
 import { mockMode } from './mock';
 import { MockControls } from './MockControls';
+import { ResetLink } from './ResetLink';
 import { RoleSwitcher } from './RoleSwitcher';
 import { SignInAs } from './SignInAs';
 
@@ -28,6 +29,7 @@ export function DevPage() {
       {mockMode ? (
         <>
           <MockControls />
+          <ResetLink />
           <SignInAs />
           {session ? (
             <>

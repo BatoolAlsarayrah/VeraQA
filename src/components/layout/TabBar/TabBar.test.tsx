@@ -2,8 +2,8 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { counts, renderAt as renderIn } from '@/mocks/render';
 import { mockServer, signIn } from '@/mocks/server';
+import { counts, renderAt as renderIn } from '@/test/render';
 
 import { TabBar } from './TabBar';
 

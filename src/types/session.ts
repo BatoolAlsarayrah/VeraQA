@@ -41,11 +41,11 @@ export type Session = z.infer<typeof Session>;
 
 const password = z
   .string()
-  .min(8, 'Use at least 8 characters.')
-  .regex(/\d/, 'Add at least one number.');
+  .min(8, 'That password is too short. Use at least 8 characters, with a number.')
+  .regex(/\d/, 'Add a number. Use at least 8 characters, with a number.');
 
 export const SignInInput = z.object({
-  email: z.email('Enter an email address, like name@company.com.'),
+  email: z.email('Enter an email like name@company.com.'),
   password: z.string().min(1, 'Enter your password.'),
 });
 export type SignInInput = z.infer<typeof SignInInput>;
@@ -53,15 +53,29 @@ export type SignInInput = z.infer<typeof SignInInput>;
 export const RegisterInput = z.object({
   firstName: z.string().trim().min(1, 'Enter your first name.'),
   lastName: z.string().trim().min(1, 'Enter your last name.'),
-  email: z.email('Enter an email address, like name@company.com.'),
+  email: z.email('Enter an email like name@company.com.'),
   password,
 });
 export type RegisterInput = z.infer<typeof RegisterInput>;
 
 export const ForgotPasswordInput = z.object({
-  email: z.email('Enter an email address, like name@company.com.'),
+  email: z.email('Enter an email like name@company.com.'),
 });
 export type ForgotPasswordInput = z.infer<typeof ForgotPasswordInput>;
+
+export const ResetPasswordInput = z.object({
+  token: z.string().min(1),
+  password,
+});
+export type ResetPasswordInput = z.infer<typeof ResetPasswordInput>;
+
+export const NewPassword = z
+  .object({ password, confirm: z.string() })
+  .refine((value) => value.password === value.confirm, {
+    path: ['confirm'],
+    message: 'The two passwords don’t match. Type the new one again.',
+  });
+export type NewPassword = z.infer<typeof NewPassword>;
 
 export const ProfileInput = RegisterInput.pick({ firstName: true, lastName: true, email: true });
 export type ProfileInput = z.infer<typeof ProfileInput>;

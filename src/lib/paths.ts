@@ -5,6 +5,8 @@ export const paths = {
   signin: '/signin',
   register: '/register',
   forgotPassword: '/forgot-password',
+  resetSent: '/forgot-password/sent',
+  resetPassword: (token: string) => `/reset-password/${encodeURIComponent(token)}`,
   projects: '/projects',
   account: '/account',
   search: '/search',
@@ -44,3 +46,24 @@ export const ids = {
   run: /^\d+$/,
   defect: /^BUG-\d+$/,
 };
+
+const open = [paths.signin, paths.register, paths.forgotPassword, '/reset-password', paths.dev];
+
+export function isOpen(pathname: string) {
+  return open.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+}
+
+// Only same-site paths come back from ?from=, so a crafted link can't send someone elsewhere.
+export function returnTo(from: string | null) {
+  if (!from?.startsWith('/') || from.startsWith('//') || from.startsWith('/\\')) {
+    return paths.projects;
+  }
+  return isOpen(new URL(from, 'https://veraqa.local').pathname) ? paths.projects : from;
+}
+
+export function signinFrom(from: string) {
+  const back = returnTo(from);
+  return back === paths.projects || back === paths.home
+    ? paths.signin
+    : `${paths.signin}?${new URLSearchParams({ from }).toString()}`;
+}

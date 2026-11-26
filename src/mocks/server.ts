@@ -13,7 +13,7 @@ export function mockServer() {
   beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
   beforeEach(() => {
     resetDb().signedIn = 'batool-hani';
-    setFlags({ instantJobs: true, slowNetwork: false, failNext: false });
+    setFlags({ instantJobs: true, slowNetwork: false, failNext: false, expiredLinks: false });
   });
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());

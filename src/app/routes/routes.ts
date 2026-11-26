@@ -8,7 +8,7 @@ import {
 
 import { AccountPage } from '@/features/account';
 import { ActivityPage } from '@/features/activity';
-import { ForgotPasswordPage, RegisterPage, SignInPage } from '@/features/auth';
+import { ForgotPasswordPage, RegisterPage, ResetPasswordPage, SignInPage } from '@/features/auth';
 import { DashboardPage } from '@/features/dashboard';
 import { DefectPage, DefectsPage } from '@/features/defects';
 import { MembersPage } from '@/features/members';
@@ -35,10 +35,13 @@ import { page as title, type Text } from './handle';
 import { NotFound } from './NotFound';
 import { ProjectHome } from './ProjectHome';
 import { ProjectRoute } from './ProjectRoute';
+import { requireSession } from './requireSession';
+import { ResetSentRoute } from './ResetSentRoute';
 import { Root } from './Root';
 import { RouteError } from './RouteError';
-import { requireSession } from './session';
 import { ShellRoute } from './ShellRoute';
+import { SignedOutRoute } from './SignedOutRoute';
+import { skipIfSignedIn } from './skipIfSignedIn';
 import { SoloRoute } from './SoloRoute';
 
 function back(label: Text, to: (projectId: string, params: Params) => string) {
@@ -79,12 +82,28 @@ export const routes: RouteObject[] = [
       {
         Component: AuthRoute,
         children: [
-          { path: 'signin', Component: SignInPage, handle: title('Sign in') },
-          { path: 'register', Component: RegisterPage, handle: title('Create your account') },
+          {
+            Component: SignedOutRoute,
+            loader: skipIfSignedIn,
+            children: [
+              { path: 'signin', Component: SignInPage, handle: title('Sign in') },
+              { path: 'register', Component: RegisterPage, handle: title('Create your account') },
+            ],
+          },
           {
             path: 'forgot-password',
             Component: ForgotPasswordPage,
             handle: title('Reset your password'),
+          },
+          {
+            path: 'forgot-password/sent',
+            Component: ResetSentRoute,
+            handle: title('Check your email'),
+          },
+          {
+            path: 'reset-password/:token',
+            Component: ResetPasswordPage,
+            handle: title('Choose a new password'),
           },
         ],
       },

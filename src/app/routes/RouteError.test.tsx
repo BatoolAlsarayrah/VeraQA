@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ContractError, HttpError, NetworkError } from '@/lib';
 
+import { Providers } from '../providers';
 import { RouteError } from './RouteError';
 
 function failWith(error: Error) {
@@ -18,7 +19,11 @@ function failWith(error: Error) {
       Component: () => null,
     },
   ]);
-  render(<RouterProvider router={router} />);
+  render(
+    <Providers>
+      <RouterProvider router={router} />
+    </Providers>,
+  );
 }
 
 describe('RouteError', () => {

@@ -51,10 +51,20 @@ function errorResponse(failure: Failure) {
   return HttpResponse.json({ error }, { status: failure.status });
 }
 
-export type Flags = { instantJobs: boolean; slowNetwork: boolean; failNext: boolean };
+export type Flags = {
+  instantJobs: boolean;
+  slowNetwork: boolean;
+  failNext: boolean;
+  expiredLinks: boolean;
+};
 
 const FLAGS_KEY = 'veraqa-mock-flags';
-const noFlags: Flags = { instantJobs: false, slowNetwork: false, failNext: false };
+const noFlags: Flags = {
+  instantJobs: false,
+  slowNetwork: false,
+  failNext: false,
+  expiredLinks: false,
+};
 
 let flags: Flags | null = null;
 
