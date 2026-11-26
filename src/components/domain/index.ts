@@ -7,4 +7,5 @@ export { IdText } from './IdText';
 export { Logo } from './Logo';
 export { type Priority, PriorityBadge } from './PriorityBadge';
 export { type MarkerState, RowMarker } from './RowMarker';
+export { stageLabels, StageLine } from './StageLine';
 export { type Status, StatusBadge } from './StatusBadge';

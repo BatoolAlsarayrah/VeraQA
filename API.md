@@ -26,9 +26,9 @@ The mock in `src/mocks/` implements every endpoint below, including the permissi
 | Projects         | `GET /projects`                                             | Core  |
 | Projects         | `POST /projects`                                            | Core  |
 | Projects         | `GET /projects/{p}/counts`                                  | Core  |
-| Invitations      | `GET /invitations`                                          | Later |
-| Invitations      | `POST /invitations/{id}/accept`                             | Later |
-| Invitations      | `POST /invitations/{id}/decline`                            | Later |
+| Invitations      | `GET /invitations`                                          | Core  |
+| Invitations      | `POST /invitations/{id}/accept`                             | Core  |
+| Invitations      | `POST /invitations/{id}/decline`                            | Core  |
 | Project settings | `GET /projects/{p}/settings`                                | Later |
 | Project settings | `PATCH /projects/{p}/settings`                              | Later |
 | Project settings | `POST /projects/{p}/transfer`                               | Later |
@@ -307,7 +307,7 @@ Errors: `404` when the project doesn't exist or the person isn't a member.
 
 ### Invitations
 
-#### `GET /invitations` · Later
+#### `GET /invitations` · Core
 
 Signed in. Your projects, the invitation cards.
 
@@ -323,7 +323,7 @@ Response `200`: `{ "items": [Invitation] }`, the invitations sent to the person'
 }
 ```
 
-#### `POST /invitations/{id}/accept` and `POST /invitations/{id}/decline` · Later
+#### `POST /invitations/{id}/accept` and `POST /invitations/{id}/decline` · Core
 
 Signed in, and the invitation was sent to their email. Your projects.
 

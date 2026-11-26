@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup, configure } from '@testing-library/react';
 import { afterEach } from 'vitest';
 
-import { forgetSession } from '@/lib';
+import { forgetSession, setPageTitle } from '@/lib';
 
 // Route tests load the whole app and mock server; a full parallel run can outlast the 1s default.
 configure({ asyncUtilTimeout: 3000 });
@@ -33,6 +33,7 @@ if (typeof window !== 'undefined') {
 afterEach(() => {
   cleanup();
   forgetSession();
+  setPageTitle(null);
   if (typeof window === 'undefined') return;
   localStorage.clear();
   sessionStorage.clear();

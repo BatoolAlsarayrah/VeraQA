@@ -21,3 +21,4 @@ export {
   signOut,
   subscribeCurrentProject,
 } from './session';
+export { getPageTitle, setPageTitle, subscribePageTitle } from './title';

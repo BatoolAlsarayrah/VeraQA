@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router';
 
 import { PageHeader } from '@/components/layout';
 import { LinkButton } from '@/components/ui';
+import { usePageTitle } from '@/hooks';
 import { HttpError, paths } from '@/lib';
 
 import { resetLinkQuery } from '../api';
@@ -14,6 +15,8 @@ export function ResetPasswordPage() {
   const link = useQuery(resetLinkQuery(token));
   const [state, setState] = useState<'open' | 'changed' | 'expired'>('open');
   const dead = link.error instanceof HttpError && link.error.status === 410;
+  const expired = state === 'expired' || dead;
+  usePageTitle(state === 'changed' ? 'Password changed' : expired ? 'This link has expired' : null);
 
   if (state === 'changed') {
     return (
@@ -29,7 +32,7 @@ export function ResetPasswordPage() {
     );
   }
 
-  if (state === 'expired' || dead) {
+  if (expired) {
     return (
       <>
         <PageHeader

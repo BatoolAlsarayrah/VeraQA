@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
@@ -139,6 +139,7 @@ describe('Choose a new password', () => {
     await choose(user, 'Fresh#2027', 'Fresh#2027');
 
     expect(await screen.findByRole('heading', { name: 'Password changed' })).toBeInTheDocument();
+    await waitFor(() => expect(document.title).toBe('Password changed · VeraQA'));
     expect(
       screen.getByText('You’ve been signed out on other devices. Sign in with your new password.'),
     ).toBeInTheDocument();
@@ -156,6 +157,7 @@ describe('Choose a new password', () => {
       await screen.findByRole('heading', { name: 'This link has expired' }),
     ).toBeInTheDocument();
     expect(screen.queryByLabelText('New password')).toBeNull();
+    await waitFor(() => expect(document.title).toBe('This link has expired · VeraQA'));
     expect(screen.getByRole('link', { name: 'Send a new link' })).toHaveAttribute(
       'href',
       '/forgot-password',
