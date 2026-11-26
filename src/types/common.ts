@@ -106,8 +106,15 @@ export type JobStart = z.infer<typeof JobStart>;
 export const PriorityInput = z.object({ priority: Priority });
 export type PriorityInput = z.infer<typeof PriorityInput>;
 
-export const ReasonInput = z.object({ reason: z.string().trim().min(1) });
+export const ReasonInput = z.object({
+  reason: z.string().trim().min(1, 'Write a reason before you continue.'),
+});
 export type ReasonInput = z.infer<typeof ReasonInput>;
 
-export const NoteInput = z.object({ note: z.string().trim().min(1) });
+export const NoteInput = z.object({
+  note: z.string().trim().min(1, 'Write a note before you continue.'),
+});
 export type NoteInput = z.infer<typeof NoteInput>;
+
+export const Approved = z.object({ approved: z.array(z.string().min(1)) });
+export type Approved = z.infer<typeof Approved>;

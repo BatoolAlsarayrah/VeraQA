@@ -424,6 +424,171 @@ Signed in. Opening a notification. Response `204`. Errors: `404` for a notificat
 
 Signed in. Notifications, Mark all as read. Query: `projectId` (optional) limits it to one project. Response `204`.
 
+### Requirements
+
+A requirement has a short `title`, used on every screen, and the `text` quoted from the SRS ("The system shall…"). Its review status is `pending-review`, `approved` or `rejected`. AI output stays a draft until someone with `approve` approves it, and approved requirements are never overwritten by AI output.
+
+#### `GET /projects/{p}/requirements` · Core
+
+`workspace`. Requirements (the review list) and the requirement pickers.
+
+Query, all optional: `status` (`pending-review`, `approved` or `rejected`), `search` (matches the ID, title or text, ignoring case) and `assignee` (a person ID, or `me`).
+
+Response `200`: `{ "items": [RequirementSummary] }`, in ID order.
+
+```json
+{
+  "id": "REQ-015",
+  "title": "Reset the password at any time",
+  "text": "Users shall be able to reset their password at any time.",
+  "section": "Authentication",
+  "status": "pending-review",
+  "priority": null,
+  "openFindings": 3,
+  "assignee": { "id": "batool-hani", "name": "Batool Hani" }
+}
+```
+
+`priority` is `critical`, `high`, `medium`, `low` or `null` (not set yet).
+
+#### `GET /projects/{p}/requirements/{id}` · Core
+
+`workspace`. The requirement detail panel.
+
+Response `200`: the summary fields plus:
+
+```json
+{
+  "type": "functional",
+  "origin": "ai",
+  "confidence": 0.86,
+  "source": { "file": "SRS_v2.pdf", "section": "Authentication", "page": 7 },
+  "findings": [
+    {
+      "n": 3,
+      "kind": "contradiction",
+      "text": "REQ-014 locks the account for 15 minutes, but a reset at any time would defeat the lockout.",
+      "related": "REQ-014",
+      "resolved": false
+    }
+  ],
+  "rewrite": {
+    "text": "Users shall be able to reset their password through an emailed link that stays valid for 1 hour, except during an active lockout."
+  },
+  "rejectionReason": null,
+  "decidedBy": null,
+  "decidedAt": null,
+  "scenarios": [
+    { "id": "SC-007", "title": "Lock on the 5th failed login in a row", "status": "approved" }
+  ],
+  "history": [{ "at": "…", "actor": { "type": "ai" }, "action": "drafted", "note": null }]
+}
+```
+
+- `type` is `functional` or `non-functional`. `origin` is `ai` (split out by the analysis) or `person` (typed in). `confidence` is the AI's confidence from 0 to 1, or `null` for a person's.
+- `source.file` is `null` for requirements typed in by hand.
+- `findings[].kind` is `ambiguous`, `missing-information` or `contradiction`. `related` points at the other requirement in a contradiction.
+- `history[].action` is `created`, `drafted`, `edited`, `approved`, `rejected`, `returned-to-review`, `priority-set`, `rewrite-accepted` or `finding-resolved`.
+
+Errors: `404` for an ID that doesn't exist in the project.
+
+#### `POST /projects/{p}/srs` · Core
+
+`upload`. Add requirements, Upload SRS.
+
+Request: `multipart/form-data` with one or more `files` fields. Each file is PDF, DOCX or TXT, up to 10 MB; the files are analyzed together. Response `202`: `{ "jobId": "…" }` for an [analysis job](#jobs).
+
+Errors:
+
+- `422 validation` with `fields.files` for a missing file, a wrong type ("SRS.png: Use a PDF, DOCX or TXT file.") or a file over 10 MB.
+- `409 conflict` while another analysis is running in the project.
+
+#### `POST /projects/{p}/requirements/typed` · Core
+
+`upload`. Add requirements, Write them in.
+
+Request: `{ "text": "…" }`, one requirement per line. Numbering and bullets are ignored. Response `202`: `{ "jobId": "…" }` for an analysis job, which splits and checks the lines like an uploaded SRS.
+
+Errors: `422 validation` with `fields.text` when it's empty, and `409 conflict` as above.
+
+#### Reviewing: approve, reject and return to review
+
+All need `approve` and answer `200` with the full requirement. Requirements, the detail panel.
+
+- `POST /projects/{p}/requirements/{id}/approve` · Core. `409` if it's already approved.
+- `POST /projects/{p}/requirements/{id}/reject` · Core. Request: `{ "reason": "Duplicate of REQ-017." }`; the reason is required and kept with the requirement. `409` if it's already rejected, or if approved scenarios are built on it.
+- `POST /projects/{p}/requirements/{id}/return-to-review` · Later. Used by Undo after an approve or reject. `409` if approved scenarios are built on it.
+- `POST /projects/{p}/requirements/approve-all` · Later. Approves every requirement in Pending review that has no open findings. Response `200`: `{ "approved": ["REQ-012", "REQ-020"] }`.
+
+#### `PATCH /projects/{p}/requirements/{id}` · Core
+
+`edit`. The detail panel, Edit.
+
+Request: `{ "title", "text", "section", "type" }`. Response `200`: the full requirement. Editing a rejected requirement sends it back to Pending review.
+
+Errors: `409` for an approved requirement ("Return it to review before you edit it.").
+
+#### `PATCH /projects/{p}/requirements/{id}/priority` · Core
+
+`approve`. Request: `{ "priority": "high" }`. Response `200`: the full requirement.
+
+#### `POST /projects/{p}/requirements/{id}/accept-rewrite` · Later
+
+`approve`. The detail panel, Accept rewrite. Replaces the text with the suggested rewrite and resolves the findings. Response `200`: the full requirement.
+
+Errors: `409` when there's no suggestion, or the requirement is approved.
+
+#### `POST /projects/{p}/requirements/{id}/findings/{n}/resolve` · Later
+
+`approve`. Marks one finding as resolved without changing the text. Response `200`: the full requirement. Errors: `404` for a finding that doesn't exist.
+
+### Jobs
+
+AI work (SRS analysis, scenario generation and test-case generation) runs as a background job through n8n and the LLM. Starting one answers `202` with `{ "jobId": "…" }`; the frontend then polls `GET /jobs/{jobId}` until the status is `done`, `failed` or `cancelled`. A job keeps running if the person leaves the page; the analysis banner finds it again with `GET /projects/{p}/jobs?active=true`. When a job finishes, the backend adds its drafts (as AI drafts in Pending review) and notifies the person who started it.
+
+```json
+{
+  "id": "job-…",
+  "projectId": "e-commerce-portal-v2",
+  "kind": "analysis",
+  "status": "running",
+  "step": 1,
+  "steps": [
+    { "label": "Reading 2 files", "detail": "22 pages, 4,870 words", "status": "done" },
+    { "label": "Splitting them into requirements", "detail": null, "status": "running" },
+    { "label": "Checking each one", "detail": null, "status": "waiting" },
+    { "label": "Drafting suggested rewrites", "detail": null, "status": "waiting" }
+  ],
+  "progress": 0.35,
+  "startedAt": "…",
+  "finishedAt": null,
+  "error": null,
+  "files": ["SRS_v2.pdf", "NFR_addendum.docx"],
+  "result": null
+}
+```
+
+- `status` is `queued`, `running`, `done`, `failed` or `cancelled`. `step` is the index of the current step, and `progress` runs from 0 to 1.
+- A step's `detail` is filled in once it's done. Its `status` is `waiting`, `running` or `done`.
+- `error` is `{ "code", "message" }` when the job failed, written for people like any other error.
+- `result` is `null` until the job is done. Its shape depends on `kind`:
+  - `analysis` also has `files` (the uploaded file names, empty for typed requirements), and its result is `{ "requirements", "sections", "ambiguous", "missingInformation", "contradictions", "rewrites" }`, all counts.
+  - `scenario-generation` and `test-case-generation` are described with their endpoints.
+
+#### `GET /jobs/{jobId}` · Core
+
+`workspace` in the job's project. The analysis page, the generation pages and the analysis banner. Response `200`: the job. Errors: `404` for a job that doesn't exist or isn't visible to the person.
+
+#### `GET /projects/{p}/jobs` · Core with `active=true`
+
+`workspace`. The analysis banner on every project page. Query: `active=true` lists only queued and running jobs. Response `200`: `{ "items": [Job] }`, newest first.
+
+#### `POST /jobs/{jobId}/cancel` · Later
+
+The person who started it, or anyone who could start one (`upload` for an analysis, `approve` for generation). The generation pages, Cancel. Response `200`: the job, now `cancelled`; nothing it drafted is kept.
+
+Errors: `409` when the job already finished.
+
 ## Open questions for the backend
 
 1. **Should the project manager get `fix`?** Resolved: yes. The project manager holds every permission, so in a solo project they can take a defect through its whole lifecycle. A developer still acts only on defects assigned to them, and so does a project manager acting with `fix`.

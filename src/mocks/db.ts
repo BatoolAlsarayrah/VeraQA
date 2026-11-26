@@ -205,6 +205,7 @@ export type JobRecord = {
   cancelled: boolean;
   finished: boolean;
   result: AnalysisResult | ScenarioGenerationResult | TestCaseGenerationResult | null;
+  pending: (RequirementRecord | ScenarioRecord | TestCaseRecord)[];
 };
 
 export type Db = {

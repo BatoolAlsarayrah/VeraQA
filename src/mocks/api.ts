@@ -56,22 +56,27 @@ export type Flags = { instantJobs: boolean; slowNetwork: boolean; failNext: bool
 const FLAGS_KEY = 'veraqa-mock-flags';
 const noFlags: Flags = { instantJobs: false, slowNetwork: false, failNext: false };
 
+let flags: Flags | null = null;
+
 export function getFlags(): Flags {
+  if (flags) return flags;
   try {
-    return {
+    flags = {
       ...noFlags,
       ...(JSON.parse(localStorage.getItem(FLAGS_KEY) ?? '{}') as Partial<Flags>),
     };
   } catch {
-    return noFlags;
+    flags = noFlags;
   }
+  return flags;
 }
 
 export function setFlags(next: Partial<Flags>) {
+  flags = { ...getFlags(), ...next };
   try {
-    localStorage.setItem(FLAGS_KEY, JSON.stringify({ ...getFlags(), ...next }));
+    localStorage.setItem(FLAGS_KEY, JSON.stringify(flags));
   } catch {
-    // Storage can be blocked; the flags then stay at their defaults.
+    // Storage can be blocked; the flags then last until the page reloads.
   }
 }
 

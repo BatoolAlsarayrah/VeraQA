@@ -16,7 +16,7 @@ function done(
     'id' | 'projectId' | 'kind' | 'createdBy' | 'startedAt' | 'steps' | 'files' | 'items' | 'result'
   >,
 ): JobRecord {
-  return { ...partial, duration: 8200, cancelled: false, finished: true };
+  return { ...partial, duration: 8200, cancelled: false, finished: true, pending: [] };
 }
 
 function scenarioResult(

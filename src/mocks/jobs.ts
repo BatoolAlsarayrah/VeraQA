@@ -17,6 +17,8 @@ type Start = {
   steps: { label: string; detail: string | null }[];
   files?: string[];
   items?: string[];
+  result?: JobRecord['result'];
+  pending?: JobRecord['pending'];
   instant: boolean;
 };
 
@@ -33,7 +35,8 @@ export function startJob(db: Db, start: Start): JobRecord {
     items: start.items ?? [],
     cancelled: false,
     finished: false,
-    result: null,
+    result: start.result ?? null,
+    pending: start.pending ?? [],
   };
   db.jobs.push(job);
   return job;
