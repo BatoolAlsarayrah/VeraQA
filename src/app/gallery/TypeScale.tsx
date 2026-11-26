@@ -1,6 +1,12 @@
 const styles = [
   { name: 'display', spec: '46/54 · 700', className: 'text-display', sample: "Ship what's true." },
   {
+    name: 'display-md',
+    spec: '34/42 · 700 (Page not found)',
+    className: 'text-display-md',
+    sample: 'This stop isn’t on the line',
+  },
+  {
     name: 'display-sm',
     spec: '32/38 · 700 (phones)',
     className: 'text-display-sm',
