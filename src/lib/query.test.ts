@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ContractError, HttpError, NetworkError } from './api-client';
-import { createQueryClient, keys } from './query';
+import { createQueryClient, keys, live } from './query';
 
 const retry = createQueryClient().getDefaultOptions().queries?.retry;
 
@@ -36,5 +36,11 @@ describe('keys', () => {
   it('nest project data under the project, so one prefix refreshes it all', () => {
     expect(keys.project('library-system')).toEqual(['projects', 'library-system']);
     expect(keys.project('library-system').slice(0, 1)).toEqual(keys.projects);
+  });
+});
+
+describe('live', () => {
+  it('refreshes once a minute and on return to the tab', () => {
+    expect(live).toEqual({ refetchInterval: 60_000, refetchOnWindowFocus: 'always' });
   });
 });

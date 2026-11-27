@@ -1,3 +1,4 @@
+export { activityText, actorName } from './activity';
 export { place } from './anchor';
 export {
   ContractError,
@@ -8,10 +9,10 @@ export {
   setUnauthorizedHandler,
 } from './api-client';
 export { cn } from './cn';
-export { when } from './format';
+export { counted, dayLabel, when } from './format';
 export { ids, isOpen, paths, returnTo, signinFrom } from './paths';
 export { capabilitiesFor, homePath, roleLabels } from './permissions';
-export { createQueryClient, keys, queryClient } from './query';
+export { createQueryClient, keys, live, queryClient } from './query';
 export {
   forgetSession,
   getCurrentProject,

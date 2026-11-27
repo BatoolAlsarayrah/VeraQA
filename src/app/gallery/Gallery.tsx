@@ -4,6 +4,7 @@ import { Logo } from '@/components/domain';
 
 import { Badges } from './Badges';
 import { Buttons } from './Buttons';
+import { Charts } from './Charts';
 import { Containers } from './Containers';
 import { Fields } from './Fields';
 import { Icons } from './Icons';
@@ -27,6 +28,7 @@ const sections = [
   { id: 'containers', title: 'Panels, tabs and states' },
   { id: 'overlays', title: 'Overlays' },
   { id: 'ai', title: 'AI suggestion' },
+  { id: 'charts', title: 'Charts' },
 ] as const;
 
 const content: Record<(typeof sections)[number]['id'], ReactNode> = {
@@ -49,6 +51,7 @@ const content: Record<(typeof sections)[number]['id'], ReactNode> = {
   containers: <Containers />,
   overlays: <Overlays />,
   ai: <Suggestions />,
+  charts: <Charts />,
 };
 
 export function Gallery() {

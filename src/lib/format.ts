@@ -27,3 +27,12 @@ export function when(iso: string, now = Date.now()) {
   if (days < 7) return weekday.format(at);
   return day.format(at);
 }
+
+export function dayLabel(isoDay: string) {
+  const [year = 0, month = 1, date = 1] = isoDay.split('-').map(Number);
+  return day.format(new Date(year, month - 1, date));
+}
+
+export function counted(count: number, one: string, many = `${one}s`) {
+  return `${String(count)} ${count === 1 ? one : many}`;
+}
