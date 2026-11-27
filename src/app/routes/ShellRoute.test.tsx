@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -57,7 +57,7 @@ describe('analysis banner', () => {
     expect(
       await screen.findByText('Analysis complete: 2 requirements, 1 issue'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Review' })).toHaveAttribute(
+    expect(within(banner() as HTMLElement).getByRole('link', { name: 'Review' })).toHaveAttribute(
       'href',
       `${lead}/requirements`,
     );
@@ -77,7 +77,9 @@ describe('analysis banner', () => {
     setFlags({ instantJobs: false });
     visit(`${lead}/dashboard`);
 
-    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'E-Commerce Portal v2' }),
+    ).toBeInTheDocument();
     expect(banner()).toBeNull();
   });
 

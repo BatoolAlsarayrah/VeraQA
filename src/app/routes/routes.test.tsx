@@ -58,7 +58,9 @@ describe('routes', () => {
   it('opens a project at its dashboard and titles the page', async () => {
     const router = visit(lead);
 
-    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'E-Commerce Portal v2' }),
+    ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(`${lead}/dashboard`);
     await waitFor(() => expect(document.title).toBe('Dashboard · VeraQA'));
   });
