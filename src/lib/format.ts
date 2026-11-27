@@ -36,3 +36,15 @@ export function dayLabel(isoDay: string) {
 export function counted(count: number, one: string, many = `${one}s`) {
   return `${String(count)} ${count === 1 ? one : many}`;
 }
+
+export function dueLabel(isoDay: string, now = Date.now()) {
+  const [year = 0, month = 1, date = 1] = isoDay.split('-').map(Number);
+  const days = Math.round(
+    (new Date(year, month - 1, date).getTime() - startOfDay(new Date(now))) / (24 * HOUR),
+  );
+  if (days < 0) return { text: 'Overdue', urgent: true };
+  if (days === 0) return { text: 'Due today', urgent: true };
+  if (days === 1) return { text: 'Due tomorrow', urgent: false };
+  if (days < 7) return { text: 'This week', urgent: false };
+  return { text: `Due ${dayLabel(isoDay)}`, urgent: false };
+}
