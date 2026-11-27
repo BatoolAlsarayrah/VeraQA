@@ -38,7 +38,7 @@ function details(projectId: string, kind: Kind, work: WorkItem) {
       };
     case 'ready-to-run-again':
       return {
-        note: `${work.blockedBy?.id ?? ''} is closed, so this test isn’t blocked any more.`,
+        note: `${work.blockedBy?.id ?? ''} is closed, so ${work.blockedStep ? `step ${String(work.blockedStep)}` : 'this test'} isn’t blocked any more.`,
         action: 'Run test',
         to: runTest ?? itemPath(projectId, item),
       };

@@ -1,12 +1,13 @@
 import { z } from 'zod';
 
 import { PersonId } from './common';
-import { Role } from './session';
+import { Capability, Role } from './session';
 
 export const Member = z.object({
   id: PersonId,
   name: z.string().min(1),
   role: Role,
+  capabilities: z.array(Capability),
   email: z.email().optional(),
   status: z.enum(['active', 'invited']).optional(),
   workload: z

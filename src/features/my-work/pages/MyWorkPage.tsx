@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import { PageHeader } from '@/components/layout';
 import { Button, EmptyState, Panel, Skeleton } from '@/components/ui';
-import { useProject } from '@/hooks';
+import { useCan, useProject } from '@/hooks';
 import type { WorkGroup as Group } from '@/types';
 
 import { myWorkQuery } from '../api';
+import { AssignDialog } from '../components/AssignDialog';
 import { WorkGroup } from '../components/WorkGroup';
 
 const order: Group['kind'][] = [
@@ -28,13 +30,28 @@ export function MyWorkPage() {
   const project = useProject();
   const projectId = project?.projectId ?? '';
   const work = useQuery({ ...myWorkQuery(projectId), enabled: Boolean(project) });
+  const canAssign = useCan('manage');
+  const [assigning, setAssigning] = useState(false);
   const groups = work.data?.groups
     .filter((group) => group.items.length > 0)
     .toSorted((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
 
   return (
     <>
-      <PageHeader title="My work" lede={lede(groups)} />
+      <PageHeader
+        title="My work"
+        lede={lede(groups)}
+        actions={
+          canAssign && (
+            <Button variant="primary" onClick={() => setAssigning(true)}>
+              Assign work
+            </Button>
+          )
+        }
+      />
+      {canAssign && (
+        <AssignDialog projectId={projectId} open={assigning} onClose={() => setAssigning(false)} />
+      )}
       {work.isPending && (
         <Panel aria-busy="true">
           <Skeleton lines={5} />

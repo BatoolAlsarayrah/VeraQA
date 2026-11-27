@@ -1,7 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { http } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Button, Field, FormError, Input, PasswordInput } from '@/components/ui';
@@ -89,6 +89,30 @@ describe('useApiForm', () => {
     expect(screen.getByLabelText('Work email')).toHaveFocus();
     expect(screen.getByRole('alert')).toBeEmptyDOMElement();
     expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('shows a server message for a field the form doesn’t have above the form', async () => {
+    server.use(
+      http.post('*/api/auth/register', () =>
+        HttpResponse.json(
+          {
+            error: {
+              code: 'validation',
+              message: 'Check the highlighted fields, then try again.',
+              fields: { 'items.0': 'BUG-012 is past fixing, so it can’t be reassigned.' },
+            },
+          },
+          { status: 422 },
+        ),
+      ),
+    );
+    const { user } = setup();
+
+    await fill(user, 'sami.nour@shop-team.com', 'Correct#456');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'BUG-012 is past fixing, so it can’t be reassigned.',
+    );
   });
 
   it('shows any other error once above the form', async () => {

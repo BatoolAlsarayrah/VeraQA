@@ -1,3 +1,4 @@
+import { capabilitiesFor } from '@/lib/permissions';
 import { InviteInput, type Member, RoleInput } from '@/types';
 
 import { api, fail } from '../api';
@@ -54,6 +55,7 @@ export const memberHandlers = [
           id: record.id,
           name: fullName(record),
           role: entry.role,
+          capabilities: capabilitiesFor(entry.role),
           ...(full && {
             email: record.email,
             status: 'active' as const,
@@ -68,6 +70,7 @@ export const memberHandlers = [
             id: entry.id,
             name: entry.email,
             role: entry.role,
+            capabilities: [],
             email: entry.email,
             status: 'invited' as const,
           }))

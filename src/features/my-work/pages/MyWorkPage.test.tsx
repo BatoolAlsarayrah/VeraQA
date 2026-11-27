@@ -68,7 +68,7 @@ describe('My work', () => {
     expect((await groups())[0]).toBe('Ready to run again');
     const ready = screen.getByRole('region', { name: 'Ready to run again' });
     expect(ready).toHaveTextContent(
-      'TC-009Show the clinic’s phone number when refusingBUG-003 is closed, so this test isn’t blocked any more.',
+      'TC-009Show the clinic’s phone number when refusingBUG-003 is closed, so step 2 isn’t blocked any more.',
     );
     expect(screen.getByRole('region', { name: 'Retests' })).toHaveTextContent(
       'Qays Kaled fixed it. Run TC-006 again.',

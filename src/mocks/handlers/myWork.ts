@@ -14,6 +14,7 @@ const empty = {
   openFindings: null,
   draftedFor: null,
   blockedBy: null,
+  blockedStep: null,
   fixedBy: null,
   retest: null,
 } satisfies Omit<WorkItem, 'item'>;
@@ -91,6 +92,7 @@ function myWork(db: Db, projectId: string, personId: string): MyWork {
           due: entry.due,
           run: runRef(db, projectId, entry.run),
           blockedBy: defect ? { id: defect.id, title: defect.title, status: defect.status } : null,
+          blockedStep: entry.blocked?.step ?? null,
         } satisfies WorkItem;
       }),
     },

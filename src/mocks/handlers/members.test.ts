@@ -32,6 +32,13 @@ describe('members', () => {
     expect(items.every((member) => member.workload === undefined)).toBe(true);
   });
 
+  it('shows everyone what each member can do, so pickers can filter', async () => {
+    const { items } = await request('/projects/clinic-booking-app/members', list(Member));
+
+    expect(items.find((member) => member.id === 'qays-kaled')?.capabilities).toEqual(['fix']);
+    expect(items.find((member) => member.id === 'lina-saeed')?.capabilities).toContain('approve');
+  });
+
   it('refuses the list to a developer', async () => {
     await expect(request('/projects/payments-api/members', list(Member))).rejects.toMatchObject({
       status: 403,
@@ -47,7 +54,11 @@ describe('invitations', () => {
     });
 
     const { items } = await request(ECOM, list(Member));
-    expect(items.at(-1)).toMatchObject({ name: 'new.tester@shop-team.com', status: 'invited' });
+    expect(items.at(-1)).toMatchObject({
+      name: 'new.tester@shop-team.com',
+      status: 'invited',
+      capabilities: [],
+    });
   });
 
   it('refuses to invite someone already in the project', async () => {

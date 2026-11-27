@@ -10,6 +10,7 @@ export const WorkItem = z.object({
   openFindings: z.number().int().nonnegative().nullable(),
   draftedFor: Item.nullable(),
   blockedBy: DefectRef.nullable(),
+  blockedStep: z.number().int().positive().nullable(),
   fixedBy: Person.nullable(),
   retest: TestCaseRef.nullable(),
 });

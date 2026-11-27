@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { Member, WorkItem } from '@/types';
+
 import contract from '../../../API.md?raw';
 import { handlers } from '.';
 
@@ -42,5 +44,12 @@ describe('API.md', () => {
 
     expect(rows.length).toBeGreaterThan(0);
     for (const row of rows) expect(row, row).toMatch(/\| (Core|Later) +\|$/);
+  });
+
+  it.each([
+    ['Member', Member],
+    ['WorkItem', WorkItem],
+  ])('documents every %s field', (_, schema) => {
+    for (const field of Object.keys(schema.shape)) expect(contract, field).toContain(`"${field}"`);
   });
 });

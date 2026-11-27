@@ -388,13 +388,14 @@ Errors: `422 validation` with `fields.confirmName` when the name isn't typed exa
 
 `workspace`. Members, and every assignee picker (assign work, run assignees, the developer on a defect report).
 
-Response `200`: `{ "items": [Member] }`. Everyone with `workspace` gets names and roles; with `manage`, each member also has `email`, `status` and `workload`, and pending invitations are listed with `status: "invited"`.
+Response `200`: `{ "items": [Member] }`. Everyone with `workspace` gets names, roles and `capabilities` (pickers use them to offer only people who can do the work); with `manage`, each member also has `email`, `status` and `workload`, and pending invitations are listed with `status: "invited"` and no capabilities.
 
 ```json
 {
   "id": "batool-hani",
   "name": "Batool Hani",
   "role": "qa-lead",
+  "capabilities": ["workspace", "upload", "approve", "edit", "test", "trace", "manage"],
   "email": "batool.hani@shop-team.com",
   "status": "active",
   "workload": { "assigned": 19, "done": 11, "unit": "items" }
@@ -1137,6 +1138,7 @@ Errors: `422` for someone who can't fix defects, and `409` for a defect that's F
       "openFindings": null,
       "draftedFor": null,
       "blockedBy": null,
+      "blockedStep": null,
       "fixedBy": null,
       "retest": null
     }
@@ -1149,7 +1151,7 @@ Errors: `422` for someone who can't fix defects, and `409` for a defect that's F
 | `requirements-to-review` | Requirements in Pending review assigned to the person                             | `due`, `openFindings`                             |
 | `drafts-to-approve`      | Scenarios and test cases in Pending review assigned to the person                 | `due`, `draftedFor` (its requirement or scenario) |
 | `tests-to-run`           | The person's not-run tests in active runs                                         | `due`, `run`                                      |
-| `ready-to-run-again`     | The person's blocked tests whose blocking defect closed                           | `run`, `blockedBy`                                |
+| `ready-to-run-again`     | The person's blocked tests whose blocking defect closed                           | `run`, `blockedBy`, `blockedStep`                 |
 | `retests`                | Fixed defects, or defects in Retest, waiting on the person                        | `fixedBy`, `retest` (the test case to run again)  |
 | `defects-to-fix`         | With `fix`: defects assigned to the person that are Open, In progress or Reopened | none                                              |
 
@@ -1391,6 +1393,14 @@ AI work (SRS analysis, scenario generation and test-case generation) runs as a b
 The person who started it, or anyone who could start one (`upload` for an analysis, `approve` for generation). The generation pages, Cancel. Response `200`: the job, now `cancelled`; nothing it drafted is kept.
 
 Errors: `409` when the job already finished.
+
+## Changes
+
+Additions to the contract after the first full version, newest first.
+
+- **2026-11-27 · `GET /projects/{p}/my-work`:** Ready to run again items carry `blockedStep`, the number of the step that was blocked, so the screen can say "BUG-003 is closed, so step 2 isn't blocked any more". It is `null` in every other group.
+- **2026-11-27 · `GET /projects/{p}/members`:** each member has `capabilities`, for everyone with `workspace`. Assign work offers only people who can do the picked work: `approve` for items in Pending review, `fix` for defects, `test` for test cases. Invited people have none.
+- **2026-11-26 · Password reset:** `GET /auth/reset-password/{token}` and `POST /auth/reset-password` were added (Core).
 
 ## Open questions for the backend
 

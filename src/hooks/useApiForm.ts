@@ -38,7 +38,8 @@ export function useApiForm<Input extends FieldValues, Output, Result>({
         ? Object.entries(reason.fields).filter(([name]) => known.includes(name))
         : [];
     if (fields.length === 0) {
-      setError(message(reason));
+      const unplaced = reason instanceof HttpError ? Object.values(reason.fields)[0] : undefined;
+      setError(unplaced ?? message(reason));
       return;
     }
     fields.forEach(([name, text], index) => {

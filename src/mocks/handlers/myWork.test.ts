@@ -43,6 +43,8 @@ describe('my work', () => {
       ['retests', ['BUG-002']],
     ]);
     expect(work.groups[1]?.items[0]?.blockedBy).toMatchObject({ id: 'BUG-003', status: 'closed' });
+    expect(work.groups[1]?.items[0]?.blockedStep).toBe(2);
+    expect(work.groups[0]?.items[0]?.blockedStep).toBeNull();
   });
 
   it('includes defects to fix for a solo project manager', async () => {
