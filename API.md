@@ -137,6 +137,18 @@ Every error is a non-2xx status with this body:
 - `401` means there's no valid session. The frontend clears what it holds and goes to Sign in. Sign-in itself answers wrong details with `422 invalid_credentials`, not `401`.
 - `403` means the person's role doesn't allow the action. Data a role must not see is left out of responses rather than refused.
 - `404` shows the Not found page.
+- `409 conflict` means the item's current state doesn't allow the action, for example closing a defect that is already Closed, or starting an analysis while one is running. The message says why.
+- `410 link_expired` means a password reset link is expired, used or unknown. The frontend shows This link has expired.
+
+## Connecting the frontend
+
+1. In the frontend's `.env`, set `VITE_API_MODE=live` and `VITE_API_BASE_URL` to the backend's address, for example `http://localhost:8000`, without `/api` (the frontend adds it). Restart `npm run dev`.
+2. Sign-in uses a session cookie, which must be `HttpOnly`. Every request is sent with `credentials: 'include'`, so the server must allow the frontend's origin with credentials:
+   - `Access-Control-Allow-Origin` set to that exact origin (`http://localhost:5173` in development), never `*`
+   - `Access-Control-Allow-Credentials: true`
+   - `Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE`
+   - `Access-Control-Allow-Headers: Content-Type`, since JSON requests send `Content-Type: application/json` and the browser checks that with a preflight `OPTIONS` request first
+3. When a response doesn't match this contract, the frontend shows an error page that names the endpoint and the field, such as `GET /api/projects/p/requirements · items.3.status`. Send that to the frontend developer.
 
 ## Permissions
 

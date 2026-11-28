@@ -5,6 +5,8 @@ VeraQA is an AI-supported web system for software quality assurance. A team uplo
 ## Stack
 
 - Vite, React 19 and strict TypeScript
+- React Router (data router), TanStack Query, React Hook Form and Zod, with Zod schemas checking every API response
+- MSW for the in-browser mock API, and Recharts for charts
 - Tailwind CSS v4, reading the design tokens as CSS variables, with light and dark themes
 - IBM Plex Sans and JetBrains Mono, self-hosted with Fontsource
 - Vitest, React Testing Library and jsdom
@@ -24,7 +26,9 @@ npm run dev
 | Variable            | Values                                                            |
 | ------------------- | ----------------------------------------------------------------- |
 | `VITE_API_MODE`     | `mock` uses the in-browser mock API, `live` uses the real backend |
-| `VITE_API_BASE_URL` | The backend URL when `VITE_API_MODE=live`                         |
+| `VITE_API_BASE_URL` | The backend URL when `VITE_API_MODE=live`, without `/api`         |
+
+To run against the real backend, see [Connecting the frontend](API.md#connecting-the-frontend) in `API.md`, which also lists the cookie and CORS settings the server needs.
 
 ## Demo accounts
 
@@ -59,12 +63,12 @@ The mock starts signed in as Batool Hani. Its data lives in the browser's localS
 ```
 src/
   app/          App entry, router and providers
-  assets/       Logo and images
+  assets/       Logo
   components/
     ui/         Generic primitives (Button, Input, Dialog…)
     layout/     App shell, sidebar, top bar, phone header and tab bar
     domain/     QA-specific shared pieces (Logo, status badges, chain strip…)
-  features/     One folder per area, each with pages/ and components/:
+  features/     One folder per area, each with pages/ (and components/ once needed):
                 auth, projects, dashboard, my-work, notifications, search,
                 account, requirements, scenarios, test-cases, runs, defects,
                 traceability, members, reports, activity, settings
@@ -73,7 +77,7 @@ src/
   mocks/        Mock API handlers and seed data
   styles/       tokens.css, globals.css, motion.css
   types/        Shared domain types
-tests/e2e/      End-to-end tests
+  test/         Test helpers
 ```
 
 Import from `src/` with the `@/` alias, for example `import { Logo } from '@/components/domain'`.
