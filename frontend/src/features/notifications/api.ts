@@ -17,3 +17,11 @@ export function useReadNotification(projectId: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.notifications(projectId) }),
   });
 }
+
+export function useReadAll(projectId: string) {
+  return useMutation({
+    mutationFn: () =>
+      request('/notifications/read-all', none, { method: 'POST', query: { projectId } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.notifications(projectId) }),
+  });
+}

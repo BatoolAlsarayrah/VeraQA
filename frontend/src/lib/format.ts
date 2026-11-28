@@ -48,3 +48,12 @@ export function dueLabel(isoDay: string, now = Date.now()) {
   if (days < 7) return { text: 'This week', urgent: false };
   return { text: `Due ${dayLabel(isoDay)}`, urgent: false };
 }
+
+export function dayGroup(iso: string, now = Date.now()) {
+  const at = new Date(iso);
+  const days = Math.round((startOfDay(new Date(now)) - startOfDay(at)) / (24 * HOUR));
+  if (days <= 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return 'Earlier this week';
+  return day.format(at);
+}

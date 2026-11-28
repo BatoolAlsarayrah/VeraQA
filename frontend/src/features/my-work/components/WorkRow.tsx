@@ -1,16 +1,9 @@
 import { IdTag, TextWithIds } from '@/components/domain';
 import { LinkButton } from '@/components/ui';
-import { cn, counted, dueLabel, paths } from '@/lib';
+import { cn, counted, dueLabel, itemPath, paths } from '@/lib';
 import type { WorkGroup, WorkItem } from '@/types';
 
 type Kind = WorkGroup['kind'];
-
-function itemPath(projectId: string, { type, id }: WorkItem['item']) {
-  if (type === 'requirement') return paths.requirement(projectId, id);
-  if (type === 'scenario') return paths.scenario(projectId, id);
-  if (type === 'test-case') return paths.testCase(projectId, id);
-  return paths.defect(projectId, id);
-}
 
 function details(projectId: string, kind: Kind, work: WorkItem) {
   const { item, run } = work;

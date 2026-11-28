@@ -222,6 +222,34 @@ function releaseBlocked(db: Db, record: DefectRecord, actorId: string) {
   }
 }
 
+function recordRetest(
+  record: DefectRecord,
+  outcome: 'passed' | 'failed',
+  byId: string,
+  note: string | null,
+) {
+  record.retests.push({ n: record.retests.length + 1, outcome, byId, note, at: record.updatedAt });
+}
+
+export function closeAfterRetest(
+  db: Db,
+  record: DefectRecord,
+  actorId: string,
+  note: string | null,
+) {
+  step(db, record, actorId, 'retest-passed', 'closed', note);
+  recordRetest(record, 'passed', actorId, note);
+  releaseBlocked(db, record, actorId);
+  tell(
+    db,
+    record,
+    record.assigneeId,
+    actorId,
+    `${record.id} passed retest and was closed`,
+    record.title,
+  );
+}
+
 export const defectHandlers = [
   api.get(BASE, (context) => {
     const { me, member, projectId } = inProject(context);
@@ -401,42 +429,20 @@ export const defectHandlers = [
       throw fail(403, 'forbidden', 'Your role in this project doesn’t allow that.');
     const input = await body(context.request, RetestInput);
     from(record, ['retest'], 'get a retest result');
-    const passed = input.outcome === 'passed';
-    step(
+    if (input.outcome === 'passed') {
+      closeAfterRetest(context.db, record, me.id, input.note);
+      return view(context.db, record, member);
+    }
+    step(context.db, record, me.id, 'retest-failed', 'reopened', input.note);
+    recordRetest(record, 'failed', me.id, input.note);
+    tell(
       context.db,
       record,
+      record.assigneeId,
       me.id,
-      passed ? 'retest-passed' : 'retest-failed',
-      passed ? 'closed' : 'reopened',
+      `${record.id} failed retest and was reopened`,
       input.note,
     );
-    record.retests.push({
-      n: record.retests.length + 1,
-      outcome: input.outcome,
-      byId: me.id,
-      note: input.note,
-      at: record.updatedAt,
-    });
-    if (passed) {
-      releaseBlocked(context.db, record, me.id);
-      tell(
-        context.db,
-        record,
-        record.assigneeId,
-        me.id,
-        `${record.id} passed retest and was closed`,
-        record.title,
-      );
-    } else {
-      tell(
-        context.db,
-        record,
-        record.assigneeId,
-        me.id,
-        `${record.id} failed retest and was reopened`,
-        input.note,
-      );
-    }
     return view(context.db, record, member);
   }),
 

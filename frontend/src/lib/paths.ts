@@ -67,3 +67,11 @@ export function signinFrom(from: string) {
     ? paths.signin
     : `${paths.signin}?${new URLSearchParams({ from }).toString()}`;
 }
+
+export function itemPath(projectId: string, item: { type: string; id: string }) {
+  if (item.type === 'requirement') return paths.requirement(projectId, item.id);
+  if (item.type === 'scenario') return paths.scenario(projectId, item.id);
+  if (item.type === 'test-case') return paths.testCase(projectId, item.id);
+  if (item.type === 'run') return paths.run(projectId, item.id);
+  return paths.defect(projectId, item.id);
+}

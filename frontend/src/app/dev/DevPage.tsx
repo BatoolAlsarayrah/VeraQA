@@ -7,6 +7,7 @@ import { Panel } from '@/components/ui/Panel';
 import { getCurrentProject, paths, sessionQuery, subscribeCurrentProject } from '@/lib';
 
 import { AnalysisSwitcher } from './AnalysisSwitcher';
+import { DemoStates } from './DemoStates';
 import { mockMode } from './mock';
 import { MockControls } from './MockControls';
 import { ResetLink } from './ResetLink';
@@ -30,6 +31,7 @@ export function DevPage() {
         <>
           <MockControls />
           <ResetLink />
+          <DemoStates />
           <SignInAs />
           {session ? (
             <>

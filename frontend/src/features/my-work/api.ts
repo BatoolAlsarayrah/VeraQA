@@ -6,7 +6,6 @@ import {
   type Capability,
   DefectSummary,
   list,
-  Member,
   MyWork,
   type Priority,
   RequirementSummary,
@@ -69,12 +68,6 @@ export const pickableQuery = (projectId: string, type: Pickable['type']) =>
   queryOptions({
     queryKey: [...keys.project(projectId), 'pickable', type],
     queryFn: () => pickable(projectId, type),
-  });
-
-export const membersQuery = (projectId: string) =>
-  queryOptions({
-    queryKey: [...keys.project(projectId), 'members'],
-    queryFn: async () => (await request(at(projectId, 'members'), list(Member))).items,
   });
 
 export async function assign(projectId: string, input: AssignmentInput) {
