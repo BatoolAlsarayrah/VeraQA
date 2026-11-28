@@ -22,4 +22,11 @@ describe('Avatar', () => {
 
     expect(screen.getByRole('img', { name: 'AI analysis' })).toHaveTextContent('AI');
   });
+
+  it('draws AI in the inverted ink pair, like the toast', () => {
+    render(<Avatar name="AI" tone="ai" alt="AI analysis" />);
+
+    expect(screen.getByRole('img', { name: 'AI analysis' })).toHaveClass('bg-text', 'text-bg');
+    expect(screen.getByRole('img', { name: 'AI analysis' })).not.toHaveClass('bg-primary-fill');
+  });
 });

@@ -89,4 +89,18 @@ describe('Notifications', () => {
       '/account',
     );
   });
+
+  it('shows a developer the notifications about their own defects', async () => {
+    visit('payments-api');
+
+    const today = await screen.findByRole('region', { name: 'Today' });
+    expect(
+      within(today)
+        .getAllByRole('link')
+        .map((link) => link.getAttribute('href')),
+    ).toEqual(['/projects/payments-api/defects/BUG-006', '/projects/payments-api/defects/BUG-003']);
+    expect(screen.getByRole('region', { name: 'Yesterday' })).toHaveTextContent(
+      'Batool Mahmoud assigned you BUG-005',
+    );
+  });
 });

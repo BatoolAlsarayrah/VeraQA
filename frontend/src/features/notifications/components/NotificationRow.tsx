@@ -28,7 +28,12 @@ export function NotificationRow({ projectId, notification, now, onRead }: Props)
           unread ? 'bg-sel hover:bg-sel' : 'hover:bg-subtle',
         )}
       >
-        <Avatar name={actor.type === 'ai' ? 'AI' : actor.name} size={32} className="row-span-2" />
+        <Avatar
+          name={actor.type === 'ai' ? 'AI' : actor.name}
+          tone={actor.type === 'ai' ? 'ai' : 'person'}
+          size={32}
+          className="row-span-2"
+        />
         <span className={cn('min-w-0', unread ? 'font-semibold' : 'font-medium')}>
           <TextWithIds>{title}</TextWithIds>
           {unread && <span className="sr-only"> Unread</span>}

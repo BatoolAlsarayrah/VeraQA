@@ -13,9 +13,10 @@ import {
   Tabs,
   useToast,
 } from '@/components/ui';
+import { membersQuery } from '@/features/members';
 import { useApiForm } from '@/hooks';
 
-import { assign, membersQuery, type Pickable } from '../api';
+import { assign, type Pickable } from '../api';
 import { PickList } from './PickList';
 
 const tabs: { id: Pickable['type']; label: string }[] = [
