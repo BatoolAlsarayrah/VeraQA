@@ -4,7 +4,7 @@ This file lists every endpoint the VeraQA frontend calls: method, path, request,
 
 The frontend never implements backend or AI logic. With `VITE_API_MODE=mock` it runs against an in-browser mock of these endpoints; with `VITE_API_MODE=live` it calls `VITE_API_BASE_URL` with no code changes.
 
-The mock in `src/mocks/` implements every endpoint below, including the permission rules, the defect lifecycle and the AI jobs (with canned drafts). It's a working reference for how each endpoint should behave, and a test checks that this file and the mock list the same endpoints. Its demo accounts are listed in the README.
+The mock in `frontend/src/mocks/` implements every endpoint below, including the permission rules, the defect lifecycle and the AI jobs (with canned drafts). It's a working reference for how each endpoint should behave, and a test checks that this file and the mock list the same endpoints. Its demo accounts are listed in the [README](README.md#demo-accounts).
 
 ## Endpoints at a glance
 
@@ -137,6 +137,18 @@ Every error is a non-2xx status with this body:
 - `401` means there's no valid session. The frontend clears what it holds and goes to Sign in. Sign-in itself answers wrong details with `422 invalid_credentials`, not `401`.
 - `403` means the person's role doesn't allow the action. Data a role must not see is left out of responses rather than refused.
 - `404` shows the Not found page.
+- `409 conflict` means the item's current state doesn't allow the action, for example closing a defect that is already Closed, or starting an analysis while one is running. The message says why.
+- `410 link_expired` means a password reset link is expired, used or unknown. The frontend shows This link has expired.
+
+## Connecting the frontend
+
+1. `cd frontend`, then copy `.env.example` to `.env` if it isn't there yet. In `.env`, set `VITE_API_MODE=live` and `VITE_API_BASE_URL` to the backend's address, for example `http://localhost:8000`, without `/api` (the frontend adds it). Run `npm run dev`, or restart it if it was running.
+2. Sign-in uses a session cookie, which must be `HttpOnly`. Every request is sent with `credentials: 'include'`, so the server must allow the frontend's origin with credentials:
+   - `Access-Control-Allow-Origin` set to that exact origin (`http://localhost:5173` in development), never `*`
+   - `Access-Control-Allow-Credentials: true`
+   - `Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE`
+   - `Access-Control-Allow-Headers: Content-Type`, since JSON requests send `Content-Type: application/json` and the browser checks that with a preflight `OPTIONS` request first
+3. When a response doesn't match this contract, the frontend shows an error page that names the endpoint and the field, such as `GET /api/projects/p/requirements · items.3.status`. Send that to the frontend developer.
 
 ## Permissions
 
@@ -388,13 +400,14 @@ Errors: `422 validation` with `fields.confirmName` when the name isn't typed exa
 
 `workspace`. Members, and every assignee picker (assign work, run assignees, the developer on a defect report).
 
-Response `200`: `{ "items": [Member] }`. Everyone with `workspace` gets names and roles; with `manage`, each member also has `email`, `status` and `workload`, and pending invitations are listed with `status: "invited"`.
+Response `200`: `{ "items": [Member] }`. Everyone with `workspace` gets names, roles and `capabilities` (pickers use them to offer only people who can do the work); with `manage`, each member also has `email`, `status` and `workload`, and pending invitations are listed with `status: "invited"` and no capabilities.
 
 ```json
 {
   "id": "batool-hani",
   "name": "Batool Hani",
   "role": "qa-lead",
+  "capabilities": ["workspace", "upload", "approve", "edit", "test", "trace", "manage"],
   "email": "batool.hani@shop-team.com",
   "status": "active",
   "workload": { "assigned": 19, "done": 11, "unit": "items" }
@@ -1137,6 +1150,7 @@ Errors: `422` for someone who can't fix defects, and `409` for a defect that's F
       "openFindings": null,
       "draftedFor": null,
       "blockedBy": null,
+      "blockedStep": null,
       "fixedBy": null,
       "retest": null
     }
@@ -1149,7 +1163,7 @@ Errors: `422` for someone who can't fix defects, and `409` for a defect that's F
 | `requirements-to-review` | Requirements in Pending review assigned to the person                             | `due`, `openFindings`                             |
 | `drafts-to-approve`      | Scenarios and test cases in Pending review assigned to the person                 | `due`, `draftedFor` (its requirement or scenario) |
 | `tests-to-run`           | The person's not-run tests in active runs                                         | `due`, `run`                                      |
-| `ready-to-run-again`     | The person's blocked tests whose blocking defect closed                           | `run`, `blockedBy`                                |
+| `ready-to-run-again`     | The person's blocked tests whose blocking defect closed                           | `run`, `blockedBy`, `blockedStep`                 |
 | `retests`                | Fixed defects, or defects in Retest, waiting on the person                        | `fixedBy`, `retest` (the test case to run again)  |
 | `defects-to-fix`         | With `fix`: defects assigned to the person that are Open, In progress or Reopened | none                                              |
 
@@ -1392,9 +1406,17 @@ The person who started it, or anyone who could start one (`upload` for an analys
 
 Errors: `409` when the job already finished.
 
+## Changes
+
+Additions to the contract after the first full version, newest first.
+
+- **2026-11-27 · `GET /projects/{p}/my-work`:** Ready to run again items carry `blockedStep`, the number of the step that was blocked, so the screen can say "BUG-003 is closed, so step 2 isn't blocked any more". It is `null` in every other group.
+- **2026-11-27 · `GET /projects/{p}/members`:** each member has `capabilities`, for everyone with `workspace`. Assign work offers only people who can do the picked work: `approve` for items in Pending review, `fix` for defects, `test` for test cases. Invited people have none.
+- **2026-11-26 · Password reset:** `GET /auth/reset-password/{token}` and `POST /auth/reset-password` were added (Core).
+
 ## Open questions for the backend
 
 1. **Should the project manager get `fix`?** Resolved: yes. The project manager holds every permission, so in a solo project they can take a defect through its whole lifecycle. A developer still acts only on defects assigned to them, and so does a project manager acting with `fix`.
-2. **Cookie session or bearer token?** The frontend assumes a cookie session: every request is sent with `credentials: 'include'`, and sign-in sets the cookie. If the backend issues a bearer token instead, only `lib/api-client.ts` changes, to store the token and send an `Authorization` header.
+2. **Cookie session or bearer token?** The frontend assumes a cookie session: every request is sent with `credentials: 'include'`, and sign-in sets the cookie. If the backend issues a bearer token instead, only `frontend/src/lib/api-client.ts` changes, to store the token and send an `Authorization` header.
 3. **Paging.** Lists come back whole for now, wrapped as `{ "items": [...] }`. If a project grows too large, the plan is to add `cursor` and `limit` query params and a `nextCursor` next to `items`, which doesn't break the current shape.
 4. **Report PDFs.** Reports offers Download CSV from the API. Download PDF currently uses the browser's print dialog on the Reports page. If the backend would rather render the PDF, a `GET /projects/{p}/reports/export.pdf` with the same `period` query would slot in next to the CSV export.
