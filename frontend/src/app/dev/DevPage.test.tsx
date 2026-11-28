@@ -113,4 +113,30 @@ describe('dev mock controls', () => {
       )?.role,
     ).toBe('developer');
   });
+
+  it('closes BUG-003 so TC-040 is ready to run again', async () => {
+    const user = userEvent.setup();
+    visit('/dev');
+
+    await user.click(await screen.findByRole('button', { name: 'Close BUG-003' }));
+
+    expect(screen.getByText('BUG-003 is closed. Reset demo data to undo it.')).toBeInTheDocument();
+    const db = getDb();
+    expect(
+      db.defects.find(
+        (entry) => entry.projectId === 'e-commerce-portal-v2' && entry.id === 'BUG-003',
+      )?.status,
+    ).toBe('closed');
+    expect(
+      db.entries.find(
+        (entry) =>
+          entry.projectId === 'e-commerce-portal-v2' && entry.blocked?.defectId === 'BUG-003',
+      )?.readyToRunAgain,
+    ).toBe(true);
+    expect(
+      db.notifications.some(
+        (entry) => entry.title === 'BUG-003 is closed. TC-040 can be run again.',
+      ),
+    ).toBe(true);
+  });
 });

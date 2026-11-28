@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { counted, dayLabel, dueLabel, when } from './format';
+import { counted, dayGroup, dayLabel, dueLabel, when } from './format';
 
 const now = new Date(2026, 10, 26, 15, 0).getTime();
 const at = (days: number, hours: number, minutes = 0) =>
@@ -40,5 +40,14 @@ describe('dueLabel', () => {
     expect(dueLabel('2026-11-27', now)).toEqual({ text: 'Due tomorrow', urgent: false });
     expect(dueLabel('2026-11-30', now)).toEqual({ text: 'This week', urgent: false });
     expect(dueLabel('2026-12-04', now)).toEqual({ text: 'Due 4 December', urgent: false });
+  });
+});
+
+describe('dayGroup', () => {
+  it('puts a time in a day group', () => {
+    expect(dayGroup(at(0, 9), now)).toBe('Today');
+    expect(dayGroup(at(1, 9), now)).toBe('Yesterday');
+    expect(dayGroup(at(3, 9), now)).toBe('Earlier this week');
+    expect(dayGroup(at(23, 9), now)).toBe('3 November');
   });
 });

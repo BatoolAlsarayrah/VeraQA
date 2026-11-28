@@ -16,4 +16,10 @@ describe('Avatar', () => {
     expect(container.firstChild).toHaveAttribute('aria-hidden', 'true');
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
+
+  it('keeps a short one-word name whole', () => {
+    render(<Avatar name="AI" alt="AI analysis" />);
+
+    expect(screen.getByRole('img', { name: 'AI analysis' })).toHaveTextContent('AI');
+  });
 });

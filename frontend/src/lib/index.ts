@@ -9,7 +9,7 @@ export {
   setUnauthorizedHandler,
 } from './api-client';
 export { cn } from './cn';
-export { counted, dayLabel, dueLabel, when } from './format';
+export { counted, dayGroup, dayLabel, dueLabel, when } from './format';
 export { ids, isOpen, paths, returnTo, signinFrom } from './paths';
 export { capabilitiesFor, homePath, roleLabels } from './permissions';
 export { createQueryClient, keys, live, queryClient } from './query';

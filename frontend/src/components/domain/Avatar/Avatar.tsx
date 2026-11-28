@@ -16,6 +16,7 @@ const sizes = {
 
 function initials(name: string) {
   const words = name.trim().split(/\s+/);
+  if (words.length === 1 && name.trim().length <= 2) return name.trim().toUpperCase();
   const first = words[0]?.[0] ?? '';
   const last = words.length > 1 ? (words.at(-1)?.[0] ?? '') : '';
   return (first + last).toUpperCase();
