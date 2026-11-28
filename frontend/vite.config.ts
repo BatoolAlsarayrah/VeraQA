@@ -17,6 +17,9 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
+    // Only the tests read API.md, which is shared with the backend at the repo root, outside
+    // frontend/; the dev server keeps Vite's default allow list.
+    server: mode === 'test' ? { fs: { allow: ['..'] } } : {},
     test: {
       environment: 'jsdom',
       setupFiles: ['./vitest.setup.ts'],

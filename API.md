@@ -4,7 +4,7 @@ This file lists every endpoint the VeraQA frontend calls: method, path, request,
 
 The frontend never implements backend or AI logic. With `VITE_API_MODE=mock` it runs against an in-browser mock of these endpoints; with `VITE_API_MODE=live` it calls `VITE_API_BASE_URL` with no code changes.
 
-The mock in `src/mocks/` implements every endpoint below, including the permission rules, the defect lifecycle and the AI jobs (with canned drafts). It's a working reference for how each endpoint should behave, and a test checks that this file and the mock list the same endpoints. Its demo accounts are listed in the README.
+The mock in `frontend/src/mocks/` implements every endpoint below, including the permission rules, the defect lifecycle and the AI jobs (with canned drafts). It's a working reference for how each endpoint should behave, and a test checks that this file and the mock list the same endpoints. Its demo accounts are listed in the [README](README.md#demo-accounts).
 
 ## Endpoints at a glance
 
@@ -142,7 +142,7 @@ Every error is a non-2xx status with this body:
 
 ## Connecting the frontend
 
-1. In the frontend's `.env`, set `VITE_API_MODE=live` and `VITE_API_BASE_URL` to the backend's address, for example `http://localhost:8000`, without `/api` (the frontend adds it). Restart `npm run dev`.
+1. `cd frontend`, then copy `.env.example` to `.env` if it isn't there yet. In `.env`, set `VITE_API_MODE=live` and `VITE_API_BASE_URL` to the backend's address, for example `http://localhost:8000`, without `/api` (the frontend adds it). Run `npm run dev`, or restart it if it was running.
 2. Sign-in uses a session cookie, which must be `HttpOnly`. Every request is sent with `credentials: 'include'`, so the server must allow the frontend's origin with credentials:
    - `Access-Control-Allow-Origin` set to that exact origin (`http://localhost:5173` in development), never `*`
    - `Access-Control-Allow-Credentials: true`
@@ -1417,6 +1417,6 @@ Additions to the contract after the first full version, newest first.
 ## Open questions for the backend
 
 1. **Should the project manager get `fix`?** Resolved: yes. The project manager holds every permission, so in a solo project they can take a defect through its whole lifecycle. A developer still acts only on defects assigned to them, and so does a project manager acting with `fix`.
-2. **Cookie session or bearer token?** The frontend assumes a cookie session: every request is sent with `credentials: 'include'`, and sign-in sets the cookie. If the backend issues a bearer token instead, only `lib/api-client.ts` changes, to store the token and send an `Authorization` header.
+2. **Cookie session or bearer token?** The frontend assumes a cookie session: every request is sent with `credentials: 'include'`, and sign-in sets the cookie. If the backend issues a bearer token instead, only `frontend/src/lib/api-client.ts` changes, to store the token and send an `Authorization` header.
 3. **Paging.** Lists come back whole for now, wrapped as `{ "items": [...] }`. If a project grows too large, the plan is to add `cursor` and `limit` query params and a `nextCursor` next to `items`, which doesn't break the current shape.
 4. **Report PDFs.** Reports offers Download CSV from the API. Download PDF currently uses the browser's print dialog on the Reports page. If the backend would rather render the PDF, a `GET /projects/{p}/reports/export.pdf` with the same `period` query would slot in next to the CSV export.

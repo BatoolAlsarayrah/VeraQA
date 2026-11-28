@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Member, WorkItem } from '@/types';
 
-import contract from '../../../API.md?raw';
+import contract from '../../../../API.md?raw';
 import { handlers } from '.';
 
 function shape(method: string, path: string) {
